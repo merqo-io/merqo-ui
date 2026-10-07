@@ -4,7 +4,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/cljiahao/merqo-ui.git"
+    "url": "https://github.com/merqo-io/merqo-ui.git"
   },
   "license": "UNLICENSED",
   "sideEffects": false,

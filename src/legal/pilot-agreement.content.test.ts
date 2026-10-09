@@ -11,6 +11,14 @@ const source = readFileSync(
   "utf-8",
 );
 
+function section(heading: string): string {
+  const start = source.indexOf("## " + heading + "\n");
+  expect(start, "Missing section: " + heading).toBeGreaterThanOrEqual(0);
+  const rest = source.slice(start);
+  const end = rest.indexOf("\n## ", 1);
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
 const REQUIRED_HEADINGS = [
   "## What this pilot is",
   "## Term and either-party termination",
@@ -31,16 +39,29 @@ describe("pilot-agreement.md", () => {
 
   it("limits the feedback grant to a licence, not an assignment", () => {
     expect(source).toMatch(/licen[cs]e/i);
-    expect(source.toLowerCase()).not.toMatch(/assigns? all (rights|right,? title)/);
+    expect(source.toLowerCase()).not.toMatch(
+      /assigns? all (rights|right,? title)/,
+    );
   });
 
   it("scopes 'as-is' to functionality and availability, not to negligence", () => {
-    expect(source).toMatch(/functionality|availability/i);
+    const disclaimer = section("Service as-is");
+    expect(disclaimer).toMatch(/as to functionality\s+and availability only/i);
+    expect(disclaimer).toMatch(
+      /does not exclude or limit Merqo's liability for its\s+own negligence/i,
+    );
+    expect(disclaimer).toMatch(
+      /not a waiver of\s+Merqo's data protection or confidentiality obligations/i,
+    );
   });
 
   it("includes an explicit wind-down data commitment", () => {
-    expect(source).toMatch(/export/i);
-    expect(source).toMatch(/delet/i);
+    const windDown = section("Wind-down");
+    expect(windDown).toMatch(/full export of its data/i);
+    expect(windDown).toMatch(/delete that data within 30 days/i);
+    expect(windDown).toMatch(
+      /confirm deletion to the Pilot Vendor in writing/i,
+    );
   });
 
   it("states confidentiality is mutual", () => {

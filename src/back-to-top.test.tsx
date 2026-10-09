@@ -27,6 +27,7 @@ describe("BackToTop", () => {
     render(<BackToTop />);
     const button = screen.getByRole("button", { name: "Back to top" });
     expect(button).toHaveClass("opacity-0", "pointer-events-none");
+    expect(button).toHaveAttribute("tabindex", "-1");
 
     Object.defineProperty(window, "scrollY", {
       value: 700,
@@ -35,6 +36,10 @@ describe("BackToTop", () => {
     fireEvent.scroll(window);
 
     expect(button).toHaveClass("opacity-100");
+    expect(button).toHaveAttribute("tabindex", "0");
+    Object.defineProperty(window, "scrollY", { value: 0, configurable: true });
+    fireEvent.scroll(window);
+    expect(button).toHaveAttribute("tabindex", "-1");
   });
 
   it("scrolls to top smoothly on click, respecting reduced motion", () => {

@@ -135,7 +135,7 @@ describe("navigatingAway", () => {
       }),
     );
     act(() => {
-      void result.current.run();
+      result.current.run();
     });
     await waitFor(() => expect(result.current.pending).toBe(true));
     await new Promise((r) => setTimeout(r, 10));

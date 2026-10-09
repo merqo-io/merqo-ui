@@ -1,12 +1,5 @@
 // @vitest-environment jsdom
-//
-// jsdom has no real Canvas/ImageBitmap backend, so createImageBitmap and
-// canvas.getContext('2d') both fail here — every call in this test
-// environment exercises resizeToWebp's fallback branch (return the original
-// file untouched), not the actual resize/encode path. That's still real
-// coverage of the function's control flow (decode failure -> catch ->
-// extension parsing), just not the pixel-manipulation happy path, which
-// needs a real browser and isn't unit-testable in jsdom.
+// jsdom needs Canvas/ImageBitmap stubs for the encoder path; these tests do not validate pixel fidelity.
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { resizeToWebp } from "./image-resize";
@@ -95,4 +88,34 @@ describe("resizeToWebp encode path", () => {
     expect(canvas.width).toBe(1600);
     expect(canvas.height).toBe(800);
   });
+});
+
+describe("resize failure resource cleanup", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it.each(["missing context", "draw failure"])(
+    "closes decoded pixels after %s",
+    async (failure) => {
+      const close = vi.fn();
+      vi.stubGlobal(
+        "createImageBitmap",
+        vi.fn().mockResolvedValue({ width: 100, height: 100, close }),
+      );
+      const drawImage = vi.fn(() => {
+        throw new Error("draw failed");
+      });
+      vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+        failure === "missing context"
+          ? null
+          : ({ drawImage } as unknown as CanvasRenderingContext2D),
+      );
+      const file = new File(["image"], "payload.php", { type: "image/jpeg" });
+      const result = await resizeToWebp(file, 100);
+      expect(close).toHaveBeenCalledOnce();
+      expect(result).toEqual({ blob: file, ext: "jpg", type: "image/jpeg" });
+    },
+  );
 });

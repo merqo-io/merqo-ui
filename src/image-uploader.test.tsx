@@ -353,7 +353,7 @@ describe("ImageUploader — upload pipeline", () => {
     // an upload can still be attempted (and fail) while a value/preview is
     // already showing. `onChange` is a stub here, so the `value` prop itself
     // never changes — isolating the remove button's own direct clear from
-    // the separate value-change effect.
+    // the separate value-change reset.
     const onUpload = vi.fn().mockRejectedValue(new Error("storage 403"));
     const onChange = vi.fn();
     const { container } = render(
@@ -602,5 +602,36 @@ describe("ImageUploader — preview and variants", () => {
     expect(source).not.toMatch(/\brgb\(|\bhsl\(|\boklch\(/);
     expect(source).not.toMatch(/rounded-\[/);
     expect(source).not.toMatch(/font-\[/);
+  });
+});
+
+
+describe("ImageUploader object paths", () => {
+  it("uses cryptographic bytes when randomUUID is unavailable and trims boundary slashes", async () => {
+    const getRandomValues = vi.fn((bytes: Uint8Array) => bytes.fill(171));
+    vi.stubGlobal("crypto", { getRandomValues });
+    try {
+      const onUpload = vi.fn().mockResolvedValue("https://cdn.example.test/image.jpg");
+      const { container } = render(<ImageUploader {...baseProps({ onUpload, pathPrefix: "/".repeat(4000) + "vendor-1/" })} />);
+      await selectFile(container, makeFile());
+      expect(getRandomValues).toHaveBeenCalledOnce();
+      expect(onUpload).toHaveBeenCalledWith(expect.objectContaining({ path: "vendor-1/" + "ab".repeat(16) + ".jpg" }));
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("reports an upload failure when cryptographic randomness is unavailable", async () => {
+    vi.stubGlobal("crypto", undefined);
+    try {
+      const onUpload = vi.fn();
+      const { container } = render(<ImageUploader {...baseProps({ onUpload })} />);
+      await selectFile(container, makeFile());
+      expect(await screen.findByRole("alert")).toHaveTextContent("Upload failed");
+      expect(onUpload).not.toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: "Add photo" })).not.toBeDisabled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

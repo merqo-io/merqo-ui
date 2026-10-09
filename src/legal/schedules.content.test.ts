@@ -26,9 +26,16 @@ describe("per-kit schedules", () => {
     expect(s).toMatch(/label content/i);
   });
 
-  it("qkit and stockkit schedules exist", () => {
-    expect(read("./schedules/qkit.md").length).toBeGreaterThan(0);
-    expect(read("./schedules/stockkit.md").length).toBeGreaterThan(0);
+  it("qkit and stockkit schedules state the vendor's specific record responsibilities", () => {
+    expect(read("./schedules/qkit.md")).toMatch(
+      /Vendor is solely responsible for the accuracy of the menu content,[\s\S]*?pricing, availability, and order-fulfilment information/i,
+    );
+    expect(read("./schedules/stockkit.md")).toMatch(
+      /Merqo does not verify physical inventory/i,
+    );
+    expect(read("./schedules/stockkit.md")).toMatch(
+      /stockkit reflects only what the\s+Vendor or its staff record/i,
+    );
   });
 
   it.each(["qkit", "loopkit", "paykit", "stockkit", "printkit"])(
@@ -49,7 +56,9 @@ describe("end-customer-notice.md", () => {
     expect(s).toMatch(/Privacy Policy/i);
   });
   it("is not a contract with the end-customer", () => {
-    expect(s.toLowerCase()).not.toMatch(/by (using|continuing).{0,20}you agree/);
+    expect(s.toLowerCase()).not.toMatch(
+      /by (using|continuing).{0,20}you agree/,
+    );
   });
   it("contains no em dash", () => {
     expect(s).not.toMatch(/—/);

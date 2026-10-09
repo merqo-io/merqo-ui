@@ -34,7 +34,12 @@ describe("PlanComparisonTable", () => {
     render(
       <PlanComparisonTable
         tiers={threeTiers}
-        rows={[{ label: "Live order board", values: { free: true, pass: true, pro: true } }]}
+        rows={[
+          {
+            label: "Live order board",
+            values: { free: true, pass: true, pro: true },
+          },
+        ]}
       />,
     );
     const row = screen.getByText("Live order board").closest("div");
@@ -90,14 +95,20 @@ describe("PlanComparisonTable", () => {
     const rowLabels = Array.from(
       container.querySelectorAll(".border-t > span:first-child"),
     ).map((el) => el.textContent);
-    expect(rowLabels).toEqual(["First feature", "Second feature", "Third feature"]);
+    expect(rowLabels).toEqual([
+      "First feature",
+      "Second feature",
+      "Third feature",
+    ]);
   });
 
   it("computes gridTemplateColumns from tier count via inline style, not a Tailwind class (3 tiers)", () => {
     render(
       <PlanComparisonTable
         tiers={threeTiers}
-        rows={[{ label: "A feature", values: { free: true, pass: true, pro: true } }]}
+        rows={[
+          { label: "A feature", values: { free: true, pass: true, pro: true } },
+        ]}
       />,
     );
     const row = screen.getByText("A feature").closest("div") as HTMLElement;
@@ -116,4 +127,28 @@ describe("PlanComparisonTable", () => {
     expect(row.style.gridTemplateColumns).toBe("1fr 2.75rem 2.75rem");
     expect(row.className).not.toMatch(/grid-cols-\[/);
   });
+});
+
+it("exposes table relationships and meaningful boolean cells", () => {
+  render(
+    <PlanComparisonTable
+      tiers={[
+        { key: "free", label: "Free" },
+        { key: "pro", label: "Pro" },
+      ]}
+      rows={[{ label: "Exports", values: { free: false, pro: true } }]}
+    />,
+  );
+  expect(
+    screen.getByRole("table", { name: "Plan comparison" }),
+  ).toBeInTheDocument();
+  expect(screen.getAllByRole("row")).toHaveLength(2);
+  expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+  expect(
+    screen.getByRole("rowheader", { name: "Exports" }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("cell", { name: "Included" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("cell", { name: "Not included" }),
+  ).toBeInTheDocument();
 });

@@ -1,3 +1,13 @@
+const CustomLink = ({
+  href,
+  children,
+  ...rest
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+  <a href={href} data-custom-link="true" {...rest}>
+    {children}
+  </a>
+);
+
 import type { AnchorHTMLAttributes } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within, fireEvent } from "@testing-library/react";
@@ -449,15 +459,6 @@ describe("AccountMenu", () => {
   });
 
   it("renders Profile/Plan/extraLink through a given LinkComponent instead of a plain <a>", async () => {
-    const CustomLink = ({
-      href,
-      children,
-      ...rest
-    }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
-      <a href={href} data-custom-link="true" {...rest}>
-        {children}
-      </a>
-    );
     await openMenu({
       extraLink: { href: "/admin", label: "Admin" },
       LinkComponent: CustomLink,
@@ -476,15 +477,6 @@ describe("AccountMenu", () => {
   });
 
   it("keeps the mailto Get help item a plain <a> even when LinkComponent is given", async () => {
-    const CustomLink = ({
-      href,
-      children,
-      ...rest
-    }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
-      <a href={href} data-custom-link="true" {...rest}>
-        {children}
-      </a>
-    );
     await openMenu({ LinkComponent: CustomLink });
     expect(
       await screen.findByRole("menuitem", { name: /get help/i }),

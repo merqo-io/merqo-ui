@@ -96,3 +96,15 @@ describe("storagePathFromPublicUrl", () => {
     ).toBeNull();
   });
 });
+
+it.each(["%", "%FF", "%E0%A4"])(
+  "rejects malformed encoded object path %s",
+  (suffix) => {
+    expect(
+      storagePathFromPublicUrl(
+        BASE + "/vendor-avatars/" + suffix,
+        "vendor-avatars",
+      ),
+    ).toBeNull();
+  },
+);

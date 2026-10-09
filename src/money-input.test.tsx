@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MoneyInput } from "./money-input";
 
 function Host({ initialCents }: { initialCents?: number }) {
@@ -32,13 +32,14 @@ describe("MoneyInput", () => {
     expect(input).toHaveValue("6.50");
   });
 
-  it("commits the parsed cents on blur", async () => {
+  it("commits parsed integer cents to the caller while editing", async () => {
     const user = userEvent.setup();
-    render(<Host />);
-    const input = screen.getByPlaceholderText("$");
-    await user.type(input, "6.50");
-    await user.tab();
-    expect(input).toHaveValue("6.50");
+    const onCommit = vi.fn();
+    render(
+      <MoneyInput cents={undefined} onCommit={onCommit} placeholder="$" />,
+    );
+    await user.type(screen.getByPlaceholderText("$"), "6.50");
+    expect(onCommit).toHaveBeenLastCalledWith(650);
   });
 
   it("snaps back to the canonical 2-decimal string on blur", async () => {

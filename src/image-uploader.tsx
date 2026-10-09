@@ -112,14 +112,17 @@ function toErrorMessage(_error: unknown): string {
 
 /**
  * `crypto.randomUUID` is only defined in secure contexts; the fallback keeps
- * uploads working on plain-HTTP previews and in test environments without it.
+ * uploads working on HTTP previews using cryptographically random bytes.
  */
 function randomId(): string {
   const webCrypto = globalThis.crypto;
   if (webCrypto && typeof webCrypto.randomUUID === "function") {
     return webCrypto.randomUUID();
   }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  const bytes = webCrypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+    "",
+  );
 }
 
 /**
@@ -152,6 +155,104 @@ function DefaultPreviewImage({ src, alt, className }: ImagePreviewProps) {
   return <img src={src} alt={alt} className={cn("size-full", className)} />;
 }
 
+function trimSlashes(value: string): string {
+  let start = 0;
+  let end = value.length;
+  while (start < end && value[start] === "/") start += 1;
+  while (end > start && value[end - 1] === "/") end -= 1;
+  return value.slice(start, end);
+}
+
+function UploadTrigger({
+  variant,
+  uploading,
+  box,
+  onPick,
+}: {
+  variant: ImageUploaderVariant;
+  uploading: boolean;
+  box: string;
+  onPick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onPick}
+      disabled={uploading}
+      // Stable accessible name: the visible label flips to "…"/"Optimizing…"
+      // while an upload is in flight, which would otherwise leave the button
+      // with a meaningless accessible name exactly when it's busy.
+      aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
+      aria-busy={uploading}
+      className={cn(
+        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed transition-colors disabled:opacity-60",
+        box,
+      )}
+    >
+      {uploading ? (
+        <Loader2
+          className={cn(
+            "animate-spin",
+            variant === "thumb" ? "size-4" : "size-6",
+          )}
+        />
+      ) : (
+        <ImagePlus className={variant === "thumb" ? "size-4" : "size-6"} />
+      )}
+      {variant === "banner" ? (
+        <>
+          <span className="text-sm font-medium">
+            {uploading ? "Optimizing…" : "Add a booth banner"}
+          </span>
+          <span className="text-xs">
+            JPEG, PNG, or WebP, optimized on upload
+          </span>
+          <span className="text-xs">
+            Best at a 3:1 wide ratio (e.g. 1200×400)
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="text-[10px] leading-tight font-medium">
+            {uploading ? "…" : "Add photo"}
+          </span>
+          {!uploading && (
+            <span className="text-muted-foreground/80 text-[9px] leading-tight">
+              JPG · PNG · WebP
+            </span>
+          )}
+        </>
+      )}
+    </button>
+  );
+}
+
+function useOwnedPreviews(value: string | null) {
+  const owned = React.useRef(new Set<string>());
+  const mounted = React.useRef(false);
+  React.useEffect(() => {
+    mounted.current = true;
+    const previews = owned.current;
+    return () => {
+      mounted.current = false;
+      // StrictMode immediately reconnects effects; only real departures release previews.
+      queueMicrotask(() => {
+        if (mounted.current) return;
+        previews.forEach(discardPendingImage);
+        previews.clear();
+      });
+    };
+  }, []);
+  React.useEffect(() => {
+    for (const preview of owned.current) {
+      if (preview === value) continue;
+      discardPendingImage(preview);
+      owned.current.delete(preview);
+    }
+  }, [value]);
+  return { owned, mounted };
+}
+
 export function ImageUploader({
   bucket,
   pathPrefix,
@@ -168,15 +269,16 @@ export function ImageUploader({
   className,
 }: ImageUploaderProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const { owned, mounted } = useOwnedPreviews(value);
   const [uploading, setUploading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  // A new `value` from outside (e.g. after a successful save elsewhere)
-  // means whatever error was showing is stale — clear it rather than let it
-  // stick around forever.
-  React.useEffect(() => {
+  const [previousValue, setPreviousValue] = React.useState(value);
+  // Reset stale errors before children render the replacement image.
+  if (value !== previousValue) {
+    setPreviousValue(value);
     setErrorMessage(null);
-  }, [value]);
+  }
 
   const effectiveMaxDim = maxDim ?? DEFAULT_MAX_DIM[variant];
   const box = variant === "thumb" ? "size-20 shrink-0" : "h-40 w-full";
@@ -185,7 +287,7 @@ export function ImageUploader({
     variant === "thumb" ? "5rem" : "(max-width: 640px) 100vw, 28rem";
   // Trim accidental leading/trailing slashes (e.g. a consumer interpolating
   // `${vendorId}/`) so the generated path never doubles up ("a//b.jpg").
-  const normalizedPathPrefix = pathPrefix.replace(/^\/+|\/+$/g, "");
+  const normalizedPathPrefix = trimSlashes(pathPrefix);
 
   function fail(message: string, error: unknown) {
     setErrorMessage(message);
@@ -233,9 +335,13 @@ export function ImageUploader({
           blob,
           contentType: type,
         });
-      uploadedUrl = deferUpload
-        ? registerPendingImage(blob, upload)
-        : await upload();
+      if (deferUpload) {
+        if (!mounted.current) return;
+        uploadedUrl = registerPendingImage(blob, upload);
+        owned.current.add(uploadedUrl);
+      } else {
+        uploadedUrl = await upload();
+      }
     } catch (error) {
       fail(toErrorMessage(error), error);
       return;
@@ -286,48 +392,12 @@ export function ImageUploader({
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-          // Stable accessible name: the visible label flips to "…"/"Optimizing…"
-          // while an upload is in flight, which would otherwise leave the button
-          // with a meaningless accessible name exactly when it's busy.
-          aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
-          aria-busy={uploading}
-          className={cn(
-            "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed transition-colors disabled:opacity-60",
-            box,
-          )}
-        >
-          {uploading ? (
-            <Loader2
-              className={cn("animate-spin", variant === "thumb" ? "size-4" : "size-6")}
-            />
-          ) : (
-            <ImagePlus className={variant === "thumb" ? "size-4" : "size-6"} />
-          )}
-          {variant === "banner" ? (
-            <>
-              <span className="text-sm font-medium">
-                {uploading ? "Optimizing…" : "Add a booth banner"}
-              </span>
-              <span className="text-xs">JPEG, PNG, or WebP, optimized on upload</span>
-              <span className="text-xs">Best at a 3:1 wide ratio (e.g. 1200×400)</span>
-            </>
-          ) : (
-            <>
-              <span className="text-[10px] leading-tight font-medium">
-                {uploading ? "…" : "Add photo"}
-              </span>
-              {!uploading && (
-                <span className="text-muted-foreground/80 text-[9px] leading-tight">
-                  JPG · PNG · WebP
-                </span>
-              )}
-            </>
-          )}
-        </button>
+        <UploadTrigger
+          variant={variant}
+          uploading={uploading}
+          box={box}
+          onPick={() => inputRef.current?.click()}
+        />
       )}
 
       {/* Deliberately a sibling of the trigger, not a child: an <input> is
@@ -348,7 +418,9 @@ export function ImageUploader({
       />
 
       {errorMessage ? (
-        <p className="text-destructive text-xs" role="alert">{errorMessage}</p>
+        <p className="text-destructive text-xs" role="alert">
+          {errorMessage}
+        </p>
       ) : null}
     </div>
   );

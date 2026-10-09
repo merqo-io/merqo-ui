@@ -40,7 +40,8 @@ export function getNodeText(node: React.ReactNode): string {
 }
 
 function headingRenderer(level: 1 | 2 | 3) {
-  const Tag = level === 1 ? "h1" : level === 2 ? "h2" : "h3";
+  const Tag = ({ 1: "h1", 2: "h2", 3: "h3" } as const)[level];
+  const headingClass = { 1: "mt-0 text-2xl", 2: "mt-8 text-xl", 3: "mt-5 text-lg" }[level];
   return ({ children }: { children?: React.ReactNode }) => {
     const text = getNodeText(children);
     return (
@@ -48,7 +49,7 @@ function headingRenderer(level: 1 | 2 | 3) {
         id={slugify(text)}
         className={cn(
           "font-display font-semibold text-foreground scroll-mt-24",
-          level === 1 ? "mt-0 text-2xl" : level === 2 ? "mt-8 text-xl" : "mt-5 text-lg",
+          headingClass,
         )}
       >
         {children}

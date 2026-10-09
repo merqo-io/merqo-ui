@@ -76,10 +76,7 @@ export default defineConfig([
     esbuildOptions: mdLoader,
   },
   {
-    // Pure, non-React legal utilities, kept as a documented separate public
-    // entry point (`@merqo/ui/legal`) for existing consumers -- redundant
-    // with `legal`'s own entry above now that directives are preserved
-    // per-module, but kept for backward compatibility.
+    // Preserve the public @merqo/ui/legal entry alongside per-module UI exports.
     entry: { legal: "src/legal.ts" },
     format: ["esm"],
     dts: false,

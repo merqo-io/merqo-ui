@@ -145,7 +145,7 @@ works locally.
 
 ## Components
 
-- `InfoTooltip` — icon + tooltip with a parameterized `aria-label` (defaults
+- `InfoTooltip` — icon + hover/tap help with optional `triggerClassName`, `iconClassName`, and `contentClassName` overrides for compatible touch sizing and presentation. Parameterized `aria-label` (defaults
   to `"More info"`). `trigger?: "hover" | "tap"` (default `"hover"`) switches
   to a click-triggered `Popover`, for touch-first flows where hover never
   fires.

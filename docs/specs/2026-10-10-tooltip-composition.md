@@ -1,0 +1,5 @@
+# Tooltip composition contract
+
+Printkit's domain InfoButton repeats the shared tap popover but requires a 24px trigger and 16px icon. Add optional triggerClassName, iconClassName and contentClassName to InfoTooltip, merged with existing defaults. Preserve hover/tap defaults, names, keyboard opening, Escape dismissal and focus return. Existing consumers require no changes. StatTile also gains optional className and labelClassName overrides so Paykit and Loopkit can preserve spacing/typography while reusing the label/value implementation. Test forward and reverse label layouts; defaults remain unchanged. No Next or domain dependency is introduced.
+
+Acceptance: default classes unchanged; explicit classes override conflicting defaults; both tooltip/popover content honor the optional content class; keyboard/tap tests pass; lint/typecheck/build and all aggregate coverage metrics remain at least 80%. Publish through a reviewed PR; Printkit pins the exact tested commit. Qkit pins are untouched.

@@ -20,7 +20,12 @@ describe("DeltaPill", () => {
   });
 
   it("applies a custom downClassName override", () => {
-    render(<DeltaPill pct={-8} downClassName="bg-status-cancelled/12 text-status-cancelled" />);
+    render(
+      <DeltaPill
+        pct={-8}
+        downClassName="bg-status-cancelled/12 text-status-cancelled"
+      />,
+    );
     const pill = screen.getByText("8%").closest("span");
     expect(pill).toHaveClass("bg-status-cancelled/12");
     expect(pill).not.toHaveClass("bg-destructive/12");
@@ -28,7 +33,10 @@ describe("DeltaPill", () => {
 
   it("applies the tooltip as a native title", () => {
     render(<DeltaPill pct={5} tooltip="vs the previous period" />);
-    expect(screen.getByText("5%").closest("span")).toHaveAttribute("title", "vs the previous period");
+    expect(screen.getByText("5%").closest("span")).toHaveAttribute(
+      "title",
+      "vs the previous period",
+    );
   });
 });
 
@@ -43,7 +51,9 @@ describe("StatTile", () => {
     render(<StatTile label="Enrolled" value="42" reverse />);
     const root = screen.getByText("42").closest("div")?.parentElement;
     const children = Array.from(root?.children ?? []);
-    const valueRowIndex = children.findIndex((c) => c.textContent?.includes("42"));
+    const valueRowIndex = children.findIndex((c) =>
+      c.textContent?.includes("42"),
+    );
     const labelIndex = children.findIndex((c) => c.textContent === "Enrolled");
     expect(valueRowIndex).toBeLessThan(labelIndex);
   });
@@ -54,7 +64,14 @@ describe("StatTile", () => {
   });
 
   it("renders deltaSlot content instead of a pill when both could apply", () => {
-    render(<StatTile label="Orders" value="10" delta={7} deltaSlot={<span>custom</span>} />);
+    render(
+      <StatTile
+        label="Orders"
+        value="10"
+        delta={7}
+        deltaSlot={<span>custom</span>}
+      />,
+    );
     expect(screen.getByText("custom")).toBeInTheDocument();
     expect(screen.queryByText("7%")).not.toBeInTheDocument();
   });
@@ -65,17 +82,47 @@ describe("StatTile", () => {
   });
 
   it("applies valueClassName to the value element", () => {
-    render(<StatTile label="Revenue" value="$120" valueClassName="font-mono" />);
+    render(
+      <StatTile label="Revenue" value="$120" valueClassName="font-mono" />,
+    );
     expect(screen.getByText("$120")).toHaveClass("font-mono");
   });
 
   it("renders valueTrailing content beside the value", () => {
-    render(<StatTile label="Revenue" value="$120" valueTrailing={<span>flat</span>} />);
+    render(
+      <StatTile
+        label="Revenue"
+        value="$120"
+        valueTrailing={<span>flat</span>}
+      />,
+    );
     expect(screen.getByText("flat")).toBeInTheDocument();
   });
 
   it("applies the hint as a native title on the root", () => {
-    const { container } = render(<StatTile label="Fulfilled" value="8/10" hint="2 cancelled" />);
+    const { container } = render(
+      <StatTile label="Fulfilled" value="8/10" hint="2 cancelled" />,
+    );
     expect(container.firstChild).toHaveAttribute("title", "2 cancelled");
   });
+});
+
+describe("StatTile presentation overrides", () => {
+  it.each([false, true])(
+    "preserves caller label/container classes for reverse=%s",
+    (reverse) => {
+      render(
+        <StatTile
+          label="Revenue variant"
+          value="$12"
+          reverse={reverse}
+          className="gap-1"
+          labelClassName="text-xs tracking-wide"
+        />,
+      );
+      const label = screen.getByText("Revenue variant");
+      expect(label).toHaveClass("text-xs", "tracking-wide");
+      expect(label.closest("div.flex-col")).toHaveClass("gap-1");
+    },
+  );
 });

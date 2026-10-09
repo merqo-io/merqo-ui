@@ -14,7 +14,12 @@ export interface DeltaPillProps {
 
 const DEFAULT_DOWN = "bg-destructive/12 text-destructive";
 
-export function DeltaPill({ pct, tooltip, size = "sm", downClassName = DEFAULT_DOWN }: DeltaPillProps) {
+export function DeltaPill({
+  pct,
+  tooltip,
+  size = "sm",
+  downClassName = DEFAULT_DOWN,
+}: DeltaPillProps) {
   if (pct === null) return null;
   const up = pct >= 0;
   const Icon = up ? ArrowUp : ArrowDown;
@@ -23,7 +28,9 @@ export function DeltaPill({ pct, tooltip, size = "sm", downClassName = DEFAULT_D
       className={cn(
         "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-semibold tabular-nums",
         size === "xs" ? "text-[0.65rem]" : "font-mono text-[0.7rem]",
-        up ? "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400" : downClassName,
+        up
+          ? "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400"
+          : downClassName,
       )}
       title={tooltip}
     >
@@ -34,6 +41,8 @@ export function DeltaPill({ pct, tooltip, size = "sm", downClassName = DEFAULT_D
 }
 
 export interface StatTileProps {
+  className?: string;
+  labelClassName?: string;
   label: string;
   value: string;
   /** Font treatment for the value — callers pick mono/display/plain instead of it being fixed. */
@@ -62,6 +71,8 @@ export interface StatTileProps {
  * outer wrapping differs too much to unify, so callers wrap this in their own container.
  */
 export function StatTile({
+  className,
+  labelClassName,
   label,
   value,
   valueClassName,
@@ -81,7 +92,12 @@ export function StatTile({
     deltaSlot !== undefined
       ? deltaSlot
       : delta !== undefined && (
-          <DeltaPill pct={delta} tooltip={deltaTooltip} size={deltaSize} downClassName={deltaDownClassName} />
+          <DeltaPill
+            pct={delta}
+            tooltip={deltaTooltip}
+            size={deltaSize}
+            downClassName={deltaDownClassName}
+          />
         );
 
   const labelRow = (
@@ -90,6 +106,7 @@ export function StatTile({
         className={cn(
           "text-[0.7rem] font-semibold uppercase tracking-wider",
           primary ? "text-primary" : "text-muted-foreground",
+          labelClassName,
         )}
       >
         {label}
@@ -100,22 +117,46 @@ export function StatTile({
 
   const valueRow = valueTrailing ? (
     <div className="flex items-baseline gap-2">
-      <p className={cn("truncate text-2xl font-bold leading-none tabular-nums", valueClassName)}>{value}</p>
+      <p
+        className={cn(
+          "truncate text-2xl font-bold leading-none tabular-nums",
+          valueClassName,
+        )}
+      >
+        {value}
+      </p>
       {valueTrailing}
     </div>
   ) : (
-    <p className={cn("truncate text-2xl font-bold leading-none tabular-nums", valueClassName)}>{value}</p>
+    <p
+      className={cn(
+        "truncate text-2xl font-bold leading-none tabular-nums",
+        valueClassName,
+      )}
+    >
+      {value}
+    </p>
   );
 
   return (
-    <div title={hint} className={cn("flex flex-col gap-2", hint && "cursor-help")}>
+    <div
+      title={hint}
+      className={cn("flex flex-col gap-2", hint && "cursor-help", className)}
+    >
       {reverse ? (
         <>
           <div className="flex items-center justify-between gap-2">
             {valueRow}
             {deltaContent}
           </div>
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <p
+            className={cn(
+              "text-xs font-medium text-muted-foreground",
+              labelClassName,
+            )}
+          >
+            {label}
+          </p>
         </>
       ) : (
         <>
@@ -124,7 +165,14 @@ export function StatTile({
         </>
       )}
       {caption && (
-        <p className={cn("truncate text-xs text-muted-foreground tabular-nums", captionClassName)}>{caption}</p>
+        <p
+          className={cn(
+            "truncate text-xs text-muted-foreground tabular-nums",
+            captionClassName,
+          )}
+        >
+          {caption}
+        </p>
       )}
     </div>
   );

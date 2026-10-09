@@ -7,14 +7,16 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const KITS = ["qkit", "paykit", "stockkit", "loopkit", "merqo"];
-const IMPORT_RE = /import\s+(type\s+)?\{([^}]*)\}\s*from\s*['"]@merqo\/ui(\/legal)?['"]/g;
+const KITS = ["qkit", "paykit", "stockkit", "loopkit", "merqo", "printkit"];
+const IMPORT_RE =
+  /import\s+(type\s+)?\{([^}]*)\}\s*from\s*['"]@merqo\/ui(\/legal)?['"]/g;
 
 function sourceFiles(dir, found = []) {
   for (const entry of readdirSync(dir)) {
     const path = join(dir, entry);
     if (statSync(path).isDirectory()) sourceFiles(path, found);
-    else if (/\.tsx?$/.test(entry)) found.push(path);
+    else if (/\.tsx?$/.test(entry) && !/\.(?:test|spec)\.tsx?$/.test(entry))
+      found.push(path);
   }
   return found;
 }
@@ -32,7 +34,11 @@ for (const kit of KITS) {
     const source = readFileSync(file, "utf8");
     for (const match of source.matchAll(IMPORT_RE)) {
       for (const raw of match[2].split(",")) {
-        const name = raw.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim();
+        const name = raw
+          .trim()
+          .replace(/^type\s+/, "")
+          .split(/\s+as\s+/)[0]
+          .trim();
         if (!name) continue;
         if (!counts.has(name)) counts.set(name, {});
         const row = counts.get(name);

@@ -13,7 +13,9 @@ describe("Footer", () => {
     );
     expect(screen.getByRole("link", { name: "QKit" })).toBeInTheDocument();
     expect(screen.getByText("Built for booths.")).toBeInTheDocument();
-    expect(screen.getByText("© 2026 qkit · a Merqo kit")).toBeInTheDocument();
+    expect(
+      screen.getByText(`© ${new Date().getFullYear()} qkit · a Merqo kit`),
+    ).toBeInTheDocument();
   });
 
   it("renders About, legal, and sign-in links", () => {

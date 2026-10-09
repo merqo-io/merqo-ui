@@ -8,6 +8,14 @@ const source = readFileSync(
   "utf-8",
 );
 
+function section(heading: string): string {
+  const start = source.indexOf("## " + heading + "\n");
+  expect(start, "Missing section: " + heading).toBeGreaterThanOrEqual(0);
+  const rest = source.slice(start);
+  const end = rest.indexOf("\n## ", 1);
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
 const REQUIRED_HEADINGS = [
   "## Our roles: controller and data intermediary",
   "## What we collect",
@@ -57,12 +65,24 @@ describe("privacy.md", () => {
   });
 
   it("states a retention period for each named category", () => {
-    expect(source).toMatch(/5 years/);
-    expect(source).toMatch(/90 days/);
+    const retention = section("How long we keep it");
+    expect(retention).toMatch(/\*\*audit and security logs\*\*: 5 years/i);
+    expect(retention).toMatch(
+      /\*\*acceptance records\*\*[\s\S]*?kept indefinitely/i,
+    );
+    expect(retention).toMatch(
+      /\*\*end customer records\*\*[\s\S]*?vendor relationship[\s\S]*?ends[\s\S]*?withdraws consent[\s\S]*?whichever comes\s+first/i,
+    );
+    expect(retention).toMatch(/\*\*request and access logs\*\*: 90 days/i);
+    expect(retention).toMatch(
+      /\*\*printkit label-job data\*\*: 90 days after the label is printed/i,
+    );
   });
 
   it("does not use GDPR-only terminology (PDPA has no general erasure right)", () => {
-    expect(source.toLowerCase()).not.toMatch(/legitimate.interest|right to erasure/);
+    expect(source.toLowerCase()).not.toMatch(
+      /legitimate.interest|right to erasure/,
+    );
   });
 
   it("contains no em dash", () => {

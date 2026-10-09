@@ -15,20 +15,7 @@ export interface AsyncSubmitButtonProps {
   className?: string;
 }
 
-/**
- * Shared pending-state submit button, internal to this package.
- *
- * Design-critique fix: `ProfileForm`'s `SaveButton`, `FeedbackSheet`'s
- * submit, and `HelpSheet`'s submit previously only toggled `disabled` +
- * `opacity-50` while pending — no spinner, no label change — even though
- * `AccountMenu`'s sign-out item (the 4th `useAsyncAction` consumer) swaps
- * its label to "Signing out…". That made the sign-out item feel more
- * responsive than every save/submit button in the package for the exact
- * same async-pending state. This component gives all 4 sites one shared
- * spinner treatment (the `Loader2` pattern already used by
- * `image-uploader.tsx`'s upload trigger), with `pendingChildren` available
- * for sites that also want a label swap.
- */
+/** Shared submit button with an accessible pending state and optional pending label. */
 export function AsyncSubmitButton({
   pending,
   children,
@@ -45,7 +32,9 @@ export function AsyncSubmitButton({
         className,
       )}
     >
-      {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+      {pending ? (
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      ) : null}
       {pending ? (pendingChildren ?? children) : children}
     </button>
   );

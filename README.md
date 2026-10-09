@@ -1,7 +1,7 @@
 # @merqo/ui
 
 Shared structural/behavioral components for the Merqo kit family
-(loopkit, merqo, paykit, qkit, stockkit). Ships **no color, font-family, or
+(loopkit, merqo, paykit, qkit, stockkit, printkit). Ships **no color, font-family, or
 radius values** — every component styles itself with shadcn's semantic
 Tailwind classes only, so each kit's own `globals.css` token values
 drive the rendered brand color automatically.
@@ -62,7 +62,7 @@ errors - it just never animates.
 
 pnpm 11 blocks install scripts by default via an `allowBuilds` allowlist in
 each consumer's `pnpm-workspace.yaml`. This package's `prepare` script runs
-`pnpm build`, which is what produces `dist/` (gitignored, not committed to
+`npm run build`, which is what produces `dist/` (gitignored, not committed to
 this repo). If a consuming kit's `pnpm-workspace.yaml` doesn't allowlist
 `@merqo/ui`, the build gets silently blocked, the kit installs an empty
 package, and you get a confusing module-resolution error instead of an
@@ -511,7 +511,7 @@ writes only happen through the service-role client, same as the rest of
 each kit's admin surface.
 
 **Write path** — a small `recordAudit()` helper (paykit's
-`src/app/admin/actions.ts` is the reference implementation) that inserts a
+`src/lib/admin-audit.ts` is the server-only reference implementation) that inserts a
 row and swallows its own failure: the action being recorded must never fail
 _because_ logging it failed, but a logging failure should still surface in
 server logs so a broken trail doesn't go unnoticed.
@@ -574,7 +574,39 @@ export function SettingLabel() {
 ## Development
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
+pnpm check          # ESLint and TypeScript
+pnpm build          # required before artifact regression tests
 pnpm test
-pnpm build
+pnpm test:coverage  # all production source; 80% minimum in each metric
 ```
+
+ESLint checks TypeScript, React Hooks and SonarJS rules, including unused values,
+commented-out code and trailing application comments. Test fixtures retain narrow
+exceptions for fake network values and concise case annotations. Comments explain
+durable constraints or public contracts; change history belongs in commits.
+
+Coverage thresholds apply to statements, branches, functions and lines. Generated
+build output, declarations and test setup are excluded; untested production source
+is included. Component tests do not replace validation in consuming applications.
+Changes to this checkout reach consumers only after a deliberate version/tag
+update; no release is created by these checks.
+
+### Upload and navigation contracts
+
+Deferred image previews belong to their mounted ImageUploader. Keep its preview
+value after a failed form save so commitPendingImages can retry; replace that
+value after a successful save. Replacing the value or unmounting releases the
+owned browser preview. A commit that already captured an upload continues;
+callers still remove uploaded storage objects when their persistence fails.
+Unmounting before deferred resize completes does not start an upload.
+
+Image resizing releases decoded pixels when drawing fails and uses recognized
+image MIME types for fallback extensions. Browser MIME checks are only UX:
+storage policies and server validation must enforce ownership and allowed bytes.
+storagePathFromPublicUrl parses a path, not an origin or authorization proof.
+
+Money inputs reject cents outside JavaScript's safe integer range. Onboarding
+tour loading, step resolution and seen-state failures are reported to the console
+without creating unhandled promise rejections. Tour step markup and CSS scope
+are trusted application-authored configuration, never customer HTML.

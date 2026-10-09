@@ -32,6 +32,7 @@ export function BackToTop(): ReactElement {
       type="button"
       onClick={toTop}
       aria-label="Back to top"
+      tabIndex={show ? 0 : -1}
       className={cn(
         "fixed right-6 bottom-6 z-40 grid size-12 place-items-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition-all outline-none hover:bg-secondary focus-visible:ring-[3px] focus-visible:ring-ring/50 motion-reduce:transition-none",
         show

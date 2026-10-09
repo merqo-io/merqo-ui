@@ -23,7 +23,12 @@ export function storagePathFromPublicUrl(
   const marker = `/storage/v1/object/public/${bucket}/`;
   const index = parsed.pathname.indexOf(marker);
   if (index === -1) return null;
-  const path = decodeURIComponent(parsed.pathname.slice(index + marker.length));
+  let path: string;
+  try {
+    path = decodeURIComponent(parsed.pathname.slice(index + marker.length));
+  } catch {
+    return null;
+  }
   // An empty path, or one that climbs out of the bucket, is not an object.
   if (
     !path ||

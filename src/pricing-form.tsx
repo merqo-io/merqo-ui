@@ -38,7 +38,8 @@ function parseDollarsToCents(input: string): number | null {
   if (trimmed === "") return null;
   const dollars = Number(trimmed);
   if (!Number.isFinite(dollars) || dollars < 0) return null;
-  return Math.round(dollars * 100);
+  const cents = Math.round(dollars * 100);
+  return Number.isSafeInteger(cents) ? cents : null;
 }
 
 export function PricingForm({

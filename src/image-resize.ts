@@ -33,10 +33,13 @@ export async function resizeToWebp(
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("no 2d context");
-    ctx.drawImage(bitmap, 0, 0, w, h);
-    bitmap.close?.();
+    try {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("no 2d context");
+      ctx.drawImage(bitmap, 0, 0, w, h);
+    } finally {
+      bitmap.close?.();
+    }
 
     const encode = (type: string) =>
       new Promise<Blob | null>((resolve) =>
@@ -58,12 +61,13 @@ export async function resizeToWebp(
     }
     throw new Error("encode failed");
   } catch {
-    // A dotless filename has no extension to take -- `split(".").pop()`
-    // would return the whole name (e.g. ext: "photo"), which then lands in
-    // the upload path. stockkit's copy guarded this; the others did not.
-    const ext = file.name.includes(".")
-      ? file.name.split(".").pop()?.toLowerCase() || "jpg"
-      : "jpg";
+    // Keep recognized image types independent of the untrusted filename.
+    const extensions: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    };
+    const ext = extensions[file.type] ?? "jpg";
     return { blob: file, ext, type: file.type || "application/octet-stream" };
   }
 }

@@ -13,7 +13,8 @@ function parseDollarsToCents(
   if (trimmed === "") return { ok: true, cents: undefined };
   const value = Number(trimmed);
   if (!Number.isFinite(value) || value < 0) return { ok: false };
-  return { ok: true, cents: Math.round(value * 100) };
+  const cents = Math.round(value * 100);
+  return Number.isSafeInteger(cents) ? { ok: true, cents } : { ok: false };
 }
 
 function format(cents: number | undefined): string {

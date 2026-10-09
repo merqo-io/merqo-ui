@@ -2,11 +2,11 @@
 
 Which kit uses which export, and which exports are internal. Regenerate the
 counts with `node scripts/usage-matrix.mjs` from a workspace checkout that has
-all five consumer repos as sibling folders.
+all six consumer repos as sibling folders.
 
 Numbers are **import sites** (import statements), not files — a component
 imported in six files counts six. A blank cell means the kit does not import
-that export at all. Last regenerated 2026-09-21.
+that export at all. The tables below are the historical 2026-09-21 adoption review. Current six-product import counts are in [usage-matrix-current.tsv](usage-matrix-current.tsv), regenerated on 2026-10-09. Historical rationale and paths are preserved as dated evidence; use the current snapshot for necessity decisions.
 
 ## Why this file exists
 

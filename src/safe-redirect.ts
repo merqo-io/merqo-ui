@@ -1,3 +1,5 @@
+// Control characters must be rejected before browser URL normalization.
+// eslint-disable-next-line no-control-regex
 const CONTROL_CHARACTER = /[\x00-\x1f\x7f]/;
 
 /**

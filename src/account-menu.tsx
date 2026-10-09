@@ -120,6 +120,41 @@ function AvatarInitial({ name, avatarUrl }: { name: string; avatarUrl?: string }
   );
 }
 
+
+function themePresentation(theme: string | undefined) {
+  if (theme === "light") return { label: "Light", Icon: Sun };
+  if (theme === "dark") return { label: "Dark", Icon: Moon };
+  return { label: "System", Icon: Monitor };
+}
+
+function HelpMenuEntry({ getHelp, Link, openHelp }: {
+  getHelp: AccountMenuGetHelp;
+  Link: React.ComponentType<AccountMenuLinkProps>;
+  openHelp: () => void;
+}) {
+  if (getHelp.type === "mailto") return (
+    <DropdownMenuItem asChild><a href={`mailto:${getHelp.address}`}><HelpCircle className="size-4" />Get help</a></DropdownMenuItem>
+  );
+  if (getHelp.type === "drawer" || getHelp.type === "form") return (
+    <DropdownMenuItem onSelect={openHelp}><HelpCircle className="size-4" />Get help</DropdownMenuItem>
+  );
+  return <DropdownMenuSub>
+    <DropdownMenuSubTrigger><span className="flex items-center gap-2"><HelpCircle className="size-4" />Get help</span></DropdownMenuSubTrigger>
+    <DropdownMenuSubContent>{getHelp.items.map(item => <DropdownMenuItem key={item.href} asChild><Link href={item.href}>{item.label}</Link></DropdownMenuItem>)}</DropdownMenuSubContent>
+  </DropdownMenuSub>;
+}
+
+function HelpPanel({ getHelp, open, onOpenChange, onError }: {
+  getHelp: AccountMenuGetHelp;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onError?: (error: unknown) => void;
+}) {
+  if (getHelp.type === "form") return <HelpSheet open={open} onOpenChange={onOpenChange} mode="form" onSubmit={getHelp.onSubmit} categories={getHelp.categories} onError={onError} />;
+  if (getHelp.type === "drawer") return <Sheet open={open} onOpenChange={onOpenChange}><SheetContent><SheetHeader><SheetTitle>Get help</SheetTitle></SheetHeader><div className="px-4">{getHelp.content}</div></SheetContent></Sheet>;
+  return null;
+}
+
 export function AccountMenu({
   vendor,
   signOutAction,
@@ -141,18 +176,10 @@ export function AccountMenu({
   const [helpOpen, setHelpOpen] = React.useState(false);
   const Link = LinkComponent ?? DefaultLink;
 
-  // C2 fix: sign-out used to be `void signOutAction()` - a rejection was
-  // discarded, the menu closed regardless, and the user had no way to know
-  // sign-out failed. Now it's wrapped in useAsyncAction (error state) and
-  // the dropdown item prevents Radix's default auto-close so the menu only
-  // closes on a *successful* sign-out; on failure it stays open with a
-  // visible inline error next to the item.
+  // Keep failures visible until sign-out succeeds or the menu closes.
   const signOut = useAsyncAction(signOutAction);
   const { theme, setTheme } = useTheme();
-  const themeLabel =
-    theme === "light" ? "Light" : theme === "dark" ? "Dark" : "System";
-  const ThemeIcon =
-    theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
+  const { label: themeLabel, Icon: ThemeIcon } = themePresentation(theme);
 
   return (
     <>
@@ -160,10 +187,7 @@ export function AccountMenu({
         open={menuOpen}
         onOpenChange={(open) => {
           setMenuOpen(open);
-          // N2: clear a stale sign-out error when the menu closes (whether
-          // by Escape, outside click, or a successful sign-out) so
-          // reopening the menu doesn't show a failure that's no longer
-          // current.
+          // Reopening the menu starts a fresh sign-out attempt.
           if (!open) signOut.reset();
         }}
       >
@@ -238,35 +262,7 @@ export function AccountMenu({
             </DropdownMenuItem>
           ) : null}
 
-          {getHelp.type === "mailto" ? (
-            <DropdownMenuItem asChild>
-              <a href={`mailto:${getHelp.address}`}>
-                <HelpCircle className="size-4" />
-                Get help
-              </a>
-            </DropdownMenuItem>
-          ) : getHelp.type === "drawer" || getHelp.type === "form" ? (
-            <DropdownMenuItem onSelect={() => setHelpOpen(true)}>
-              <HelpCircle className="size-4" />
-              Get help
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <span className="flex items-center gap-2">
-                  <HelpCircle className="size-4" />
-                  Get help
-                </span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                {getHelp.items.map((item) => (
-                  <DropdownMenuItem key={item.href} asChild>
-                    <Link href={item.href}>{item.label}</Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          )}
+          <HelpMenuEntry getHelp={getHelp} Link={Link} openHelp={() => setHelpOpen(true)} />
 
           <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
             <MessageSquarePlus className="size-4" />
@@ -341,25 +337,7 @@ export function AccountMenu({
         onError={onError}
       />
 
-      {getHelp.type === "form" ? (
-        <HelpSheet
-          open={helpOpen}
-          onOpenChange={setHelpOpen}
-          mode="form"
-          onSubmit={getHelp.onSubmit}
-          categories={getHelp.categories}
-          onError={onError}
-        />
-      ) : getHelp.type === "drawer" ? (
-        <Sheet open={helpOpen} onOpenChange={setHelpOpen}>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Get help</SheetTitle>
-            </SheetHeader>
-            <div className="px-4">{getHelp.content}</div>
-          </SheetContent>
-        </Sheet>
-      ) : null}
+      <HelpPanel getHelp={getHelp} open={helpOpen} onOpenChange={setHelpOpen} onError={onError} />
     </>
   );
 }

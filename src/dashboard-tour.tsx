@@ -189,7 +189,18 @@ function ensureScopedStyles(scopeClassName: string) {
   // would never get its own rule, since that string already appears inside
   // the CSS for ANY scope).
   if (!styleEl.textContent?.includes(`.driver-popover.${scopeClassName} {`)) {
-    styleEl.textContent = (styleEl.textContent ?? "") + popoverCss(scopeClassName);
+    styleEl.textContent =
+      (styleEl.textContent ?? "") + popoverCss(scopeClassName);
+  }
+}
+
+function runTourTask(task: () => Promise<void>) {
+  try {
+    task().catch((error: unknown) =>
+      console.error("Onboarding tour failed", error),
+    );
+  } catch (error) {
+    console.error("Onboarding tour failed", error);
   }
 }
 
@@ -247,14 +258,7 @@ export function DashboardTour({
     instance.drive();
   }, [steps, scopeClassName]);
 
-  // Auto-start once, on mount, for a first-time visitor on the tour's home
-  // route. Stamps `onFirstSeen` immediately when the tour STARTS — not from
-  // driver.js's `onDestroyed` — matching the fix every kit already shipped
-  // in production (see the `onFirstSeen` doc comment above for why).
-  // Deliberately no `.catch` here: every kit's own `void markTourSeen()` is
-  // fire-and-forget too — this is a proven, already-shipped pattern, not an
-  // oversight, so it should not be "fixed" later by someone who doesn't
-  // know this.
+  // Stamp at start so interrupted tours do not auto-run on every visit.
   React.useEffect(() => {
     // Reset unconditionally, before the early-return below: this effect
     // (deps []) re-fires on every mount, including React StrictMode's
@@ -267,8 +271,8 @@ export function DashboardTour({
     // (below) still fires normally since it happens before that guard.
     unmountedRef.current = false;
     if (!isHomeRoute || seenAtMountRef.current) return;
-    void onFirstSeen();
-    const id = requestAnimationFrame(() => void start());
+    runTourTask(onFirstSeen);
+    const id = requestAnimationFrame(() => runTourTask(start));
     return () => cancelAnimationFrame(id);
     // Intentionally mount-only, matching every kit's own effect; replay
     // after this is manual.
@@ -280,7 +284,7 @@ export function DashboardTour({
   React.useEffect(() => {
     if (!pendingReplayRef.current || !isHomeRoute) return;
     pendingReplayRef.current = false;
-    const id = requestAnimationFrame(() => void start());
+    const id = requestAnimationFrame(() => runTourTask(start));
     return () => cancelAnimationFrame(id);
     // `start` is deliberately NOT a dependency here: this effect should
     // only react to isHomeRoute transitions. A consumer passing an inline/
@@ -317,7 +321,7 @@ export function DashboardTour({
       navigateHome();
       return;
     }
-    void start();
+    runTourTask(start);
   }
 
   return (

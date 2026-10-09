@@ -4,6 +4,38 @@ import userEvent from "@testing-library/user-event";
 import { InfoTooltip } from "./info-tooltip";
 
 describe("InfoTooltip", () => {
+  it("preserves explicit touch sizing and content styling with keyboard dismissal", async () => {
+    const user = userEvent.setup();
+    render(
+      <InfoTooltip
+        trigger="tap"
+        ariaLabel="Printer help"
+        content={<h2>Printer details</h2>}
+        triggerClassName="size-6 shrink-0"
+        iconClassName="size-4"
+        contentClassName="text-foreground"
+      />,
+    );
+    const trigger = screen.getByRole("button", { name: "Printer help" });
+    expect(trigger).toHaveClass("size-6", "shrink-0");
+    expect(trigger).not.toHaveClass("size-4");
+    expect(trigger.querySelector("svg")).toHaveClass("size-4");
+    await user.tab();
+    await user.keyboard("{Enter}");
+    expect(await screen.findByRole("dialog")).toHaveClass("text-foreground");
+    await user.keyboard("{Escape}");
+    expect(screen.queryByText("Printer details")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it("passes optional styling to hover content", async () => {
+    render(
+      <InfoTooltip content="Hover details" contentClassName="bg-primary" />,
+    );
+    fireEvent.focus(screen.getByRole("button", { name: "More info" }));
+    expect(await screen.findByText("Hover details")).toHaveClass("bg-primary");
+  });
+
   it("renders a trigger button with the given aria-label", () => {
     render(
       <InfoTooltip content="More detail" ariaLabel="More about this setting" />,

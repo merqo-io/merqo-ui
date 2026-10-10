@@ -54,7 +54,10 @@ describe("build output", () => {
       "Run pnpm build before these tests: dist/index.d.ts is missing",
     ).toBe(true);
   });
-  it("loads actual built exports in a fresh Node process", () => {
+  // A cold import of the whole barrel can take 15 to 22 s on a Windows
+  // checkout, and longer while the rest of the suite runs beside it, so both
+  // limits sit far above the 30 s default in vitest.config.ts.
+  it("loads actual built exports in a fresh Node process", { timeout: 150_000 }, () => {
     const script = `const built = await import(process.argv[1]);
       console.log(JSON.stringify({ google: typeof built.GoogleMark,
         socialFields: Array.isArray(built.SOCIAL_LINK_FIELDS),
@@ -71,7 +74,7 @@ describe("build output", () => {
             ? { SystemRoot: process.env.SystemRoot }
             : {}),
         },
-        timeout: 30000,
+        timeout: 120_000,
       },
     );
     expect(JSON.parse(stdout)).toEqual({

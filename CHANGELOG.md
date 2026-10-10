@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `pnpm test:coverage` no longer times out on slow Windows checkouts: the built-exports test gives its fresh Node process 120 s instead of 30 s.
+
 ## [0.32.1] - 2026-10-10
 
 ### Fixed

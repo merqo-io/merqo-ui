@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.27.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.1"
 }
 ```
 
@@ -593,7 +593,9 @@ Coverage thresholds apply to statements, branches, functions and lines. Generate
 build output, declarations and test setup are excluded; untested production source
 is included. Component tests do not replace validation in consuming applications.
 Changes to this checkout reach consumers only after a deliberate version/tag
-update; no release is created by these checks.
+update; no release is created by these checks. A release changes `version` in
+`package.json`, the install snippet above and the changelog heading together,
+then tags `v<version>`. `src/release-version.test.ts` fails when they disagree.
 
 ### Upload and navigation contracts
 

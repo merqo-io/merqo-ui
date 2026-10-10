@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Info } from "lucide-react";
 import { Section } from "./section";
@@ -98,6 +98,55 @@ describe("Section", () => {
     );
     await user.hover(screen.getByRole("button", { name: /more about stall name/i }));
     expect(await screen.findByTestId("tooltip-rich-content")).toBeInTheDocument();
+  });
+
+  it("opens the tooltip on a touch tap, where hover never fires", async () => {
+    const user = userEvent.setup();
+    render(
+      <Section icon={<span />} title="Stall name" tooltip="extra detail">
+        <p>content</p>
+      </Section>,
+    );
+    const trigger = screen.getByRole("button", { name: "More about Stall name" });
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("extra detail");
+  });
+
+  it("closes the tooltip when the trigger is tapped again", async () => {
+    const user = userEvent.setup();
+    render(
+      <Section icon={<span />} title="Stall name" tooltip="extra detail">
+        <p>content</p>
+      </Section>,
+    );
+    const trigger = screen.getByRole("button", { name: "More about Stall name" });
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+    expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+  });
+
+  it("opens the tooltip on keyboard focus", async () => {
+    const user = userEvent.setup();
+    render(
+      <Section icon={<span />} title="Stall name" tooltip="extra detail">
+        <p>content</p>
+      </Section>,
+    );
+
+    await user.tab();
+
+    expect(
+      screen.getByRole("button", { name: "More about Stall name" }),
+    ).toHaveFocus();
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("extra detail");
   });
 
   it("merges a custom className onto the root element", () => {

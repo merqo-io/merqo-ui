@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.27.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.1"
 }
 ```
 
@@ -146,9 +146,11 @@ works locally.
 ## Components
 
 - `InfoTooltip` — icon + hover/tap help with optional `triggerClassName`, `iconClassName`, and `contentClassName` overrides for compatible touch sizing and presentation. Parameterized `aria-label` (defaults
-  to `"More info"`). `trigger?: "hover" | "tap"` (default `"hover"`) switches
-  to a click-triggered `Popover`, for touch-first flows where hover never
-  fires.
+  to `"More info"`). `trigger?: "hover" | "tap"` (default `"hover"`). The
+  default is a `Tooltip` that opens on hover, on keyboard focus and on tap, so
+  it is reachable on phones and tablets: a second tap on the icon, a tap
+  elsewhere or Escape closes it. `"tap"` switches to a click-only `Popover`,
+  for longer content that should stay open until dismissed.
 - `useAsyncAction` — pending-state hook that always resets, even on throw.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the
@@ -159,7 +161,8 @@ works locally.
   already-rendered element, e.g. `<Store className="size-5" />`, not a
   component reference), optional `eyebrow?: string`, title, optional
   `description?: string`, optional `tooltip?: ReactNode` (rich content, not
-  just a string). Kit-specific skins (e.g. a paper texture) layer on top via
+  just a string), shown behind an info icon beside the title that opens on
+  hover, keyboard focus and tap. Kit-specific skins (e.g. a paper texture) layer on top via
   `className`, not baked into the component. Optional `wrapper?: (content:
 ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
@@ -590,7 +593,9 @@ Coverage thresholds apply to statements, branches, functions and lines. Generate
 build output, declarations and test setup are excluded; untested production source
 is included. Component tests do not replace validation in consuming applications.
 Changes to this checkout reach consumers only after a deliberate version/tag
-update; no release is created by these checks.
+update; no release is created by these checks. A release changes `version` in
+`package.json`, the install snippet above and the changelog heading together,
+then tags `v<version>`. `src/release-version.test.ts` fails when they disagree.
 
 ### Upload and navigation contracts
 

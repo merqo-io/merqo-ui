@@ -11,8 +11,9 @@ export interface InfoTooltipProps {
   content: React.ReactNode;
   ariaLabel?: string;
   icon?: React.ComponentType<{ className?: string }>;
-  /** "hover" (default) shows on hover/focus via a Tooltip. "tap" shows on
-   *  click via a Popover — for touch-first flows where hover never fires. */
+  /** "hover" (default) shows on hover, keyboard focus and tap via a Tooltip;
+   *  a second tap, a tap elsewhere or Escape closes it. "tap" shows on click
+   *  only, via a Popover, for richer content that should stay put. */
   trigger?: "hover" | "tap";
   triggerClassName?: string;
   iconClassName?: string;
@@ -28,6 +29,12 @@ export function InfoTooltip({
   iconClassName,
   contentClassName,
 }: InfoTooltipProps) {
+  const [open, setOpen] = React.useState(false);
+  // Radix closes the Tooltip on the trigger's pointerdown, before the click
+  // lands, so the click handler alone cannot tell "tap to open" from "tap to
+  // close". null means the click had no pointerdown (keyboard Enter/Space).
+  const openAtPointerDown = React.useRef<boolean | null>(null);
+
   const triggerButton = (
     <button
       type="button"
@@ -55,8 +62,24 @@ export function InfoTooltip({
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>{triggerButton}</TooltipTrigger>
+    <Tooltip open={open} onOpenChange={setOpen}>
+      <TooltipTrigger
+        asChild
+        onPointerDown={() => {
+          openAtPointerDown.current = open;
+        }}
+        onClick={(event) => {
+          // Radix's own click handler only ever closes, which leaves a touch
+          // user (no hover, no focus-on-tap) with no way to open the Tooltip.
+          // preventDefault() skips it so a click toggles instead.
+          event.preventDefault();
+          const wasOpen = openAtPointerDown.current ?? open;
+          openAtPointerDown.current = null;
+          setOpen(!wasOpen);
+        }}
+      >
+        {triggerButton}
+      </TooltipTrigger>
       <TooltipContent className={contentClassName}>{content}</TooltipContent>
     </Tooltip>
   );

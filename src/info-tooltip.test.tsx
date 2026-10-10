@@ -93,6 +93,76 @@ describe("InfoTooltip", () => {
     expect(await screen.findByText("Some detail")).toBeInTheDocument();
   });
 
+  it("trigger defaults to hover: a touch tap opens it and a second tap closes it", async () => {
+    const user = userEvent.setup();
+    render(<InfoTooltip content="Some detail" ariaLabel="Detail" />);
+    const trigger = screen.getByRole("button", { name: "Detail" });
+
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Some detail");
+
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+  });
+
+  it("trigger defaults to hover: a tap outside closes a tapped-open tooltip", async () => {
+    const user = userEvent.setup();
+    render(
+      <div>
+        <InfoTooltip content="Some detail" ariaLabel="Detail" />
+        <p>elsewhere</p>
+      </div>,
+    );
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Detail" }),
+    });
+    expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+
+    await user.pointer({ keys: "[TouchA]", target: screen.getByText("elsewhere") });
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+  });
+
+  it("trigger defaults to hover: a mouse click on a hovered trigger still dismisses it", async () => {
+    const user = userEvent.setup();
+    render(<InfoTooltip content="Some detail" ariaLabel="Detail" />);
+    const trigger = screen.getByRole("button", { name: "Detail" });
+    await user.hover(trigger);
+    expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+
+    await user.click(trigger);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+  });
+
+  it("trigger defaults to hover: Enter toggles it for keyboard users and Escape closes it", async () => {
+    const user = userEvent.setup();
+    render(<InfoTooltip content="Some detail" ariaLabel="Detail" />);
+
+    await user.tab();
+    expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+
+    await user.keyboard("{Enter}");
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+
+    await user.keyboard("{Enter}");
+    expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+  });
+
   it('trigger="tap": content opens on click, not on hover', async () => {
     const user = userEvent.setup();
     render(

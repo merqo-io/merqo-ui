@@ -1,6 +1,6 @@
 import ts from "typescript";
 import { beforeAll, describe, it, expect } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
@@ -84,6 +84,18 @@ describe("build output", () => {
       qr: "function",
     });
   });
+  it("no built module imports the Simple Icons barrel (it re-exports about 3,400 icon modules, which every Node importer of this package would load; import one icon file per icon instead)", () => {
+    const distDir = path.dirname(distIndexPath);
+    const offenders = readdirSync(distDir)
+      .filter((file) => file.endsWith(".js"))
+      .filter((file) =>
+        /from\s*["']@icons-pack\/react-simple-icons["']/.test(
+          readFileSync(path.join(distDir, file), "utf-8"),
+        ),
+      );
+    expect(offenders).toEqual([]);
+  });
+
   it('dist/index.js carries no "use client" directive (regression guard: a package-wide directive turns every plain-data export into a client reference, so a Server Component reading e.g. SOCIAL_LINK_FIELDS gets an opaque stub instead of the array - see qkit docs/meta/2026-09-18 AAR)', () => {
     const contents = readFileSync(distIndexPath, "utf-8");
     expect(contents.startsWith('"use client";')).toBe(false);

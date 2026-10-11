@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Importing this package in Node no longer loads the whole Simple Icons set. `social-icons` imported three brand icons from the `@icons-pack/react-simple-icons` barrel, which re-exports about 3,400 icon modules; it now imports one file per icon. A cold import of `dist/index.js` on a slow Windows checkout drops from 15 to 22 s to about 4 s, which every kit test that imports `@merqo/ui` was paying.
+
 ## [0.32.2] - 2026-10-11
 
 ### Changed

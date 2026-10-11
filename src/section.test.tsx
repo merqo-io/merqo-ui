@@ -133,6 +133,17 @@ describe("Section", () => {
     });
   });
 
+  it("gives the tooltip icon a 44px touch area on touch devices", () => {
+    render(
+      <Section icon={<span />} title="Stall name" tooltip="extra detail">
+        <p>content</p>
+      </Section>,
+    );
+    expect(
+      screen.getByRole("button", { name: "More about Stall name" }),
+    ).toHaveClass("relative", "pointer-coarse:after:size-11");
+  });
+
   it("opens the tooltip on keyboard focus", async () => {
     const user = userEvent.setup();
     render(

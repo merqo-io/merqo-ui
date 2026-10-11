@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.1"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.2"
 }
 ```
 
@@ -150,7 +150,12 @@ works locally.
   default is a `Tooltip` that opens on hover, on keyboard focus and on tap, so
   it is reachable on phones and tablets: a second tap on the icon, a tap
   elsewhere or Escape closes it. `"tap"` switches to a click-only `Popover`,
-  for longer content that should stay open until dismissed.
+  for longer content that should stay open until dismissed. In both modes the
+  icon is drawn at 16px and, on a touch device (`pointer: coarse`), takes taps
+  through a transparent 44px box centred on it, so nothing moves in the layout.
+  That box reaches 14px past each edge of the icon: leave that much room, or
+  size the trigger with `triggerClassName`, where it sits against another
+  control. Needs Tailwind 4.1 or later for the `pointer-coarse` variant.
 - `useAsyncAction` — pending-state hook that always resets, even on throw.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the

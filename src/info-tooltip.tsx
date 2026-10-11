@@ -7,6 +7,13 @@ import { cn } from "./lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
+// The icon is drawn at 16px, too small for a finger. On a touch device a
+// transparent 44px box centred on it takes the tap, so the drawn size and the
+// layout stay as they are. `relative` anchors that box; a caller that positions
+// the trigger itself overrides it through `triggerClassName`.
+const TOUCH_AREA =
+  "relative pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']";
+
 export interface InfoTooltipProps {
   content: React.ReactNode;
   ariaLabel?: string;
@@ -41,6 +48,7 @@ export function InfoTooltip({
       aria-label={ariaLabel}
       className={cn(
         "text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex size-4 items-center justify-center rounded-full outline-none focus-visible:ring-2",
+        TOUCH_AREA,
         triggerClassName,
       )}
     >

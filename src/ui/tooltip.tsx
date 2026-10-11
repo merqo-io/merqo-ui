@@ -37,6 +37,7 @@ function TooltipTrigger({
 function TooltipContent({
   className,
   sideOffset = 0,
+  collisionPadding = 8,
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
@@ -45,6 +46,7 @@ function TooltipContent({
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         sideOffset={sideOffset}
+        collisionPadding={collisionPadding}
         className={cn(
           // Design-critique fix: this used to be `bg-primary text-primary-foreground`
           // (a solid brand-colored bubble), which made InfoTooltip render as two
@@ -52,6 +54,12 @@ function TooltipContent({
           // component) vs. tap mode (`ui/popover.tsx`'s neutral `bg-popover`
           // bordered card). Matching PopoverContent's neutral treatment here means
           // switching `trigger` only changes the interaction model, not the look.
+          // Radix gives the positioned wrapper `min-width: max-content`, so
+          // without a cap a long sentence stays on one line and runs off a
+          // phone screen. The cap keeps it inside the viewport and lets
+          // `text-balance` wrap it; `contentClassName` can widen it. The 1rem
+          // it leaves is the 8px `collisionPadding` kept on each side.
+          "max-w-[min(20rem,calc(100vw-1rem))]",
           "bg-popover text-popover-foreground border animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit rounded-md px-3 py-1.5 text-xs text-balance shadow-md",
           className,
         )}

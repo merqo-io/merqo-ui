@@ -190,6 +190,32 @@ describe("InfoTooltip", () => {
     expect(button).toHaveClass("pointer-coarse:after:size-11");
   });
 
+  it("trigger defaults to hover: long content wraps inside the viewport instead of running off a phone screen", async () => {
+    render(
+      <InfoTooltip
+        ariaLabel="Detail"
+        content="A flat per-kit, per-plan estimate, not tracked from your actual usage, based on an hourly wage and the hours a week the kit saves you on that plan."
+      />,
+    );
+    fireEvent.focus(screen.getByRole("button", { name: "Detail" }));
+    const visible = (await screen.findAllByText(/A flat per-kit/)).find(
+      (node) => node.getAttribute("data-slot") === "tooltip-content",
+    );
+    expect(visible).toHaveClass("max-w-[min(20rem,calc(100vw-1rem))]");
+  });
+
+  it("trigger defaults to hover: a caller's own max width replaces the default", async () => {
+    render(
+      <InfoTooltip ariaLabel="Detail" content="Wide detail" contentClassName="max-w-md" />,
+    );
+    fireEvent.focus(screen.getByRole("button", { name: "Detail" }));
+    const visible = (await screen.findAllByText("Wide detail")).find(
+      (node) => node.getAttribute("data-slot") === "tooltip-content",
+    );
+    expect(visible).toHaveClass("max-w-md");
+    expect(visible).not.toHaveClass("max-w-[min(20rem,calc(100vw-1rem))]");
+  });
+
   it('trigger="tap": content opens on click, not on hover', async () => {
     const user = userEvent.setup();
     render(

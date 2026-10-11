@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A long `InfoTooltip` or `Section` tooltip no longer runs off a phone screen. The default-mode tooltip had no maximum width, so its text stayed on one line (1,271px for a 229-character sentence on the merqo dashboard). It now wraps at 20rem, or at the viewport width on a narrower screen.
+
 ## [0.32.2] - 2026-10-11
 
 ### Changed

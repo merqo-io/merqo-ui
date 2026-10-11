@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.32.2] - 2026-10-11
+
+### Changed
+
+- `InfoTooltip`, and so every `Section` title tooltip, takes taps through a transparent 44px box on touch devices. The icon is still drawn at 16px and nothing moves in the layout. The peer range for `tailwindcss` is now `^4.1.0`, for the `pointer-coarse` variant.
+
 ### Fixed
 
 - `pnpm test:coverage` no longer times out on slow Windows checkouts: the built-exports test gives its fresh Node process 120 s instead of 30 s.

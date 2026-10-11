@@ -163,6 +163,33 @@ describe("InfoTooltip", () => {
     });
   });
 
+  it.each(["hover", "tap"] as const)(
+    'trigger="%s": the 16px icon gets a 44px touch area on touch devices',
+    (trigger) => {
+      render(<InfoTooltip content="x" ariaLabel="Detail" trigger={trigger} />);
+      const button = screen.getByRole("button", { name: "Detail" });
+      expect(button).toHaveClass("size-4", "relative");
+      expect(button).toHaveClass(
+        "pointer-coarse:after:absolute",
+        "pointer-coarse:after:top-1/2",
+        "pointer-coarse:after:left-1/2",
+        "pointer-coarse:after:size-11",
+        "pointer-coarse:after:-translate-x-1/2",
+        "pointer-coarse:after:-translate-y-1/2",
+      );
+    },
+  );
+
+  it("a caller that positions the trigger itself keeps its own positioning", () => {
+    render(
+      <InfoTooltip content="x" ariaLabel="Detail" triggerClassName="absolute top-0" />,
+    );
+    const button = screen.getByRole("button", { name: "Detail" });
+    expect(button).toHaveClass("absolute");
+    expect(button).not.toHaveClass("relative");
+    expect(button).toHaveClass("pointer-coarse:after:size-11");
+  });
+
   it('trigger="tap": content opens on click, not on hover', async () => {
     const user = userEvent.setup();
     render(

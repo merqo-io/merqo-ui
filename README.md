@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.2"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.3"
 }
 ```
 
@@ -149,7 +149,9 @@ works locally.
   to `"More info"`). `trigger?: "hover" | "tap"` (default `"hover"`). The
   default is a `Tooltip` that opens on hover, on keyboard focus and on tap, so
   it is reachable on phones and tablets: a second tap on the icon, a tap
-  elsewhere or Escape closes it. `"tap"` switches to a click-only `Popover`,
+  elsewhere or Escape closes it. Its content wraps at 20rem, or at the
+  viewport width on a narrower screen; pass a `max-w-*` class in
+  `contentClassName` to change that. `"tap"` switches to a click-only `Popover`,
   for longer content that should stay open until dismissed. In both modes the
   icon is drawn at 16px and, on a touch device (`pointer: coarse`), takes taps
   through a transparent 44px box centred on it, so nothing moves in the layout.

@@ -95,3 +95,5 @@ export { safeRedirectPath } from "./safe-redirect";
 export { resizeToWebp } from "./image-resize";
 export type { ResizeResult } from "./image-resize";
 export { storagePathFromPublicUrl } from "./storage-path";
+export { DataCollectionNotice } from "./data-collection-notice";
+export type { DataCollectionNoticeProps } from "./data-collection-notice";

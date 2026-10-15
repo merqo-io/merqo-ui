@@ -18,6 +18,7 @@ const ENTRIES = {
   "dashboard-nav": "src/dashboard-nav.tsx",
   "dashboard-tour": "src/dashboard-tour.tsx",
   "dashboard-tours": "src/dashboard-tours.tsx",
+  "data-collection-notice": "src/data-collection-notice.tsx",
   "data-table": "src/data-table.tsx",
   "elevated-card": "src/elevated-card.tsx",
   "feedback-sheet": "src/feedback-sheet.tsx",

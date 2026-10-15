@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-10-15
+
+### Added
+
+- `DataCollectionNotice`: a one-line notice to render beside a customer-facing phone and name field, stating the purpose and linking to the Privacy Policy. Display only, no consent record. Lets each kit meet the PDPA Notification Obligation with the same wording.
+
 ## [0.32.3] - 2026-10-11
 
 ### Fixed

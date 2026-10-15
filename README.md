@@ -455,6 +455,16 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   image and walks away leaves no orphan in storage; leave it off where
   picking is the save (profile icons). Added v0.32.0.
 
+- `DataCollectionNotice` — one muted line for a customer-facing form that
+  asks for a phone number and name: "We use your phone number and name to
+  {purpose}. See our Privacy Policy." `purpose` is a short verb phrase
+  (required). `basePath` (default `"/legal"`) and `className` work as on
+  `TermsAcceptanceCheckbox`. Render it next to the fields, before the
+  submit button. Display only: it records nothing, which is enough for
+  Singapore PDPA's Notification Obligation on the core service. It is not
+  consent to marketing; any SMS, voice or fax marketing needs express
+  consent and a Do Not Call Registry check first. Not released yet.
+
 These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server

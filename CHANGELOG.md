@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-10-16
+
+### Added
+
+- `DataCollectionNotice` takes `phoneOptional`. Set it on a form whose phone field can be left blank and the line reads "We use your name, and your phone number if you give one, to {purpose}." instead of claiming a phone number the customer may not have given. The default wording is unchanged.
+
 ## [0.33.0] - 2026-10-15
 
 ### Added

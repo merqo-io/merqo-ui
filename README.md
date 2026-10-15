@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.32.3"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.33.0"
 }
 ```
 
@@ -463,7 +463,7 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   submit button. Display only: it records nothing, which is enough for
   Singapore PDPA's Notification Obligation on the core service. It is not
   consent to marketing; any SMS, voice or fax marketing needs express
-  consent and a Do Not Call Registry check first. Not released yet.
+  consent and a Do Not Call Registry check first. Added v0.33.0.
 
 These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,

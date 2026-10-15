@@ -10,6 +10,24 @@ describe("DataCollectionNotice", () => {
     ).toBeInTheDocument();
   });
 
+  it("says the phone number is only used when given when phoneOptional is set", () => {
+    render(<DataCollectionNotice purpose="send your order updates" phoneOptional />);
+    expect(
+      screen.getByText(
+        /We use your name, and your phone number if you give one, to send your order updates\./,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/your phone number and name/)).not.toBeInTheDocument();
+  });
+
+  it("keeps the privacy link when phoneOptional is set", () => {
+    render(<DataCollectionNotice purpose="x" phoneOptional />);
+    expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
+      "href",
+      "/legal/privacy",
+    );
+  });
+
   it("links to the privacy policy under the default base path", () => {
     render(<DataCollectionNotice purpose="track your stamp card" />);
     expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(

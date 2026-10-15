@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.33.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.34.0"
 }
 ```
 
@@ -458,7 +458,10 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
 - `DataCollectionNotice` — one muted line for a customer-facing form that
   asks for a phone number and name: "We use your phone number and name to
   {purpose}. See our Privacy Policy." `purpose` is a short verb phrase
-  (required). `basePath` (default `"/legal"`) and `className` work as on
+  (required). `phoneOptional` (default `false`, added v0.34.0) is for a form
+  whose phone field can be left blank: the line then reads "We use your
+  name, and your phone number if you give one, to {purpose}." `basePath`
+  (default `"/legal"`) and `className` work as on
   `TermsAcceptanceCheckbox`. Render it next to the fields, before the
   submit button. Display only: it records nothing, which is enough for
   Singapore PDPA's Notification Obligation on the core service. It is not

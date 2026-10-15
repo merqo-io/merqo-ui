@@ -11,13 +11,10 @@ export interface BackButtonProps {
   }>;
 }
 
-const DefaultLink = ({
-  href,
-  children,
-}: {
-  href: string;
-  children?: React.ReactNode;
-}) => <a href={href}>{children}</a>;
+// Button's asChild hands its classes to this element, so it must pass every
+// prop through to the <a>. Keeping only href and children dropped the button
+// styling, and the arrow stacked above the label.
+const DefaultLink = (props: React.ComponentProps<"a">) => <a {...props} />;
 
 /** Consistent "leave this page" nav — a real button (proper hit target,
  * hover/focus state), not a plain text link that reads as body copy. */

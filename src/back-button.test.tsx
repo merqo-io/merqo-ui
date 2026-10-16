@@ -9,6 +9,12 @@ describe("BackButton", () => {
     expect(link).toHaveAttribute("href", "/dashboard/booths");
   });
 
+  it("keeps the button styling on the default link", () => {
+    render(<BackButton href="/dashboard" label="Back to board" />);
+    const link = screen.getByRole("link", { name: /back to board/i });
+    expect(link).toHaveClass("inline-flex", "items-center");
+  });
+
   it("renders through a custom LinkComponent when given one", () => {
     const CustomLink = ({
       href,

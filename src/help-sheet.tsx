@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { AsyncSubmitButton } from "./async-submit-button";
 import { PillRadioGroup } from "./pill-radio-group";
+import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import {
   Sheet,
@@ -111,7 +112,9 @@ function HelpForm({
       className="flex flex-1 flex-col gap-4 px-4"
       onSubmit={(event) => {
         event.preventDefault();
-        run().catch((err) => onError?.(err));
+        run().catch((err) => {
+          if (!isRedirectError(err)) onError?.(err);
+        });
       }}
     >
       {categories && categories.length > 0 && (

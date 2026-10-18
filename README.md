@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.34.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.34.2"
 }
 ```
 
@@ -162,6 +162,16 @@ works locally.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the
   route transition instead of the button re-enabling mid-navigation.
+  An action that throws a Next.js `redirect()` is treated the same way:
+  `pending` stays true, `error` stays null and `run()` still rejects with
+  the redirect, so a server action that ends in `redirect("/login")` never
+  shows as a failure. Every component here that takes `onError` skips it
+  for a redirect (since v0.34.2).
+- `isRedirectError(error)` — true when `error` is the one Next.js
+  `redirect()` throws (a string `digest` starting `NEXT_REDIRECT;`).
+  Matches by digest, so it imports nothing from Next.js. `notFound()` and
+  the other HTTP fallbacks are not redirects and return false. Plain
+  function, no React.
 - `TwoColumnSections` — the profile/settings two-column flex-stack layout
   (never a CSS grid — see the component's test file for why).
 - `Section` — visually-neutral field-group shell. `icon: ReactNode` (an

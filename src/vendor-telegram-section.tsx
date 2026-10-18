@@ -4,6 +4,7 @@ import * as React from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 
 import { Section } from "./section";
+import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import { cn } from "./lib/utils";
 
@@ -43,7 +44,9 @@ function DisconnectButton({
       disabled={disconnectAction.pending}
       aria-busy={disconnectAction.pending}
       onClick={() => {
-        disconnectAction.run().catch((err) => onError?.(err));
+        disconnectAction.run().catch((err) => {
+          if (!isRedirectError(err)) onError?.(err);
+        });
       }}
       className={cn(
         "inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-md border px-4 text-sm font-medium",
@@ -103,7 +106,9 @@ function ConnectPanel({
       disabled={connectAction.pending}
       aria-busy={connectAction.pending}
       onClick={() => {
-        connectAction.run().catch((err) => onError?.(err));
+        connectAction.run().catch((err) => {
+          if (!isRedirectError(err)) onError?.(err);
+        });
       }}
       className={cn(
         "bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium",

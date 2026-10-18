@@ -88,6 +88,27 @@ describe("FeedbackSheet", () => {
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
   });
 
+  it("treats a Next.js redirect from onSubmit as navigation, not an error", async () => {
+    const user = userEvent.setup();
+    const onError = vi.fn();
+    const onSubmit = vi.fn().mockRejectedValue(
+      Object.assign(new Error("NEXT_REDIRECT"), {
+        digest: "NEXT_REDIRECT;push;/thanks;303;",
+      }),
+    );
+    render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} onError={onError} />,
+    );
+
+    await user.type(screen.getByLabelText(/message/i), "hi");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(onSubmit).toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 20));
+    expect(screen.queryByText(/NEXT_REDIRECT/)).not.toBeInTheDocument();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
   it("does not render the NPS score grid when showNps is not set", () => {
     render(<FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} />);
     expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();

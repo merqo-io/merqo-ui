@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AsyncSubmitButton } from "./async-submit-button";
+import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -73,7 +74,9 @@ export function PricingForm({
       parsed[field.key] = cents;
     }
     setValidationError(null);
-    save.run(parsed).catch((err) => onError?.(err));
+    save.run(parsed).catch((err) => {
+      if (!isRedirectError(err)) onError?.(err);
+    });
   }
 
   return (

@@ -128,6 +128,22 @@ describe("navigatingAway", () => {
     expect(settled).toBe(false);
   });
 
+  it("a Next.js redirect thrown by the action re-throws, records no error and keeps pending true", async () => {
+    const redirect = Object.assign(new Error("NEXT_REDIRECT"), {
+      digest: "NEXT_REDIRECT;replace;/login;307;",
+    });
+    const { result } = renderHook(() =>
+      useAsyncAction(() => Promise.reject(redirect)),
+    );
+
+    await act(async () => {
+      await expect(result.current.run()).rejects.toBe(redirect);
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.pending).toBe(true);
+  });
+
   it("run() keeps pending true when the action awaits navigatingAway", async () => {
     const { result } = renderHook(() =>
       useAsyncAction(async () => {

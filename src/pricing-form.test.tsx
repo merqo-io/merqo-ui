@@ -74,6 +74,28 @@ describe("PricingForm", () => {
     await waitFor(() => expect(onError).toHaveBeenCalled());
   });
 
+  it("does not call onError when onSave ends in a Next.js redirect", async () => {
+    const onSave = vi.fn().mockRejectedValue(
+      Object.assign(new Error("NEXT_REDIRECT"), {
+        digest: "NEXT_REDIRECT;replace;/dashboard;307;",
+      }),
+    );
+    const onError = vi.fn();
+    render(
+      <PricingForm
+        fields={ONE_FIELD}
+        initial={{ values: { monthly_cents: 499 }, currency: "SGD" }}
+        onSave={onSave}
+        onError={onError}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 20));
+    expect(onError).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /saving/i })).toBeDisabled();
+  });
+
   it("disables the save button while onSave is pending", async () => {
     let resolve: () => void = () => {};
     const onSave = vi.fn(

@@ -241,6 +241,28 @@ describe("AccountMenu", () => {
     expect(onError).toHaveBeenCalled();
   });
 
+  it("a sign-out action that ends in a Next.js redirect is navigation: no alert, no onError, stays Signing out…", async () => {
+    signOutAction.mockRejectedValue(
+      Object.assign(new Error("NEXT_REDIRECT"), {
+        digest: "NEXT_REDIRECT;replace;/login;307;",
+      }),
+    );
+    const onError = vi.fn();
+    const user = await openMenu({ onError });
+
+    const signOut = await screen.findByRole("menuitem", { name: /sign out/i });
+    await user.pointer({ keys: "[TouchA]", target: signOut });
+
+    expect(
+      await screen.findByRole("menuitem", { name: /signing out…/i }),
+    ).toHaveAttribute("data-disabled");
+    await new Promise((r) => setTimeout(r, 20));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByText(/NEXT_REDIRECT/)).not.toBeInTheDocument();
+    expect(onError).not.toHaveBeenCalled();
+    expect(screen.getByRole("menuitem", { name: /signing out…/i })).toBeInTheDocument();
+  });
+
   it("C2: a successful sign-out closes the menu", async () => {
     const user = await openMenu();
     const signOut = await screen.findByRole("menuitem", { name: /sign out/i });

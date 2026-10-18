@@ -38,6 +38,7 @@ const ENTRIES = {
   "plan-comparison-table": "src/plan-comparison-table.tsx",
   "pricing-form": "src/pricing-form.tsx",
   qr: "src/qr.ts",
+  "redirect-error": "src/redirect-error.ts",
   "safe-redirect": "src/safe-redirect.ts",
   section: "src/section.tsx",
   "social-icons": "src/social-icons.tsx",

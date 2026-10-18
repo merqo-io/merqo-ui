@@ -74,6 +74,30 @@ describe("VendorTelegramSection", () => {
     });
   });
 
+  it("does not call onError when connect or disconnect ends in a Next.js redirect", async () => {
+    const redirect = Object.assign(new Error("NEXT_REDIRECT"), {
+      digest: "NEXT_REDIRECT;replace;/dashboard;307;",
+    });
+    const onError = vi.fn();
+    const onConnect = vi.fn().mockRejectedValue(redirect);
+    const onDisconnect = vi.fn().mockRejectedValue(redirect);
+    const { unmount } = render(
+      <VendorTelegramSection connected={false} onConnect={onConnect} onError={onError} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /connect telegram/i }));
+    await waitFor(() => expect(onConnect).toHaveBeenCalled());
+    unmount();
+
+    render(
+      <VendorTelegramSection connected={true} onDisconnect={onDisconnect} onError={onError} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
+    await waitFor(() => expect(onDisconnect).toHaveBeenCalled());
+
+    await new Promise((r) => setTimeout(r, 20));
+    expect(onError).not.toHaveBeenCalled();
+  });
+
   it("connected: surfaces a disconnect failure via onError", async () => {
     const onError = vi.fn();
     const onDisconnect = vi.fn().mockRejectedValue(new Error("boom"));

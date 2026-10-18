@@ -17,6 +17,7 @@ import { useTheme } from "next-themes";
 
 import { FeedbackSheet, type FeedbackData } from "./feedback-sheet";
 import { HelpSheet, type SupportRequest } from "./help-sheet";
+import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import {
   DropdownMenu,
@@ -313,7 +314,9 @@ export function AccountMenu({
               signOut
                 .run()
                 .then(() => setMenuOpen(false))
-                .catch((err) => onError?.(err));
+                .catch((err) => {
+                  if (!isRedirectError(err)) onError?.(err);
+                });
             }}
           >
             <LogOut className="size-4" />

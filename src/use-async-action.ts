@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { isRedirectError } from "./redirect-error";
 
 export function useAsyncAction<Args extends unknown[]>(
   action: (...args: Args) => Promise<void>,
@@ -12,16 +13,20 @@ export function useAsyncAction<Args extends unknown[]>(
     async (...args: Args) => {
       setPending(true);
       setError(null);
+      let redirecting = false;
       try {
         await action(...args);
       } catch (err) {
-        setError(err);
+        // A Next.js redirect means the page is leaving: like
+        // `navigatingAway()`, keep `pending` true and record no error.
+        if (isRedirectError(err)) redirecting = true;
+        else setError(err);
         // Re-thrown so existing caller-level error handling (including
         // `rejects.toThrow` in tests) keeps working unchanged - `error` is
         // an additive field, not a replacement for propagation.
         throw err;
       } finally {
-        setPending(false);
+        if (!redirecting) setPending(false);
       }
     },
     [action],

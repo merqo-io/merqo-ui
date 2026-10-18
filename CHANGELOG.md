@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.34.2] - 2026-10-18
+
+### Fixed
+
+- Signing out from `AccountMenu` with a server action that ends in `redirect("/login")` no longer flashes a "NEXT_REDIRECT" error under the button or calls `onError`. Next.js implements `redirect()` by throwing, and `useAsyncAction` recorded that throw as a failure. It now treats a redirect as navigation: `pending` stays true, so the item keeps reading "Signing out…", `error` stays null, and `run()` still rejects with the redirect. `FeedbackSheet`, `HelpSheet`, `PricingForm` and `VendorTelegramSection` skip `onError` for a redirect too.
+
+### Added
+
+- `isRedirectError(error)`: true for the error Next.js `redirect()` throws, matched by its `digest` without importing Next.js.
+
 ## [0.34.0] - 2026-10-16
 
 ### Added

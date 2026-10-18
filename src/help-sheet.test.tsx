@@ -58,6 +58,27 @@ describe("HelpSheet", () => {
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
   });
 
+  it("form mode treats a Next.js redirect from onSubmit as navigation, not an error", async () => {
+    const user = userEvent.setup();
+    const onError = vi.fn();
+    const onSubmit = vi.fn().mockRejectedValue(
+      Object.assign(new Error("NEXT_REDIRECT"), {
+        digest: "NEXT_REDIRECT;push;/dashboard;303;",
+      }),
+    );
+    render(
+      <HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={onSubmit} onError={onError} />,
+    );
+
+    await user.type(screen.getByLabelText(/message/i), "help!");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(onSubmit).toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 20));
+    expect(screen.queryByText(/NEXT_REDIRECT/)).not.toBeInTheDocument();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
   it("form mode: does not render a category grid when categories is not set", () => {
     render(<HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={vi.fn()} />);
     expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();

@@ -1,6 +1,6 @@
 {
   "name": "@merqo/ui",
-  "version": "0.34.3",
+  "version": "0.35.0",
   "private": true,
   "repository": {
     "type": "git",
@@ -23,6 +23,22 @@
     "./legal": {
       "types": "./dist/legal.d.ts",
       "import": "./dist/legal.js"
+    },
+    "./eslint": {
+      "types": "./dist/eslint/preset.d.ts",
+      "import": "./dist/eslint.js"
+    },
+    "./security": {
+      "types": "./dist/security/csp.d.ts",
+      "import": "./dist/security.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/vendor-activity.d.ts",
+      "import": "./dist/contracts.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/render-smoke.d.ts",
+      "import": "./dist/testing.js"
     }
   },
   "files": [
@@ -39,9 +55,15 @@
     "test:coverage": "vitest run --coverage"
   },
   "peerDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": ">=4.8.1",
+    "@playwright/test": ">=1.64.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-sonarjs": ">=4.2.2",
+    "next": ">=16.4.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "tailwindcss": "^4.1.0"
+    "tailwindcss": "^4.1.0",
+    "zod": ">=4.6.6 <5"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "13.13.0",
@@ -59,11 +81,12 @@
     "radix-ui": "^1.6.7",
     "react-markdown": "9.0.1",
     "remark-gfm": "4.0.0",
-    "tailwind-merge": "^2.6.0",
-    "zod": "4.6.6"
+    "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "4.8.1",
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "1.64.1",
     "@testing-library/jest-dom": "~6.9.1",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
@@ -74,15 +97,37 @@
     "@vitest/coverage-v8": "4.1.12",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-sonarjs": "4.1.0",
+    "eslint-plugin-sonarjs": "4.2.2",
     "jsdom": "30.0.1",
+    "next": "16.4.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.71.1",
     "vite": "8.3.5",
-    "vitest": "4.1.12"
+    "vitest": "4.1.12",
+    "zod": "4.6.6"
   },
-  "packageManager": "pnpm@11.10.0"
+  "packageManager": "pnpm@11.10.0",
+  "peerDependenciesMeta": {
+    "@eslint-community/eslint-plugin-eslint-comments": {
+      "optional": true
+    },
+    "@playwright/test": {
+      "optional": true
+    },
+    "eslint": {
+      "optional": true
+    },
+    "eslint-plugin-sonarjs": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  }
 }

@@ -78,6 +78,8 @@ export interface ImageUploaderProps {
    * picking is itself the save (a profile icon that saves on change).
    */
   deferUpload?: boolean;
+  /** Alt text for the preview of the current image. Default "Uploaded image preview". */
+  previewAlt?: string;
   className?: string;
 }
 
@@ -264,6 +266,7 @@ export function ImageUploader({
   variant = "thumb",
   maxDim,
   imageComponent,
+  previewAlt = "Uploaded image preview",
   onError,
   deferUpload = false,
   className,
@@ -373,7 +376,7 @@ export function ImageUploader({
         >
           <PreviewImage
             src={value}
-            alt=""
+            alt={previewAlt}
             fill
             sizes={previewSizes}
             className="object-cover"

@@ -3,6 +3,7 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 import sonarjs from "eslint-plugin-sonarjs";
+import { merqoEslintPreset } from "./src/eslint/preset.ts";
 
 export default defineConfig(
   { ignores: ["dist/**", "coverage/**", "node_modules/**", "**/*.generated.*"] },
@@ -10,7 +11,6 @@ export default defineConfig(
     files: ["**/*.{js,mjs,cjs,ts,tsx}"],
     extends: [js.configs.recommended],
     languageOptions: { globals: { console: "readonly", process: "readonly", Buffer: "readonly", URL: "readonly" } },
-    linterOptions: { reportUnusedDisableDirectives: "error" },
   },
   {
     files: ["**/*.{ts,tsx}"],
@@ -18,28 +18,20 @@ export default defineConfig(
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "sonarjs/no-unused-vars": "off",
-      "sonarjs/no-commented-code": "error",
-      "no-inline-comments": ["error", { ignorePattern: "eslint-|@ts-|prettier-|c8 |istanbul " }],
     },
   },
+  ...merqoEslintPreset({
+    sonarjsPlugin: sonarjs.configs.recommended.plugins.sonarjs,
+    tsPlugin: tseslint.plugin,
+  }),
   {
-    files: ["**/*.tsx"],
-    rules: {
-      // JSX composition routinely nests render callbacks.
-      "sonarjs/no-nested-functions": "off",
-    },
+    // Google brand mark colours are fixed by the brand guidelines.
+    files: ["src/google-mark.tsx"],
+    rules: { "no-restricted-syntax": "off" },
   },
   {
     files: ["**/*.{test,spec}.{ts,tsx}", "src/test-setup.ts"],
     languageOptions: { globals: { describe: "readonly", it: "readonly", test: "readonly", expect: "readonly", beforeEach: "readonly", afterEach: "readonly", beforeAll: "readonly", afterAll: "readonly", vi: "readonly" } },
-    rules: {
-      // Fixture annotations and fake network values are deliberate test inputs.
-      "no-inline-comments": "off",
-      "sonarjs/no-nested-functions": "off",
-      "sonarjs/no-hardcoded-passwords": "off",
-      "sonarjs/no-hardcoded-ip": "off",
-      "sonarjs/no-clear-text-protocols": "off",
-      "sonarjs/pseudo-random": "off",
-    },
+    rules: { "no-inline-comments": "off" },
   },
 );

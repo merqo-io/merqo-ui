@@ -145,4 +145,21 @@ describe("build output", () => {
       ).toBe(true);
     }
   });
+
+  describe("subpath entries", () => {
+    const distDir = path.dirname(distIndexPath);
+    const entries = ["eslint", "security", "contracts", "testing"];
+
+    it.each(entries)("dist/%s.js exists", (name) => {
+      expect(existsSync(path.join(distDir, `${name}.js`))).toBe(true);
+    });
+
+    it.each(["security", "contracts"])(
+      "dist/%s.js imports no React (it must load in a proxy or API route)",
+      (name) => {
+        const contents = readFileSync(path.join(distDir, `${name}.js`), "utf-8");
+        expect(contents).not.toMatch(/from\s*["']react(-dom)?(\/[^"']*)?["']/);
+      },
+    );
+  });
 });

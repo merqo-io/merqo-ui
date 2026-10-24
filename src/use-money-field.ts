@@ -18,7 +18,7 @@ function parseDollarsToCents(
 }
 
 function format(cents: number | undefined): string {
-  return cents == null ? "" : centsToDollarString(cents);
+  return cents === undefined ? "" : centsToDollarString(cents);
 }
 
 /**

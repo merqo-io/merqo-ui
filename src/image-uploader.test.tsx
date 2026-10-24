@@ -452,7 +452,20 @@ describe("ImageUploader — preview and variants", () => {
 
     const img = container.querySelector("img");
     expect(img).toHaveAttribute("src", "https://cdn.example.test/current.webp");
-    expect(img).toHaveAttribute("alt", "");
+    expect(img).toHaveAttribute("alt", "Uploaded image preview");
+  });
+
+  it("previewAlt overrides the default preview alt text", () => {
+    render(
+      <ImageUploader
+        {...baseProps({
+          value: "https://cdn.example.test/current.webp",
+          previewAlt: "Booth banner",
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("img", { name: "Booth banner" })).toBeInTheDocument();
   });
 
   it("renders an injected imageComponent (e.g. next/image) with fill and sizes", () => {

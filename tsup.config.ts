@@ -85,4 +85,16 @@ export default defineConfig([
     clean: false,
     esbuildOptions: mdLoader,
   },
+  {
+    // Non-React subpath entries: lint preset, CSP builder, contracts, smoke helper.
+    entry: {
+      eslint: "src/eslint/preset.ts",
+      security: "src/security/csp.ts",
+      contracts: "src/contracts/vendor-activity.ts",
+      testing: "src/testing/render-smoke.ts",
+    },
+    format: ["esm"],
+    dts: false,
+    clean: false,
+  },
 ]);

@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.34.3"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.35.0"
 }
 ```
 
@@ -245,7 +245,9 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   misaligned again unless its own `<main>` also caps at `max-w-7xl`.
   Optional `LinkComponent?: React.ComponentType<{href: string, ...}>` (since
   v0.10.0) renders each nav link (desktop and mobile) through it instead of
-  a plain `<a>` — same rationale as `AccountMenu`'s prop above.
+  a plain `<a>` — same rationale as `AccountMenu`'s prop above. The mobile
+  tap-away scrim is a `tabIndex={-1}` `<button>` named "Close navigation
+  menu" (since v0.35.0).
 - `LandingNav` — public-page nav shell: sticky header, shared shape
   (`z-20`, `bg-background/85`, padding on the header not the inner `<nav>`),
   `max-w-6xl` centered row. Takes only two slots — `wordmark: ReactNode`
@@ -258,7 +260,9 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   backend-agnostic. `uploading` always resets — success, validation failure,
   or throw. Default `variant` is `"thumb"` — qkit's booth-banner usage
   **must** pass `variant="banner"` explicitly when migrating, or it will
-  silently render as a small square with the wrong resize target.
+  silently render as a small square with the wrong resize target. The
+  preview `<img>` takes `previewAlt` (default "Uploaded image preview",
+  since v0.35.0).
 - `DashboardTour` — wires up `driver.js` (config, lifecycle, floating
   replay button, `driver.js` + its CSS both lazily self-imported) from an
   injected `steps` array/resolver, `onFirstSeen` callback, `isHomeRoute`,
@@ -482,6 +486,46 @@ These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server
 Component rather than an opaque client-reference stub.
+
+## Shared tooling entries (since v0.35.0)
+
+Four subpath exports with no React. Their peer dependencies are optional;
+install only what the entries you import need.
+
+- `@merqo/ui/eslint`: `merqoEslintPreset({ sonarjsPlugin, tsPlugin })`
+  returns flat-config blocks: directive hygiene (`eslint-comments`,
+  unused-disable errors), own-line comments, code-smell limits
+  (`max-lines` 500, `complexity` 15, `max-params` 4), a ban on colour
+  literals in `src/**`, and the em dash copy rule. Pass the kit's own
+  plugin objects so ESLint sees one instance of each:
+
+  ```js
+  import sonarjs from "eslint-plugin-sonarjs";
+  import { merqoEslintPreset } from "@merqo/ui/eslint";
+
+  export default [
+    // next config, kit ignores, kit-local rules (e.g. no-use-before-define)
+    ...merqoEslintPreset({
+      sonarjsPlugin: sonarjs.configs.recommended.plugins.sonarjs,
+      tsPlugin: typescriptEslintPlugin,
+    }),
+  ];
+  ```
+
+  The preset adds no `@typescript-eslint/no-use-before-define`; kits keep
+  their own. Test files, `scripts/**` and `e2e/**` are exempt from inline
+  comment, size and colour rules.
+- `@merqo/ui/security`: `buildCsp`, `withNonceCsp` (call from `proxy.ts`
+  on dynamic routes), `createNonce` and `robotsHeaderFor(VERCEL_ENV)` for
+  the staging `noindex` header. `style-src` keeps `'unsafe-inline'`; with no
+  nonce `script-src` falls back to `'unsafe-inline'` for static routes.
+- `@merqo/ui/contracts`: `vendorActivityPayloadSchema` (Zod 4),
+  `vendorStatusSchema` and `INCIDENT_KINDS`. `incidents` and `recent`
+  (max 10) are optional, so a kit that does not report them yet stays valid.
+- `@merqo/ui/testing`: `renderSmoke(page, routes)` visits each route on a
+  signed-in Playwright page and returns the failures: 5xx, error boundary
+  (default selector `[data-error-boundary="true"]`), `pageerror`, or a CSP
+  violation in the console. An empty array means every route rendered.
 
 ## Z-index scale
 

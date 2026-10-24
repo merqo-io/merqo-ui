@@ -83,16 +83,17 @@ describe("DashboardNav", () => {
     expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
   });
 
-  it("I7: renders a tap-away scrim that closes the panel when clicked", async () => {
+  it("I7: renders a tap-away scrim button that closes the panel when clicked", async () => {
     const user = userEvent.setup();
-    const { container } = render(<DashboardNav {...baseProps} />);
+    render(<DashboardNav {...baseProps} />);
 
     await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
     expect(screen.getByRole("navigation", { name: "Mobile navigation menu" })).toBeInTheDocument();
 
-    const scrim = container.querySelector('[aria-hidden="true"]');
-    expect(scrim).not.toBeNull();
-    await user.click(scrim as Element);
+    const scrim = screen.getByRole("button", { name: "Close navigation menu" });
+    expect(scrim.tagName).toBe("BUTTON");
+    expect(scrim).toHaveAttribute("tabindex", "-1");
+    await user.click(scrim);
 
     expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
   });
@@ -137,11 +138,6 @@ describe("DashboardNav", () => {
     );
   });
 
-  it("does not set data-tour on links when tourAnchor is not given", () => {
-    render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
-    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("data-tour");
-  });
-
   it("marks the active link via aria-current when isActiveHref returns true", () => {
     render(
       <DashboardNav
@@ -157,10 +153,13 @@ describe("DashboardNav", () => {
     expect(screen.getByRole("link", { name: "Stats" })).not.toHaveAttribute("aria-current");
   });
 
-  it("no link has aria-current when isActiveHref is not given", () => {
-    render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
-    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("aria-current");
-  });
+  it.each(["data-tour", "aria-current"])(
+    "links carry no %s when its driver prop is not given",
+    (attribute) => {
+      render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
+      expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute(attribute);
+    },
+  );
 
   it("active desktop link gets pill-style active classes (bg-primary/10 text-primary)", () => {
     render(

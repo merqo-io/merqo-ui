@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.34.3] - 2026-10-24
+
+### Security
+
+- Pinned `zod` to `4.6.6` (GHSA-mrhx-c7xc-m3w5, memory exhaustion on oversized constrained collections). No code change: the library already uses the Zod 4 API.
+
+- Dev tooling: `vitest` and `@vitest/coverage-v8` to `4.1.12` (`@vitest/mocker` GHSA-qxg6-89mg-rqv8, GHSA-xp26-3454-mjgp), `vite` pinned to `8.3.5` (GHSA-587h-7wmj-h5pm and five more), `undici` forced to `>=8.12.2` through `pnpm-workspace.yaml` overrides (via `jsdom`).
+
 ## [0.34.2] - 2026-10-18
 
 ### Fixed

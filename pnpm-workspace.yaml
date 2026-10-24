@@ -4,3 +4,4 @@ allowBuilds:
 overrides:
   source-map-js@<1.2.2: ">=1.2.2 <2"
   esbuild@<0.28.1: ">=0.28.1 <0.29"
+  undici@>=8.0.0 <8.12.2: ">=8.12.2 <9"

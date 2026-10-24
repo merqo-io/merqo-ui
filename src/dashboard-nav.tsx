@@ -97,13 +97,13 @@ export function DashboardNav({
 
       {mobileOpen ? (
         <>
-          {/* Tap-away scrim (I7): closes the panel on outside click. Purely
-              decorative/interaction-only, so it's hidden from the a11y tree
-              - Escape (above) and the panel's own focusable links remain the
-              accessible ways to dismiss it. */}
-          <div
-            aria-hidden="true"
-            className="bg-foreground/20 fixed inset-0 z-10 sm:hidden"
+          {/* Tap-away scrim (I7). Out of the tab order: Escape (above) and the
+              panel's own links are the keyboard ways to dismiss it. */}
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Close navigation menu"
+            className="bg-foreground/20 fixed inset-0 z-10 cursor-default sm:hidden"
             onClick={() => setMobileOpen(false)}
           />
           <nav

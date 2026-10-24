@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-24
+
+### Added
+
+- `@merqo/ui/eslint`: `merqoEslintPreset`, the shared lint rules for comment hygiene, code-smell limits, the colour-token ban and the em dash rule. Optional peers: `eslint`, `eslint-plugin-sonarjs`, `@eslint-community/eslint-plugin-eslint-comments`.
+- `@merqo/ui/security`: `buildCsp`, `withNonceCsp`, `createNonce` and `robotsHeaderFor` for a nonce Content-Security-Policy and a non-production `noindex` header.
+- `@merqo/ui/contracts`: the Zod 4 `vendorActivityPayloadSchema` with optional `incidents` and `recent`, plus `INCIDENT_KINDS`. Optional peer: `zod`.
+- `@merqo/ui/testing`: `renderSmoke`, a signed-in render smoke helper for Playwright. Optional peer: `@playwright/test`.
+- `ImageUploader` takes `previewAlt` for the preview image.
+
+### Changed
+
+- `ImageUploader` preview images now carry the alt text "Uploaded image preview" instead of an empty one.
+- `DashboardNav`: the mobile tap-away scrim is a `<button>` named "Close navigation menu" (out of the tab order) instead of a clickable `div`.
+- `zod` moves from `dependencies` to dev and optional peer, since only `@merqo/ui/contracts` uses it.
+
 ## [0.34.2] - 2026-10-18
 
 ### Fixed

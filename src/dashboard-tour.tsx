@@ -92,6 +92,7 @@ const STYLE_ELEMENT_ID = "merqo-tour-styles";
 
 // One shared block per scope class, appended (not replaced) so multiple
 // kit-branded tours mounted in the same document each keep their own rule.
+/* eslint-disable no-restricted-syntax -- no cross-kit shadow-colour token exists */
 function popoverCss(scopeClassName: string): string {
   return `
 .driver-popover.${scopeClassName} {
@@ -172,6 +173,7 @@ function popoverCss(scopeClassName: string): string {
 }
 `;
 }
+/* eslint-enable no-restricted-syntax */
 
 function ensureScopedStyles(scopeClassName: string) {
   let styleEl = document.getElementById(
@@ -276,7 +278,7 @@ export function DashboardTour({
     return () => cancelAnimationFrame(id);
     // Intentionally mount-only, matching every kit's own effect; replay
     // after this is manual.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only by design
   }, []);
 
   // Resume a cross-page replay once the caller's own navigation has landed
@@ -298,7 +300,7 @@ export function DashboardTour({
     // spent the flag — silently dropping the replay with no error and no
     // drive() call. Reading `start` via the closure (current value at the
     // time the rAF callback actually runs) is fine either way.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `start` is read at rAF time
   }, [isHomeRoute]);
 
   React.useEffect(() => {

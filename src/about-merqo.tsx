@@ -37,8 +37,8 @@ export function AboutMerqo({ kitName, className, children }: AboutMerqoProps) {
           piloting, running with a few vendors.
         </p>
         <p>
-          Merqo is the shared home for the rest of the family, which is
-          in build, built but not yet tried with vendors: <span className="font-medium text-foreground">loopkit</span> for
+          Merqo is the shared home for the rest of the family. The rest of
+          the family is in build (built, not yet tried with vendors): <span className="font-medium text-foreground">loopkit</span> for
           stamp-card loyalty, <span className="font-medium text-foreground">paykit</span> for
           PayNow and payment tracking, and <span className="font-medium text-foreground">stockkit</span> for
           stock. The plan is one account, one

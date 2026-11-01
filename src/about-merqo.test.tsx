@@ -15,13 +15,11 @@ describe("AboutMerqo", () => {
     const { container } = render(<AboutMerqo />);
     const text = container.textContent ?? "";
     expect(text).toMatch(/piloting, running with a few vendors/);
-    expect(text).toMatch(/in build, built but not yet tried with vendors/);
+    expect(text).toMatch(/is in build \(built, not yet tried with vendors\)/);
     expect(text).toMatch(/loopkit/);
     expect(text).toMatch(/paykit/);
     expect(text).toMatch(/stockkit/);
-    for (const word of ["live", "available today", "proven"]) {
-      expect(text.toLowerCase()).not.toContain(word);
-    }
+    expect(text).not.toMatch(/\b(live|now|available today|proven)\b/i);
   });
 
   it("does not name the reader's kit when kitName is omitted", () => {

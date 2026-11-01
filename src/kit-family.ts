@@ -1,5 +1,5 @@
 /**
- * The Merqo kit family, one place — adding a new live kit means updating
+ * The Merqo kit family, one place — adding a new kit means updating
  * this list, not every kit's own DashboardNav wrapper. Each kit's real
  * production host is its `<slug>.merqo.io` subdomain (matching
  * `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.merqo.io`'s shared-session scope) —
@@ -23,7 +23,7 @@ export const KIT_FAMILY: KitFamilyMember[] = [
 ];
 
 /**
- * The other live kits a vendor can switch to from `currentSlug`, formatted
+ * The other kits a vendor can switch to from `currentSlug`, formatted
  * directly for `AccountMenu`/`DashboardNav`'s `switchKits` prop. A kit not
  * yet in `KIT_FAMILY` (or an unrecognized `currentSlug`) just gets the
  * full family back — fails open to "show the switcher" rather than silently

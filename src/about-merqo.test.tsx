@@ -11,6 +11,17 @@ describe("AboutMerqo", () => {
     ).toBeInTheDocument();
   });
 
+  it("describes qkit as piloting and the rest as in build, never live", () => {
+    const { container } = render(<AboutMerqo />);
+    const text = container.textContent ?? "";
+    expect(text).toMatch(/piloting, running with a few vendors/);
+    expect(text).toMatch(/is in build \(built, not yet tried with vendors\)/);
+    expect(text).toMatch(/loopkit/);
+    expect(text).toMatch(/paykit/);
+    expect(text).toMatch(/stockkit/);
+    expect(text).not.toMatch(/\b(live|now|available today|proven)\b/i);
+  });
+
   it("does not name the reader's kit when kitName is omitted", () => {
     render(<AboutMerqo />);
     expect(screen.queryByText(/one kit in that/)).not.toBeInTheDocument();

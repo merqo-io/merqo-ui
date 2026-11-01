@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { KIT_FAMILY, getSwitchKits } from "./kit-family";
 
 describe("KIT_FAMILY", () => {
-  it("lists all four live kits with a slug/name/url", () => {
+  it("lists all four kits with a slug/name/url", () => {
     expect(KIT_FAMILY.map((k) => k.slug).sort()).toEqual([
       "loopkit",
       "paykit",

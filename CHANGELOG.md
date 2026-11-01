@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-11-02
+
+### Changed
+
+- `AboutMerqo`: describes qkit as piloting with a few vendors and loopkit, paykit and stockkit as in build (built, not yet tried with vendors), instead of presenting them as existing products.
+
 ## [0.35.0] - 2026-10-24
 
 ### Added

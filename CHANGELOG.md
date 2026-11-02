@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-11-02
+
+### Security
+
+- `VendorTelegramSection`: the QR markup is rendered inside an `<img>` data URI instead of being injected into the DOM, so script or handlers in it cannot run.
+- `VendorTelegramSection`: the connect deep link must be `https://t.me/...` (no userinfo or port); anything else is reported through `onError` and no link or QR is shown.
+- Repo: gitleaks and `pnpm audit` workflow, CodeQL analysis and Dependabot security updates.
+
 ## [0.36.0] - 2026-11-02
 
 ### Changed

@@ -30,6 +30,26 @@ export type VendorTelegramSectionProps = VendorTelegramSectionCommon &
       }
   );
 
+/**
+ * Only `https://t.me/...` may reach an `href`: a caller-supplied
+ * `javascript:` or look-alike host would otherwise be one click from running.
+ */
+function isTelegramDeepLink(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  return (
+    url.protocol === "https:" &&
+    url.hostname === "t.me" &&
+    url.port === "" &&
+    url.username === "" &&
+    url.password === ""
+  );
+}
+
 function DisconnectButton({
   onDisconnect,
   onError,
@@ -73,16 +93,24 @@ function ConnectPanel({
     qrSvgMarkup: string;
   } | null>(null);
   const connectAction = useAsyncAction(async () => {
-    setLink(await onConnect());
+    const minted = await onConnect();
+    if (!isTelegramDeepLink(minted.deepLink)) {
+      throw new Error("Unexpected Telegram link");
+    }
+    setLink(minted);
   });
 
   if (link) {
     return (
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-        <div
-          className="shrink-0 rounded-xl border bg-white p-2 [&_svg]:size-20"
-          dangerouslySetInnerHTML={{ __html: link.qrSvgMarkup }}
-        />
+        <div className="shrink-0 rounded-xl border bg-white p-2">
+          {/* An <img> never executes script or handlers inside SVG, unlike injected markup. */}
+          <img
+            src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(link.qrSvgMarkup)}`}
+            alt="Telegram connect QR code"
+            className="size-20"
+          />
+        </div>
         <div className="w-full min-w-0 flex-1 space-y-2">
           <p className="text-sm text-muted-foreground">
             Scan with Telegram, or tap the link below.

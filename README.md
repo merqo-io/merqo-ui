@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.36.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.37.0"
 }
 ```
 
@@ -296,7 +296,10 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   settings UI. `connected: false` renders a "Connect Telegram" action that
   calls the injected `onConnect` (mints a fresh deep-link token on demand,
   e.g. via a server action — no token is pre-minted on page load) and then
-  shows the returned `deepLink` + `qrSvgMarkup`; `connected: true` shows a
+  shows the returned `deepLink` + `qrSvgMarkup` (the QR renders as an `<img>`
+  data URI, never injected markup). `deepLink` must be an `https://t.me/...`
+  URL without userinfo or a port; any other value is reported through
+  `onError` and no link or QR is shown. `connected: true` shows a
   connected status and a "Disconnect" action calling the injected
   `onDisconnect`. Optional `onError?: (error: unknown) => void` and
   `sectionWrapper?` (forwarded to its internal `Section`) match the rest of

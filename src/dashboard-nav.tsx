@@ -23,7 +23,22 @@ export type DashboardNavProps = {
    * (e.g. an unawaited "mark seen" call) started just before the click.
    */
   LinkComponent?: React.ComponentType<DashboardNavLinkProps>;
+  /**
+   * Links render in the burger menu below this breakpoint and inline at or
+   * above it. Defaults to `"sm"`; raise it when many links would overflow
+   * the header between `sm` and the width they need.
+   */
+  collapseBelow?: "sm" | "md" | "lg" | "xl";
 } & AccountMenuProps;
+
+// Tailwind only sees literal class strings, so each breakpoint spells out
+// its full classes instead of interpolating the prefix.
+const COLLAPSE_CLASSES = {
+  sm: { burger: "sm:hidden", inline: "hidden sm:flex", overlay: "sm:hidden" },
+  md: { burger: "md:hidden", inline: "hidden md:flex", overlay: "md:hidden" },
+  lg: { burger: "lg:hidden", inline: "hidden lg:flex", overlay: "lg:hidden" },
+  xl: { burger: "xl:hidden", inline: "hidden xl:flex", overlay: "xl:hidden" },
+} as const;
 
 const MOBILE_PANEL_ID = "dashboard-nav-mobile-panel";
 
@@ -37,8 +52,10 @@ export function DashboardNav({
   isActiveHref,
   tourAnchor,
   LinkComponent,
+  collapseBelow = "sm",
   ...accountMenuProps
 }: DashboardNavProps) {
+  const collapse = COLLAPSE_CLASSES[collapseBelow];
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const Link = LinkComponent ?? DefaultLink;
 
@@ -68,13 +85,16 @@ export function DashboardNav({
             aria-expanded={mobileOpen}
             aria-controls={MOBILE_PANEL_ID}
             data-tour="nav-menu"
-            className="focus-visible:ring-ring/50 inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2 sm:hidden"
+            className={cn(
+              "focus-visible:ring-ring/50 inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2",
+              collapse.burger,
+            )}
             onClick={() => setMobileOpen((open) => !open)}
           >
             <Menu className="size-5" />
           </button>
           {wordmark}
-          <nav className="hidden items-center gap-4 sm:flex">
+          <nav className={cn("items-center gap-4", collapse.inline)}>
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -103,13 +123,16 @@ export function DashboardNav({
             type="button"
             tabIndex={-1}
             aria-label="Close navigation menu"
-            className="bg-foreground/20 fixed inset-0 z-10 cursor-default sm:hidden"
+            className={cn("bg-foreground/20 fixed inset-0 z-10 cursor-default", collapse.overlay)}
             onClick={() => setMobileOpen(false)}
           />
           <nav
             id={MOBILE_PANEL_ID}
             aria-label="Mobile navigation menu"
-            className="border-border bg-background absolute inset-x-0 top-full z-20 flex flex-col gap-1 border-b p-3 sm:hidden"
+            className={cn(
+              "border-border bg-background absolute inset-x-0 top-full z-20 flex flex-col gap-1 border-b p-3",
+              collapse.overlay,
+            )}
           >
             {navLinks.map((link) => (
               <Link

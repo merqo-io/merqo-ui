@@ -215,4 +215,33 @@ describe("DashboardNav", () => {
     render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
     expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("data-custom-link");
   });
+
+  describe("collapseBelow", () => {
+    async function openMenu() {
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
+    }
+
+    it("uses sm classes when the prop is omitted", async () => {
+      render(<DashboardNav {...baseProps} />);
+      await openMenu();
+      expect(screen.getByRole("button", { name: "Mobile navigation menu" })).toHaveClass("sm:hidden");
+      expect(document.querySelector("header nav:not(#dashboard-nav-mobile-panel)")).toHaveClass("hidden", "sm:flex");
+      expect(screen.getByRole("button", { name: "Close navigation menu" })).toHaveClass("sm:hidden");
+      expect(document.getElementById("dashboard-nav-mobile-panel")).toHaveClass("sm:hidden");
+    });
+
+    it("uses xl classes on burger, inline nav, scrim and panel when collapseBelow is xl", async () => {
+      render(<DashboardNav {...baseProps} collapseBelow="xl" />);
+      await openMenu();
+      const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+      expect(burger).toHaveClass("xl:hidden");
+      expect(burger).not.toHaveClass("sm:hidden");
+      const inline = document.querySelector("header nav:not(#dashboard-nav-mobile-panel)");
+      expect(inline).toHaveClass("hidden", "xl:flex");
+      expect(inline).not.toHaveClass("sm:flex");
+      expect(screen.getByRole("button", { name: "Close navigation menu" })).toHaveClass("xl:hidden");
+      expect(document.getElementById("dashboard-nav-mobile-panel")).toHaveClass("xl:hidden");
+    });
+  });
 });

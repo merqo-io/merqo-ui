@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { VendorTelegramSection } from "./vendor-telegram-section";
 
 describe("VendorTelegramSection", () => {
@@ -31,7 +32,7 @@ describe("VendorTelegramSection", () => {
     await waitFor(() => {
       expect(onConnect).toHaveBeenCalledTimes(1);
     });
-    expect(await screen.findByTestId("qr")).toBeInTheDocument();
+    expect(await screen.findByAltText(/telegram connect qr/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /t\.me\/MerqoNotifyBot/ }),
     ).toHaveAttribute("href", "https://t.me/MerqoNotifyBot?start=abc123");
@@ -114,5 +115,71 @@ describe("VendorTelegramSection", () => {
     await waitFor(() => {
       expect(onError).toHaveBeenCalled();
     });
+  });
+
+  it("renders hostile QR markup only as an img data URI, never as DOM nodes", async () => {
+    const markup =
+      "<svg onload=\"alert(1)\"><script>alert(2)</script><rect/></svg>";
+    const onConnect = vi.fn().mockResolvedValue({
+      deepLink: "https://t.me/MerqoNotifyBot?start=abc",
+      qrSvgMarkup: markup,
+    });
+    const { container } = render(
+      <VendorTelegramSection connected={false} onConnect={onConnect} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /connect telegram/i }));
+
+    const img = await screen.findByAltText(/telegram connect qr/i);
+    expect(img.getAttribute("src")).toBe(
+      `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`,
+    );
+    expect(container.querySelector("script")).toBeNull();
+    expect(container.querySelector("rect")).toBeNull();
+    expect(container.querySelector("[onload]")).toBeNull();
+  });
+
+  it.each([
+    "javascript:alert(1)",
+    "http://t.me/bot?start=x",
+    "https://evil.com/t.me",
+    "https://t.me.evil.com/bot",
+    "https://t.me@evil.com/bot",
+    "https://user:pass@t.me/bot",
+    "https://t.me:8443/bot",
+    "tg://resolve?domain=MerqoNotifyBot",
+    "not a url",
+  ])("rejects deep link %s and reports an error", async (deepLink) => {
+    const onError = vi.fn();
+    const onConnect = vi
+      .fn()
+      .mockResolvedValue({ deepLink, qrSvgMarkup: "<svg/>" });
+    render(
+      <VendorTelegramSection
+        connected={false}
+        onConnect={onConnect}
+        onError={onError}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /connect telegram/i }));
+
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByAltText(/telegram connect qr/i)).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /connect telegram/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("accepts an https://t.me deep link when connect is tapped", async () => {
+    const deepLink = "https://t.me/bot?start=x";
+    const onConnect = vi
+      .fn()
+      .mockResolvedValue({ deepLink, qrSvgMarkup: "<svg/>" });
+    render(<VendorTelegramSection connected={false} onConnect={onConnect} />);
+    await userEvent.setup().pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: /connect telegram/i }),
+    });
+    expect(await screen.findByRole("link")).toHaveAttribute("href", deepLink);
   });
 });

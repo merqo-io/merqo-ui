@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-11-03
+
+### Added
+
+- `DashboardNav`: optional `collapseBelow?: "sm" | "md" | "lg" | "xl"` (default `"sm"`, unchanged behaviour) picks the breakpoint at and above which links render inline instead of in the burger menu, for consoles with many links.
+
 ## [0.37.0] - 2026-11-03
 
 ### Security

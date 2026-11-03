@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.37.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.38.0"
 }
 ```
 
@@ -247,7 +247,9 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   v0.10.0) renders each nav link (desktop and mobile) through it instead of
   a plain `<a>` — same rationale as `AccountMenu`'s prop above. The mobile
   tap-away scrim is a `tabIndex={-1}` `<button>` named "Close navigation
-  menu" (since v0.35.0).
+  menu" (since v0.35.0). Optional `collapseBelow?: "sm" | "md" | "lg" | "xl"`
+  (since v0.38.0, default `"sm"`) sets the breakpoint below which links
+  collapse into the burger menu.
 - `LandingNav` — public-page nav shell: sticky header, shared shape
   (`z-20`, `bg-background/85`, padding on the header not the inner `<nav>`),
   `max-w-6xl` centered row. Takes only two slots — `wordmark: ReactNode`

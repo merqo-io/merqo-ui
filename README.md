@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.40.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.41.0"
 }
 ```
 
@@ -199,6 +199,11 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   checked) is a Tab stop; Left/Right/Up/Down move focus and selection
   between pills, wrapping at the ends, and Home/End jump to the first/last
   pill.
+- `tierLabel(tier)` — maps a raw plan tier (`free`, `starter`, `pro`, `qkit`;
+  case-insensitive) to its display label ("Free", "Starter", "Pro", "Pro");
+  other values are capitalised. `AccountMenu` applies it to `vendor.tier`.
+  `AccountMenu`'s `extraLink` also takes an optional `icon` component
+  (rendered at `size-4`) and `placement: "top"` to list it first.
 - `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
   settings, optional Plan, Get help, Feedback, Sign out — always last,
   separated, destructive-styled). Reusable without the full nav shell. The

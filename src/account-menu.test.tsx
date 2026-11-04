@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "next-themes";
-import { AccountMenu } from "./account-menu";
+import { AccountMenu, tierLabel } from "./account-menu";
 
 const signOutAction = vi.fn().mockResolvedValue(undefined);
 const onFeedbackSubmit = vi.fn().mockResolvedValue(undefined);
@@ -334,6 +334,42 @@ describe("AccountMenu", () => {
     expect(link).toHaveAttribute("href", "/admin");
   });
 
+  it("renders the extraLink icon at size-4 inside the menu item", async () => {
+    const Icon = ({ className }: { className?: string }) => (
+      <svg data-testid="extra-icon" className={className} />
+    );
+    await openMenu({ extraLink: { href: "/guide", label: "User guide", icon: Icon } });
+    const link = await screen.findByRole("menuitem", { name: /user guide/i });
+    const icon = within(link).getByTestId("extra-icon");
+    expect(icon).toHaveClass("size-4");
+  });
+
+  it("renders no svg in the extraLink item when no icon is given", async () => {
+    await openMenu({ extraLink: { href: "/guide", label: "User guide" } });
+    const link = await screen.findByRole("menuitem", { name: /user guide/i });
+    expect(link.querySelector("svg")).toBeNull();
+  });
+
+  it("places the extraLink first, before Profile, when placement is top", async () => {
+    await openMenu({
+      extraLink: { href: "/setup", label: "Payment setup", placement: "top" },
+      switchKits: [{ label: "Loopkit", href: "https://loop.example" }],
+    });
+    await screen.findByRole("menuitem", { name: /payment setup/i });
+    const items = screen.getAllByRole("menuitem");
+    expect(items[0]).toHaveTextContent("Payment setup");
+    const names = items.map((i) => i.textContent);
+    expect(names.indexOf("Payment setup")).toBeLessThan(names.indexOf("Profile"));
+    expect(screen.getByText("Switch products")).toBeInTheDocument();
+  });
+
+  it("keeps the extraLink after Feedback by default", async () => {
+    await openMenu({ extraLink: { href: "/guide", label: "User guide" } });
+    await screen.findByRole("menuitem", { name: /user guide/i });
+    const names = screen.getAllByRole("menuitem").map((i) => i.textContent);
+    expect(names.indexOf("User guide")).toBeGreaterThan(names.indexOf("Feedback"));
+  });
+
   it("forwards showNps to the internal FeedbackSheet, rendering the NPS score grid", async () => {
     const user = await openMenu({ showNps: true });
     await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
@@ -503,5 +539,27 @@ describe("AccountMenu", () => {
     expect(
       await screen.findByRole("menuitem", { name: /get help/i }),
     ).not.toHaveAttribute("data-custom-link");
+  });
+});
+
+describe("tierLabel", () => {
+  it.each([
+    ["free", "Free"],
+    ["starter", "Starter"],
+    ["pro", "Pro"],
+    ["qkit", "Pro"],
+    ["Pro", "Pro"],
+    ["PRO", "Pro"],
+    ["QKit", "Pro"],
+    ["enterprise", "Enterprise"],
+  ])("maps %s to %s", (input, expected) => {
+    expect(tierLabel(input)).toBe(expected);
+  });
+});
+
+describe("AccountMenu plan label", () => {
+  it("shows the mapped label for a raw tier", async () => {
+    await openMenu({ showPlanItem: true, vendor: { name: "Manfred", tier: "qkit" } });
+    expect(await screen.findByRole("menuitem", { name: "Plan · Pro" })).toBeInTheDocument();
   });
 });

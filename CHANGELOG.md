@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-11-04
+
+### Added
+
+- `AccountMenu` `extraLink` accepts an optional `icon` component (rendered at `size-4`, like the other items) and `placement: "top"` to show the link first in the menu, above Switch products and Profile. Without them the output is unchanged.
+- `tierLabel(tier)`: maps a raw plan tier (`free`, `starter`, `pro`, `qkit`; case-insensitive) to its display label, capitalising unknown values. `AccountMenu` now renders `Plan · {tierLabel(vendor.tier)}`, so kits may pass raw tiers or labels.
+
 ## [0.40.0] - 2026-11-04
 
 ### Removed

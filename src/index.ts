@@ -50,12 +50,6 @@ export {
 export type { PlanCatalog, CatalogPlan, EventPass } from "./plan-catalog";
 export { VendorTelegramSection } from "./vendor-telegram-section";
 export type { VendorTelegramSectionProps } from "./vendor-telegram-section";
-export { PlanComparisonTable } from "./plan-comparison-table";
-export type {
-  PlanComparisonTableProps,
-  PlanComparisonTier,
-  PlanComparisonRow,
-} from "./plan-comparison-table";
 export { AuditLogTable } from "./audit-log-table";
 export type { AuditLogTableProps, AuditLogEntry } from "./audit-log-table";
 export { StatTile, DeltaPill } from "./stat-tile";

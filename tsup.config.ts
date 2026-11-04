@@ -35,7 +35,6 @@ const ENTRIES = {
   "legal-footer-links": "src/legal-footer-links.tsx",
   "money-input": "src/money-input.tsx",
   "pending-image": "src/pending-image.ts",
-  "plan-comparison-table": "src/plan-comparison-table.tsx",
   "plan-catalog": "src/plan-catalog.ts",
   "pricing-ladder": "src/pricing-ladder.tsx",
   qr: "src/qr.ts",

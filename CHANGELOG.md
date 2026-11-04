@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-11-04
+
+### Removed
+
+- `PlanComparisonTable` and its `PlanComparisonTableProps`, `PlanComparisonTier` and `PlanComparisonRow` types. Breaking for any consumer; plan pages should render `PricingLadder` from `fetchPlanCatalog` instead.
+
 ## [0.39.0] - 2026-11-04
 
 ### Added

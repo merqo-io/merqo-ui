@@ -11,7 +11,6 @@ import { ImageUploader } from "./image-uploader";
 import { commitPendingImages, isPendingImage } from "./pending-image";
 import { DashboardTour } from "./dashboard-tour";
 import { MoneyInput } from "./money-input";
-import { PricingForm } from "./pricing-form";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -133,27 +132,11 @@ it.each(["1e308", "9007199254740992"])(
   "rejects unsafe monetary cents from %s",
   (input) => {
     const onCommit = vi.fn();
-    const onSave = vi.fn();
-    render(
-      <>
-        <MoneyInput cents={100} onCommit={onCommit} placeholder="Amount" />
-        <PricingForm
-          fields={[{ key: "price", label: "Price" }]}
-          initial={{ values: { price: 100 }, currency: "SGD" }}
-          onSave={onSave}
-        />
-      </>,
-    );
+    render(<MoneyInput cents={100} onCommit={onCommit} placeholder="Amount" />);
     fireEvent.change(screen.getByPlaceholderText("Amount"), {
       target: { value: input },
     });
-    fireEvent.change(screen.getByLabelText("Price"), {
-      target: { value: input },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(onCommit).not.toHaveBeenCalled();
-    expect(onSave).not.toHaveBeenCalled();
-    expect(screen.getByText(/enter a valid/i)).toBeInTheDocument();
   },
 );
 

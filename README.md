@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.38.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.39.0"
 }
 ```
 
@@ -318,6 +318,47 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   `gridTemplateColumns` inline style, not a Tailwind arbitrary-value
   class, so the layout can't be silently dropped by a consuming app's own
   JIT purge.
+- `fetchPlanCatalog(baseUrl, init?)` (since v0.39.0) — fetches merqo's public
+  `GET {baseUrl}/api/plans` and returns a validated `PlanCatalog`
+  (`{ plans: CatalogPlan[], event_pass: EventPass }`, types exported;
+  `planCatalogSchema` is the zod schema, so `zod` must be installed). Prices
+  are cents; `kind` and `kits` are free strings. It resolves to `null` on any
+  failure (network error, timeout, non-2xx, invalid JSON, unexpected shape)
+  and never throws. Defaults: `next: { revalidate: 300 }` and a 5 s abort
+  signal; keys in `init` override them. `formatCatalogPrice(cents)` formats
+  `1600` as `S$16`, `1333` as `S$13.33` and `15` as `15c`. No `"use client"`;
+  call it from a Server Component.
+- `PricingLadder` (since v0.39.0) — renders a `PlanCatalog` as a ladder of
+  plan cards plus a separate Event Pass section. Server-renderable, no
+  billing toggle, and every amount comes from the catalog. Props:
+  `catalog` (required); `highlight?: "qkit" | "all_access"` (default
+  `"qkit"`; the emphasised card carries a "Recommended" label and
+  `aria-current`; falls back to the other option when absent; Starter is
+  never highlighted); `slugs?: string[]` (filter, catalog order kept);
+  `descriptions?: Partial<Record<string, ReactNode>>` (per-slug override;
+  `starter` defaults to an identity-framed line); `renderAction?: (plan) =>
+  ReactNode` (the CTA in each card); `showEventPass?: boolean` (default
+  `true`). A plan with a zero monthly price shows "Free" and no annual line.
+  Annual prices are plain amounts, never discounts. Replaces `PricingForm`,
+  which was removed in v0.39.0.
+
+  ```tsx
+  // app/dashboard/plan/page.tsx (Server Component)
+  import { fetchPlanCatalog, PricingLadder } from "@merqo/ui";
+
+  export default async function PlanPage() {
+    const catalog = await fetchPlanCatalog(process.env.MERQO_URL!);
+    if (!catalog) return <p>Plans are unavailable right now. Try again soon.</p>;
+    return (
+      <PricingLadder
+        catalog={catalog}
+        slugs={["free", "starter", "qkit", "all_access"]}
+        renderAction={(plan) => <ChoosePlanButton slug={plan.slug} />}
+      />
+    );
+  }
+  ```
+
 - `AuditLogTable` — renders a list of audit/activity entries
   (`{id, actor, action, target?, detail?, createdAt}`) as a bordered
   row list: action (with `detail` as a secondary line when present),

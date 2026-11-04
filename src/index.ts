@@ -10,7 +10,7 @@ export { FeedbackSheet } from "./feedback-sheet";
 export type { FeedbackSheetProps, FeedbackData } from "./feedback-sheet";
 export { HelpSheet } from "./help-sheet";
 export type { HelpSheetProps, SupportRequest } from "./help-sheet";
-export { AccountMenu } from "./account-menu";
+export { AccountMenu, tierLabel } from "./account-menu";
 export type {
   AccountMenuProps,
   AccountMenuGetHelp,

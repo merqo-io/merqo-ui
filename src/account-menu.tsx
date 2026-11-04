@@ -49,6 +49,8 @@ export type AccountMenuLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>
 };
 
 export interface AccountMenuProps {
+  /** `tier` may be a raw plan value ("qkit", "pro") or a display label
+   * ("Pro"); it is normalised with `tierLabel` and shown as "Plan · {label}". */
   vendor: { name: string; avatarUrl?: string; tier?: string; subtitle?: string };
   signOutAction: () => Promise<void>;
   kitLocalSettingsHref?: string;
@@ -63,7 +65,15 @@ export interface AccountMenuProps {
   showNps?: boolean;
   /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
   onError?: (error: unknown) => void;
-  extraLink?: { href: string; label: string };
+  /** One extra menu link. `icon` is a component (not an element) so the menu
+   * applies the shared `size-4`. `placement` "top" puts it first in the menu,
+   * above Switch products and Profile; the default sits after Feedback. */
+  extraLink?: {
+    href: string;
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    placement?: "top" | "default";
+  };
   /** Optional slot rendered next to the vendor name in the dropdown header (only shown when vendor.subtitle is also set). */
   tierBadge?: React.ReactNode;
   /** Other kits in the Merqo family this vendor can switch to — SSO
@@ -156,6 +166,46 @@ function HelpPanel({ getHelp, open, onOpenChange, onError }: {
   return null;
 }
 
+const TIER_LABELS: Record<string, string> = {
+  free: "Free",
+  starter: "Starter",
+  pro: "Pro",
+  qkit: "Pro",
+};
+
+/**
+ * Maps a raw plan tier (case-insensitive) to its display label. Known tiers
+ * use their canonical label; any other non-empty value gets its first letter
+ * upper-cased, so an already-formatted label such as "Pro" is unchanged.
+ */
+export function tierLabel(tier: string): string {
+  const known = TIER_LABELS[tier.toLowerCase()];
+  if (known) return known;
+  return tier.charAt(0).toUpperCase() + tier.slice(1);
+}
+
+function planItemLabel(tier: string | undefined): string {
+  return tier ? `Plan · ${tierLabel(tier)}` : "Plan";
+}
+
+function ExtraLinkItem({
+  link,
+  Link,
+}: {
+  link: NonNullable<AccountMenuProps["extraLink"]>;
+  Link: React.ComponentType<AccountMenuLinkProps>;
+}) {
+  const Icon = link.icon;
+  return (
+    <DropdownMenuItem asChild>
+      <Link href={link.href}>
+        {Icon ? <Icon className="size-4" /> : null}
+        {link.label}
+      </Link>
+    </DropdownMenuItem>
+  );
+}
+
 export function AccountMenu({
   vendor,
   signOutAction,
@@ -181,6 +231,9 @@ export function AccountMenu({
   const signOut = useAsyncAction(signOutAction);
   const { theme, setTheme } = useTheme();
   const { label: themeLabel, Icon: ThemeIcon } = themePresentation(theme);
+
+  const extraLinkItem = extraLink ? <ExtraLinkItem link={extraLink} Link={Link} /> : null;
+  const extraLinkOnTop = extraLink?.placement === "top";
 
   return (
     <>
@@ -217,6 +270,13 @@ export function AccountMenu({
               <DropdownMenuSeparator />
             </>
           )}
+          {extraLinkOnTop ? (
+            <>
+              {extraLinkItem}
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
+
           {switchKits && switchKits.length > 0 ? (
             <>
               <DropdownMenuSub>
@@ -258,7 +318,7 @@ export function AccountMenu({
             <DropdownMenuItem asChild>
               <Link href="/dashboard/plan">
                 <CreditCard className="size-4" />
-                Plan{vendor.tier ? ` · ${vendor.tier}` : ""}
+                {planItemLabel(vendor.tier)}
               </Link>
             </DropdownMenuItem>
           ) : null}
@@ -270,11 +330,7 @@ export function AccountMenu({
             Feedback
           </DropdownMenuItem>
 
-          {extraLink ? (
-            <DropdownMenuItem asChild>
-              <Link href={extraLink.href}>{extraLink.label}</Link>
-            </DropdownMenuItem>
-          ) : null}
+          {extraLinkOnTop ? null : extraLinkItem}
 
           <DropdownMenuSeparator />
 

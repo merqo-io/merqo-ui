@@ -41,12 +41,11 @@ export function PricingLadder({
   renderAction,
   showEventPass = true,
 }: PricingLadderProps) {
-  // Resolved before the slug filter so a filtered view never moves the
-  // emphasis onto a plan the catalog did not pick.
-  const highlighted = resolveHighlight(catalog.plans, highlight);
+  const headingId = React.useId();
   const plans = slugs
     ? catalog.plans.filter((plan) => slugs.includes(plan.slug))
     : catalog.plans;
+  const highlighted = resolveHighlight(plans, highlight);
   const pass = catalog.event_pass;
 
   return (
@@ -107,10 +106,10 @@ export function PricingLadder({
 
       {showEventPass ? (
         <section
-          aria-labelledby="event-pass-heading"
+          aria-labelledby={headingId}
           className="rounded-2xl border border-border bg-muted p-5 text-foreground"
         >
-          <h3 id="event-pass-heading" className="text-lg font-semibold">
+          <h3 id={headingId}className="text-lg font-semibold">
             Event Pass
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">

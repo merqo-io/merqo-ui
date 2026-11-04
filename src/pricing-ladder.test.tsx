@@ -101,6 +101,25 @@ describe("PricingLadder highlight", () => {
     expect(card("qkit")).toHaveAttribute("aria-current", "true");
   });
 
+  it("resolves the highlight against the filtered plans", () => {
+    render(
+      <PricingLadder catalog={CATALOG} slugs={["free", "loopkit", "all_access"]} />,
+    );
+    expect(card("All-Access")).toHaveAttribute("aria-current", "true");
+  });
+
+  it("gives two ladders on one page distinct heading ids", () => {
+    render(
+      <>
+        <PricingLadder catalog={CATALOG} />
+        <PricingLadder catalog={CATALOG} />
+      </>,
+    );
+    const regions = screen.getAllByRole("region", { name: "Event Pass" });
+    const ids = regions.map((r) => r.getAttribute("aria-labelledby"));
+    expect(new Set(ids).size).toBe(2);
+  });
+
   it("never highlights Starter and highlights nothing without either plan", () => {
     const catalog = { ...CATALOG, plans: [plan("starter", "Starter", 1200, 12000)] };
     render(<PricingLadder catalog={catalog} />);

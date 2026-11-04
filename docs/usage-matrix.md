@@ -62,7 +62,6 @@ plan page, and no kit switcher. Its absence here is by design, not a gap.
 | `DashboardNav`                  | 1    | 1      | 1        | 1       | —     |
 | `DataTable` + `DataTableColumn` | 2    | 4      | 1        | 3       | —     |
 | `getSwitchKits`                 | 1    | 1      | 1        | 1       | —     |
-| `PricingForm`                   | 1    | 1      | 1        | 1       | —     |
 
 ## Partial adoption
 

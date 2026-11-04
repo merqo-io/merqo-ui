@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-11-04
+
+### Added
+
+- `PricingLadder`: renders a plan catalog as a ladder of plan cards with a highlighted recommended plan and a separate Event Pass section. Server-renderable; all prices come from the catalog.
+- `fetchPlanCatalog(baseUrl, init?)`: fetches and validates merqo's public `/api/plans`, resolving to `null` on any failure. Also exports `formatCatalogPrice`, `planCatalogSchema` and the `PlanCatalog`, `CatalogPlan` and `EventPass` types.
+
+### Removed
+
+- `PricingForm` and its `PricingFormProps`, `PricingFormInitial` and `PricingFieldConfig` types. Breaking for any consumer; plan pages should render `PricingLadder` from `fetchPlanCatalog` instead.
+
 ## [0.38.0] - 2026-11-03
 
 ### Added

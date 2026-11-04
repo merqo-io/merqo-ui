@@ -40,12 +40,14 @@ export { DashboardTours } from "./dashboard-tours";
 export type { DashboardToursProps, TourDefinition } from "./dashboard-tours";
 export { KIT_FAMILY, getSwitchKits } from "./kit-family";
 export type { KitFamilyMember } from "./kit-family";
-export { PricingForm } from "./pricing-form";
-export type {
-  PricingFormProps,
-  PricingFormInitial,
-  PricingFieldConfig,
-} from "./pricing-form";
+export { PricingLadder } from "./pricing-ladder";
+export type { PricingLadderProps } from "./pricing-ladder";
+export {
+  fetchPlanCatalog,
+  formatCatalogPrice,
+  planCatalogSchema,
+} from "./plan-catalog";
+export type { PlanCatalog, CatalogPlan, EventPass } from "./plan-catalog";
 export { VendorTelegramSection } from "./vendor-telegram-section";
 export type { VendorTelegramSectionProps } from "./vendor-telegram-section";
 export { PlanComparisonTable } from "./plan-comparison-table";

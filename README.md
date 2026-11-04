@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.39.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.40.0"
 }
 ```
 
@@ -308,16 +308,6 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   the package's own conventions. Named apart from any kit's own
   customer-facing Telegram-connect component — this one is vendor-scoped
   and standing, never single-use.
-- `PlanComparisonTable` — the free/paid-tier feature-comparison grid shared
-  across kits' `/dashboard/plan` pages. `tiers: {key, label}[]` (any
-  length — column count is computed, never hardcoded to 2 or 3) and
-  `rows: {label, values: Record<string, boolean | string>}[]` (`values`
-  keyed by each tier's `key`). A boolean cell renders a check icon
-  (`true`) or a muted dash (`false`); a string cell (e.g. `"1"`/`"∞"`)
-  renders as plain centered text. The column grid uses a computed
-  `gridTemplateColumns` inline style, not a Tailwind arbitrary-value
-  class, so the layout can't be silently dropped by a consuming app's own
-  JIT purge.
 - `fetchPlanCatalog(baseUrl, init?)` (since v0.39.0) — fetches merqo's public
   `GET {baseUrl}/api/plans` and returns a validated `PlanCatalog`
   (`{ plans: CatalogPlan[], event_pass: EventPass }`, types exported;
@@ -668,7 +658,7 @@ keeping norm for a small business) rather than growing the table forever
 with no stated policy.
 
 **Built (2026-08-19):** `AuditLogTable` (see Components below) — a
-shared render component, same class as `PlanComparisonTable`/
+shared render component, same class as
 `VendorTelegramSection` (renders rows uniformly, each kit passes its own
 data, no backend coupling inside the package), so a vendor-facing
 "Activity" view can look the same across kits without each one

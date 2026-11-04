@@ -73,7 +73,6 @@ difference, recorded so the next audit does not re-litigate it.
 | `StatusBadge` (+ `Config`) | 3    | 2      | 1        | —       | 1     | loopkit's admin health pill is a shadcn `Badge` — see below         |
 | `InfoTooltip`              | 5    | 1      | —        | 2       | 2     | stockkit has no tooltip surface (checked: no `title=` hints either) |
 | `DashboardTour`            | —    | 1      | 1        | 1       | 1     | qkit uses `DashboardTours` (plural, route-matched) instead          |
-| `PlanComparisonTable`      | 1    | —      | —        | 1       | —     | paykit/stockkit plan pages render a feature list, not a table       |
 | `MoneyInput`               | 2    | —      | —        | —       | —     | see "Money fields" below                                            |
 | `DeltaPill`                | 1    | —      | —        | —       | —     | qkit only                                                           |
 | `SOCIAL_LINK_FIELDS`       | 1    | —      | —        | —       | —     | qkit only; the 2026-09-18 RSC crash site                            |

@@ -109,7 +109,7 @@ export function PricingLadder({
           aria-labelledby={headingId}
           className="rounded-2xl border border-border bg-muted p-5 text-foreground"
         >
-          <h3 id={headingId}className="text-lg font-semibold">
+          <h3 id={headingId} className="text-lg font-semibold">
             Event Pass
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">

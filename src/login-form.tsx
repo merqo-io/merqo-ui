@@ -281,6 +281,7 @@ export function LoginForm({
     const next: LoginMode = isSignin ? "signup" : "signin";
     setMode(next);
     setMessage(null);
+    setNotice(null);
     onModeChange?.(next);
   }
 

@@ -285,6 +285,22 @@ describe("LoginForm", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
+  it("clears a notice when the mode toggles", async () => {
+    const user = userEvent.setup();
+    render(
+      <LoginForm
+        onPasswordSignIn={vi.fn()}
+        onPasswordSignUp={vi.fn().mockResolvedValue({ notice: "Check your email." })}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Create an account" }));
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
   it("sends a reset link for the typed email from a button", async () => {
     const onForgotPassword = vi.fn().mockResolvedValue({ notice: "Reset link sent." });
     const user = userEvent.setup();

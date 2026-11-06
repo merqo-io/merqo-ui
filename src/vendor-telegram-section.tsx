@@ -4,6 +4,7 @@ import * as React from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 
 import { Section } from "./section";
+import { isTelegramLink } from "./telegram-link";
 import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import { cn } from "./lib/utils";
@@ -29,26 +30,6 @@ export type VendorTelegramSectionProps = VendorTelegramSectionCommon &
         onConnect: () => Promise<{ deepLink: string; qrSvgMarkup: string }>;
       }
   );
-
-/**
- * Only `https://t.me/...` may reach an `href`: a caller-supplied
- * `javascript:` or look-alike host would otherwise be one click from running.
- */
-function isTelegramDeepLink(value: string): boolean {
-  let url: URL;
-  try {
-    url = new URL(value);
-  } catch {
-    return false;
-  }
-  return (
-    url.protocol === "https:" &&
-    url.hostname === "t.me" &&
-    url.port === "" &&
-    url.username === "" &&
-    url.password === ""
-  );
-}
 
 function DisconnectButton({
   onDisconnect,
@@ -94,7 +75,7 @@ function ConnectPanel({
   } | null>(null);
   const connectAction = useAsyncAction(async () => {
     const minted = await onConnect();
-    if (!isTelegramDeepLink(minted.deepLink)) {
+    if (!isTelegramLink(minted.deepLink)) {
       throw new Error("Unexpected Telegram link");
     }
     setLink(minted);

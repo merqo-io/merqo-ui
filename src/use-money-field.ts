@@ -1,21 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-
-function centsToDollarString(cents: number): string {
-  return (cents / 100).toFixed(2);
-}
-
-function parseDollarsToCents(
-  raw: string,
-): { ok: true; cents: number | undefined } | { ok: false } {
-  const trimmed = raw.trim();
-  if (trimmed === "") return { ok: true, cents: undefined };
-  const value = Number(trimmed);
-  if (!Number.isFinite(value) || value < 0) return { ok: false };
-  const cents = Math.round(value * 100);
-  return Number.isSafeInteger(cents) ? { ok: true, cents } : { ok: false };
-}
+import { centsToDollarString, parseDollarsToCents } from "./money";
 
 function format(cents: number | undefined): string {
   return cents === undefined ? "" : centsToDollarString(cents);

@@ -58,3 +58,5 @@ export const vendorActivityPayloadSchema = z.object({
 });
 
 export type VendorActivityPayload = z.infer<typeof vendorActivityPayloadSchema>;
+
+export * from "./entitlement";

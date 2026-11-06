@@ -2,14 +2,29 @@
 
 ## [Unreleased]
 
+### Added
+
+- Shared money helpers: `formatMoney`, `centsToDollarString`, `parseDollarsToCents`, `dollarsToCents`, `MAX_MONEY_CENTS`. Integer SGD cents shown as `S$12.50`; replaces the per-kit `formatPrice`, `formatCents` and money parsers.
+- Shared SGT time helpers: `formatDate`, `formatTime`, `formatDateTime`, `formatRelativeTime`, `sgDayKey`, `startOfSgDay`, `SGT_TIME_ZONE`. All output is pinned to Asia/Singapore.
+- Telegram link helpers: `normalizeTelegramHandle`, `telegramLink`, `isTelegramLink` (only `https://t.me/...`).
+- `@merqo/ui/contracts` now exports the entitlement wire enum (`ENTITLEMENT_TIERS`, `entitlementTierSchema`, `EntitlementTier`) and `ENTITLEMENT_TIER_LABELS`.
+
+### Changed
+
+- `useMoneyField`/`MoneyInput`, `formatCatalogPrice` and `VendorTelegramSection` now use the shared helpers. Money input parsing is stricter: exponent and hex forms such as `1e3` are rejected, and rounding uses the decimal digits (`1.005` is 101 cents).
+- `tierLabel("paid")` now returns "Pro" (was "Paid"), matching the entitlement wire enum.
+
 ## [0.42.1] - 2026-11-06
 
 ### Fixed
 
 - v0.42.0 could not be installed from git: the `buttonVariants` declaration emit failed with TS2742 when pnpm prepared the package. It now has an explicit type.
 - Radix and 
-ext-themes are now peer dependencies (adix-ui ^1.4.3, 
-ext-themes ^0.4.6) instead of bundled dependencies, so a kit no longer installs a second Radix copy with its own DismissableLayer stack (a shared dialog opened from a kit menu left ody with pointer-events: none). Kits must provide adix-ui themselves. All @radix-ui/react-* imports now come from the adix-ui umbrella.
+ext-themes are now peer dependencies (
+adix-ui ^1.4.3, 
+ext-themes ^0.4.6) instead of bundled dependencies, so a kit no longer installs a second Radix copy with its own DismissableLayer stack (a shared dialog opened from a kit menu left ody with pointer-events: none). Kits must provide 
+adix-ui themselves. All @radix-ui/react-* imports now come from the 
+adix-ui umbrella.
 
 ## [0.42.0] - 2026-11-06
 

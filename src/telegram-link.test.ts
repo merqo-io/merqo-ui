@@ -12,6 +12,9 @@ describe("normalizeTelegramHandle", () => {
     ["  @Shop_Bot  ", "Shop_Bot"],
     ["https://t.me/shop_bot", "shop_bot"],
     ["https://t.me/shop_bot/", "shop_bot"],
+    ["t.me/shop_bot", "shop_bot"],
+    ["telegram.me/shop_bot", "shop_bot"],
+    ["T.ME/shop_bot/", "shop_bot"],
   ])("%j -> %j", (input, expected) => {
     expect(normalizeTelegramHandle(input)).toBe(expected);
   });
@@ -31,6 +34,9 @@ describe("normalizeTelegramHandle", () => {
     "http://t.me/shop_bot",
     "https://t.me/",
     "https://t.me/a/b",
+    "evil.me/shop_bot",
+    "t.me.evil.example/shop_bot",
+    "t.me/",
     "https://user@t.me/shop_bot",
   ])("rejects %j", (input) => {
     expect(normalizeTelegramHandle(input)).toBeNull();

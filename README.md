@@ -584,7 +584,10 @@ whatever the server or browser zone.
 - `sgDayKey(input)` (`2026-11-07`), `startOfSgDay(input)` (the 00:00 SGT
   instant) and `SGT_TIME_ZONE`.
 - `normalizeTelegramHandle`, `telegramLink(handle)`, `isTelegramLink(url)`:
-  only `https://t.me/<handle>` is ever produced or accepted; `@` is stripped
+  `normalizeTelegramHandle` accepts `@handle`, `handle`, `t.me/handle`,
+  `telegram.me/handle` and `https://t.me/handle`; `telegramLink` only ever
+  produces `https://t.me/<handle>` and `isTelegramLink` accepts only that
+  host; `@` is stripped
   and the handle must be 5-32 letters, digits or underscores starting with a
   letter.
 - `@merqo/ui/contracts`: `ENTITLEMENT_TIERS`, `entitlementTierSchema` (zod),

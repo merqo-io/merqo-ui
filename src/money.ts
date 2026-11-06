@@ -14,17 +14,20 @@ function groupThousands(whole: string): string {
   return groups.join(",");
 }
 
+// Rounds the magnitude, so -2.5 and 2.5 round alike (Math.round alone rounds
+// half toward +Infinity). Null when the value has no exact digit string.
 function splitCents(cents: number): {
   negative: boolean;
   whole: string;
   frac: string;
-} {
-  const rounded = Math.round(cents);
-  const abs = Math.abs(rounded);
+} | null {
+  if (!Number.isFinite(cents)) return null;
+  const abs = Math.round(Math.abs(cents));
+  if (abs > Number.MAX_SAFE_INTEGER) return null;
   const whole = Math.floor(abs / 100);
   const frac = abs - whole * 100;
   return {
-    negative: rounded < 0,
+    negative: cents < 0 && abs > 0,
     whole: String(whole),
     frac: String(frac).padStart(2, "0"),
   };
@@ -44,15 +47,21 @@ export function formatMoney(
   cents: number,
   options: FormatMoneyOptions = {},
 ): string {
-  if (!Number.isFinite(cents)) return "-";
-  const { negative, whole, frac } = splitCents(cents);
+  const parts = splitCents(cents);
+  if (!parts) return "-";
+  const { negative, whole, frac } = parts;
   const fraction = options.trimWholeDollars && frac === "00" ? "" : `.${frac}`;
   return `${negative ? "-" : ""}S$${groupThousands(whole)}${fraction}`;
 }
 
-/** 650 -> "6.50". Plain digits for an input value: no symbol, no grouping. */
+/**
+ * 650 -> "6.50". Plain digits for an input value: no symbol, no grouping.
+ * Non-finite or unsafe-large input gives "".
+ */
 export function centsToDollarString(cents: number): string {
-  const { negative, whole, frac } = splitCents(cents);
+  const parts = splitCents(cents);
+  if (!parts) return "";
+  const { negative, whole, frac } = parts;
   return `${negative ? "-" : ""}${whole}.${frac}`;
 }
 
@@ -66,15 +75,22 @@ export type ParsedMoney =
 
 const DECIMAL = /^(\d*)(?:\.(\d*))?$/;
 
+// The sign may sit before or after the currency prefix, but not both.
+function splitSign(
+  raw: string,
+  allowNegative: boolean,
+): { negative: boolean; rest: string } | null {
+  const text = raw.trim();
+  const prefix = /^(-)?(?:S?\$)?(-)?/i.exec(text) as RegExpExecArray;
+  const signs = (prefix[1] ? 1 : 0) + (prefix[2] ? 1 : 0);
+  if (signs > 1 || (signs === 1 && !allowNegative)) return null;
+  return { negative: signs === 1, rest: text.slice(prefix[0].length) };
+}
+
 function stringToCents(raw: string, allowNegative: boolean): number | null {
-  let text = raw.trim();
-  let negative = false;
-  if (text.startsWith("-")) {
-    if (!allowNegative) return null;
-    negative = true;
-    text = text.slice(1);
-  }
-  text = text.replace(/^S?\$/i, "");
+  const signed = splitSign(raw, allowNegative);
+  if (!signed) return null;
+  let text = signed.rest;
   // Comma grouping is only valid in strict 3-digit groups ("1,234.50").
   if (text.includes(",")) {
     if (!/^\d{1,3}(,\d{3})+(\.\d*)?$/.test(text)) return null;
@@ -90,7 +106,7 @@ function stringToCents(raw: string, allowNegative: boolean): number | null {
   const padded = `${frac}000`;
   let cents = Number(whole || "0") * 100 + Number(padded.slice(0, 2));
   if (Number(padded[2]) >= 5) cents += 1;
-  return negative ? -cents : cents;
+  return signed.negative && cents !== 0 ? -cents : cents;
 }
 
 /**

@@ -117,3 +117,41 @@ describe("dollarsToCents", () => {
     expect(dollarsToCents("nope")).toBeNull();
   });
 });
+
+describe("rounding, guards and signs", () => {
+  it("rounds half away from zero symmetrically", () => {
+    expect(formatMoney(2.5)).toBe("S$0.03");
+    expect(formatMoney(-2.5)).toBe("-S$0.03");
+    expect(centsToDollarString(-2.5)).toBe("-0.03");
+  });
+
+  it("never prints negative zero", () => {
+    expect(formatMoney(-0.4)).toBe("S$0.00");
+    expect(formatMoney(-0)).toBe("S$0.00");
+    expect(centsToDollarString(-0.4)).toBe("0.00");
+  });
+
+  it("guards non-finite and unsafe-large values", () => {
+    expect(formatMoney(1e21)).toBe("-");
+    expect(formatMoney(-1e21)).toBe("-");
+    expect(centsToDollarString(1e21)).toBe("");
+    expect(centsToDollarString(Number.NaN)).toBe("");
+    expect(centsToDollarString(Number.POSITIVE_INFINITY)).toBe("");
+  });
+
+  it("normalises negative zero when parsing", () => {
+    const parsed = parseDollarsToCents("-0", { allowNegative: true });
+    expect(parsed).toEqual({ ok: true, cents: 0 });
+    expect(Object.is((parsed as { cents: number }).cents, -0)).toBe(false);
+    expect(parseDollarsToCents(-0)).toEqual({ ok: true, cents: 0 });
+  });
+
+  it("accepts the sign before or after the currency prefix", () => {
+    const opts = { allowNegative: true };
+    expect(parseDollarsToCents("-S$5", opts)).toEqual({ ok: true, cents: -500 });
+    expect(parseDollarsToCents("S$-5", opts)).toEqual({ ok: true, cents: -500 });
+    expect(parseDollarsToCents("$-5.25", opts)).toEqual({ ok: true, cents: -525 });
+    expect(parseDollarsToCents("S$-5")).toEqual({ ok: false });
+    expect(parseDollarsToCents("-S$-5", opts)).toEqual({ ok: false });
+  });
+});

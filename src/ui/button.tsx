@@ -4,7 +4,16 @@ import { Slot } from "radix-ui";
 
 import { cn } from "../lib/utils";
 
-const buttonVariants = cva(
+type ButtonVariant =
+  | "default"
+  | "destructive"
+  | "outline"
+  | "secondary"
+  | "ghost"
+  | "link";
+type ButtonSize = "default" | "sm" | "lg" | "icon";
+
+const variants = cva(
   "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -33,6 +42,20 @@ const buttonVariants = cva(
     },
   },
 );
+
+// Wrapper with an explicit signature: the inferred cva type cannot be named in
+// the emitted .d.ts when pnpm builds the package from a temp store (TS2742).
+function buttonVariants({
+  variant,
+  size,
+  className,
+}: {
+  variant?: ButtonVariant | null;
+  size?: ButtonSize | null;
+  className?: string;
+} = {}): string {
+  return variants({ variant, size, className });
+}
 
 export interface ButtonProps extends React.ComponentProps<"button"> {
   variant?:

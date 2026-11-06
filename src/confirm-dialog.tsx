@@ -44,6 +44,9 @@ export interface ConfirmDialogProps {
  * A confirm/cancel alert dialog for actions that need a second look. Owns the
  * pending and error states so callers only supply `onConfirm`. Works
  * uncontrolled (give it a `trigger`) or controlled (`open` + `onOpenChange`).
+ *
+ * If `onConfirm` throws a Next.js redirect, the dialog stays busy and never
+ * clears its pending state: navigation is expected to unmount it.
  */
 export function ConfirmDialog({
   trigger,

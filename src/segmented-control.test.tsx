@@ -174,6 +174,22 @@ describe("SegmentedControl", () => {
     expect(screen.getByRole("radio", { name: "Beta" })).toBeDisabled();
   });
 
+  it("never reports a disabled option as checked; the Tab stop falls to the first enabled one", () => {
+    render(
+      <SegmentedControl
+        ariaLabel="Pick one"
+        options={[
+          { value: "a", label: "Alpha" },
+          { value: "b", label: "Beta", disabled: true },
+        ]}
+        value="b"
+        onChange={() => {}}
+      />,
+    );
+    expect(screen.getByRole("radio", { name: "Beta" })).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("radio", { name: "Alpha" })).toHaveAttribute("tabindex", "0");
+  });
+
   it("starts the Tab stop on the first enabled option", () => {
     render(
       <SegmentedControl

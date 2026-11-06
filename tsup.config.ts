@@ -46,6 +46,7 @@ const ENTRIES = {
   "stat-card": "src/stat-card.tsx",
   "stat-tile": "src/stat-tile.tsx",
   "tier-chip": "src/tier-chip.tsx",
+  "tier-label": "src/tier-label.ts",
   "segmented-control": "src/segmented-control.tsx",
   "page-header": "src/page-header.tsx",
   "empty-state": "src/empty-state.tsx",

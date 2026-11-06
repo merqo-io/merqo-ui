@@ -15,6 +15,7 @@
 
 ### Changed
 
+- `tierLabel` now lives in a directive-free `tier-label` module (still exported from the package root), so Server Components can call it; `TierChip` uses it.
 - `FeedbackSheet` and `HelpSheet` now use `SegmentedControl variant="pill"`. `PillRadioGroup` was never exported and is removed; its tests moved to `SegmentedControl`. Rendering is unchanged.
 
 ## [0.41.0] - 2026-11-04

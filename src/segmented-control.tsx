@@ -43,7 +43,9 @@ const TRACK_SIZE = {
  * WAI-ARIA radio group pattern: one Tab stop for the whole group (the checked
  * option, or the first enabled one before anything is checked); arrow keys
  * move focus and selection together, wrapping at the ends, skipping disabled
- * options; Home and End jump to the first and last enabled option.
+ * options; Home and End jump to the first and last enabled option. A disabled
+ * option is never reported as checked, so the Tab stop and `aria-checked`
+ * always agree. Option values must be unique: they are used as React keys.
  */
 export function SegmentedControl<T extends string = string>({
   ariaLabel,
@@ -113,7 +115,7 @@ export function SegmentedControl<T extends string = string>({
       onKeyDown={handleKeyDown}
     >
       {options.map((option, index) => {
-        const checked = option.value === value;
+        const checked = option.value === value && !option.disabled;
         return (
           <button
             key={option.value}

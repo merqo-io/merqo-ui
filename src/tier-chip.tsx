@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { tierLabel } from "./account-menu";
+import { tierLabel } from "./tier-label";
 import { cn } from "./lib/utils";
 
 export interface TierChipProps {

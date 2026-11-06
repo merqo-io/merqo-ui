@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.42.1] - 2026-11-06
+
+### Fixed
+
+- v0.42.0 could not be installed from git: the `buttonVariants` declaration emit failed with TS2742 when pnpm prepared the package. It now has an explicit type.
+
 ## [0.42.0] - 2026-11-06
 
 ### Added

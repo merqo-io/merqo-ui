@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:merqo-io/merqo-ui#v0.41.0"
+  "@merqo/ui": "github:merqo-io/merqo-ui#v0.42.0"
 }
 ```
 
@@ -194,7 +194,7 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   message field (an empty array behaves like no categories at all). Both
   take optional `title?`/`description?` overrides (each kit's own copy) —
   omit either for this package's own defaults. Both pill grids share an
-  internal `PillRadioGroup` implementing the full WAI-ARIA "radio group"
+  shared `SegmentedControl` (`variant="pill"`) implementing the full WAI-ARIA "radio group"
   keyboard pattern — only the checked pill (or the first, before anything's
   checked) is a Tab stop; Left/Right/Up/Down move focus and selection
   between pills, wrapping at the ends, and Home/End jump to the first/last
@@ -409,6 +409,35 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   Promoted 2026-09-16 after being found byte-identical in 2 of 4 kits and
   near-identical in the other 2 (one kit's own copy literally commented
   "Mirrors qkit's identical component").
+- `PageHeader({eyebrow?, title, description?, children?, action?, back?,
+  responsive?, className, ...rest})` — top of a dashboard/admin page:
+  `back` slot, small-caps eyebrow, display-font h1, muted line
+  (`description`, or `children` for the older call style) and a
+  right-aligned `action` (below the title on a phone). `responsive` drops
+  the title one size on a phone.
+- `SegmentedControl<T extends string>({ariaLabel, options, value, onChange,
+  size?, variant?, className?, optionClassName?})` — mutually exclusive
+  options as a radiogroup (roving tabindex; arrows, Home and End; disabled
+  options are skipped). `options` is `{value, label, ariaLabel?, disabled?}[]`;
+  `value` may be `null`. `variant="track"` (default, `size` `sm`|`md`) is the
+  bordered row with a tinted active pill; `"pill"` is a grid of bordered
+  buttons (give it `className="grid-cols-11 gap-1"`). For link-based
+  switches, call `router.push` from `onChange`.
+- `StatCard` — `StatTile` (all its props) inside the `ElevatedCard` shell.
+  Adds `icon` (label-row icon, ignored when `delta`/`deltaSlot` is set),
+  `featured` (tinted card, primary value) and `className` for the card.
+- `ConfirmDialog({trigger?, title, description, confirmLabel, cancelLabel?,
+  pendingLabel?, variant?, onConfirm, errorMessage?, open?, onOpenChange?})`
+  — confirm/cancel alert dialog. `onConfirm` may be async: the dialog stays
+  open and busy until it settles, closes on success, and on a throw stays
+  open with the message inline (retry allowed). A Next.js redirect error is
+  treated as navigation. Callers fire their own success toast inside
+  `onConfirm`.
+- `EmptyState({icon?, title, description?, children?, actions?, className})`
+  — dashed "nothing here yet" card with up to two actions.
+- `TierChip({tier, className?})` — plan badge for `AccountMenu`/`DashboardNav`
+  `tierBadge`, labelled by `tierLabel(tier)`: muted for free, primary tint
+  for starter, filled for any paid tier.
 - `ElevatedCard({as?, className, children})` — the polished lifted-shadow
   card shell used across profile/dashboard/setup pages, deliberately not
   qkit's own scalloped `Ticket` theme (that stays local to qkit). `as`

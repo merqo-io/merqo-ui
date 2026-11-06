@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Avatar`, `AvatarIdentity` and `initials`: shared identity pieces moved out of `AccountMenu`. The name sits on the right of the avatar, hidden below `sm`; the side is not configurable.
+- `AsyncSubmitButton` is now a public export.
+- `FORM_LABEL_CLASS` and `FormError` (`role="alert"`, `text-destructive`).
+- `StatTile` `card` prop renders the `ElevatedCard` shell.
+- `AccountMenu` `tier` prop renders a `TierChip`; `tierBadge` still overrides it.
+- `Section` `surface` prop: `"default"` (unchanged), `"elevated"` or `"none"`.
+
+### Changed
+
+- `StatCard` is deprecated in favour of `<StatTile card />` and now delegates to it.
+- `HelpSheet` and `FeedbackSheet` share a private sheet shell; behaviour is unchanged.
+
 ## [0.42.1] - 2026-11-06
 
 ### Fixed

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { ElevatedCard } from "./elevated-card";
 import { cn } from "./lib/utils";
 
 export interface DeltaPillProps {
@@ -63,12 +64,14 @@ export interface StatTileProps {
   deltaDownClassName?: string;
   /** Arbitrary content rendered beside the value itself (e.g. a 3-state trend indicator that doesn't fit DeltaPill's 2-state contract). */
   valueTrailing?: React.ReactNode;
+  /** Renders the `ElevatedCard` chrome (border, background, shadow, padding) on the tile itself; `className` then styles the card. */
+  card?: boolean;
 }
 
 /**
- * The label/value/delta content shared across every kit's stat strip. Deliberately
- * has no outer card shell (border/background/padding/hover treatment) — each kit's
- * outer wrapping differs too much to unify, so callers wrap this in their own container.
+ * The label/value/delta content shared across every kit's stat strip. Has no
+ * outer shell by default, since some kits wrap it in their own container; set
+ * `card` for the family's `ElevatedCard` shell.
  */
 export function StatTile({
   className,
@@ -87,6 +90,7 @@ export function StatTile({
   deltaSize,
   deltaDownClassName,
   valueTrailing,
+  card,
 }: StatTileProps) {
   const deltaContent =
     deltaSlot !== undefined
@@ -138,10 +142,16 @@ export function StatTile({
     </p>
   );
 
+  const Root = card ? ElevatedCard : "div";
   return (
-    <div
+    <Root
       title={hint}
-      className={cn("flex flex-col gap-2", hint && "cursor-help", className)}
+      className={cn(
+        "flex flex-col gap-2",
+        card && "p-4",
+        hint && "cursor-help",
+        className,
+      )}
     >
       {reverse ? (
         <>
@@ -174,6 +184,6 @@ export function StatTile({
           {caption}
         </p>
       )}
-    </div>
+    </Root>
   );
 }

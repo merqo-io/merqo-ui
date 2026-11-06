@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})`: the centred sign-in card shared by login, MFA and reset pages. Server-renderable.
+- `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?, showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?, mapError?, initialError?})`: email and password form with an optional Google button and sign in / create account toggle. Callbacks return an error string or throw; a redirect keeps the form pending with no error flash. No auth library dependency.
+- `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?, enrolIntro?, mapError?})`: six-digit authenticator code entry with optional enrolment (QR code and manual key) and a sign-out action.
+- `AdminShell({wordmark, tabs, pathname, actions?, backHref?, backLabel?, LinkComponent?, children?})`: sticky header with an "Admin" label and a horizontally scrolling tab bar whose active tab is the longest matching prefix.
+
 ## [0.42.1] - 2026-11-06
 
 ### Fixed

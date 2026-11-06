@@ -557,6 +557,75 @@ v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server
 Component rather than an opaque client-reference stub.
 
+### Sign-in and admin chrome
+
+These four are presentational: none imports Supabase or any auth library.
+The kit passes async callbacks that return an error message (or nothing on
+success) or throw. A thrown Next.js redirect, or a callback that ends with
+`await navigatingAway()`, keeps the form pending with no error shown.
+
+- `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})` —
+  centred card with a wordmark slot above, an `h1` title, optional subtitle
+  and a footer slot (legal links) under the card. Server-renderable.
+- `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?,
+  showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?, mapError?,
+  initialError?})` — email and password with correct `autocomplete`
+  (`current-password` or `new-password`). The Google button needs
+  `onGoogleSignIn` and `showGoogle` (default true). The "Create an account"
+  toggle shows only with `onPasswordSignUp`; `onModeChange` lets the kit
+  update the `AuthShell` title or `?mode=signup`. `mapError(raw, context)`
+  turns a returned string, or a thrown error's `code` (else `message`), into
+  vendor copy; context is `"signin" | "signup" | "oauth"`. Without it the
+  returned string is shown as is and an opaque throw shows a generic line.
+  Controls are 44px or taller and the whole form works by touch.
+- `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?,
+  enrolIntro?, mapError?})` — six-digit code (`inputMode="numeric"`,
+  `autocomplete="one-time-code"`, digits only). With `hasFactor` false it
+  first shows "Set up authenticator"; `onEnrol` returns
+  `{qr, secret, factorId?}` or an error string, and `factorId` is handed back
+  as `onVerify(code, {factorId})`. `onCancel` adds a secondary button
+  (default label "Sign out"). Covers the qkit, loopkit and merqo form and
+  the paykit and stockkit variants, which differ only in radius and error
+  copy.
+- `AdminShell({wordmark, tabs, pathname, actions?, backHref?, backLabel?,
+  LinkComponent?, children?})` — sticky header with the wordmark and an
+  "Admin" label, then a tab bar that scrolls sideways on phones. The active
+  tab is the longest `href` that is a prefix of `pathname`, so an Overview
+  tab at `/admin` is not active on `/admin/vendors`. `backHref` adds a
+  leading back link (stockkit). Pass `next/link`'s `Link` as `LinkComponent`.
+  It does not render `DashboardNav`, which needs an account menu the admin
+  header does not have; put sign-out and the like in `actions`.
+
+Wiring example in a Next.js kit:
+
+```tsx
+// app/login/page.tsx (client component)
+<AuthShell wordmark={<Wordmark />} title="Welcome back" footer={<LegalFooterLinks />}>
+  <LoginForm
+    onPasswordSignIn={async (c) => {
+      const { error } = await supabase.auth.signInWithPassword(c);
+      if (error) return friendlyAuthError(error, "signin");
+      router.push("/dashboard");
+      router.refresh();
+      await navigatingAway();
+    }}
+    onGoogleSignIn={signInWithGoogle}
+    forgotPasswordHref="/forgot-password"
+  />
+</AuthShell>
+
+// app/admin/layout.tsx (client wrapper)
+<AdminShell
+  wordmark={<Wordmark />}
+  tabs={[{ href: "/admin", label: "Overview" }, { href: "/admin/vendors", label: "Vendors" }]}
+  pathname={usePathname()}
+  LinkComponent={Link}
+  actions={<SignOutButton />}
+>
+  {children}
+</AdminShell>
+```
+
 ## Shared tooling entries (since v0.35.0)
 
 Four subpath exports with no React. Their peer dependencies are optional;

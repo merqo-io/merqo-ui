@@ -2,18 +2,21 @@
 
 import * as React from "react";
 import { GoogleMark } from "./google-mark";
-import { rawErrorText } from "./auth-form-utils";
+import { rawErrorText, runOnce } from "./auth-form-utils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useAsyncAction } from "./use-async-action";
 
 export type LoginMode = "signin" | "signup";
-export type LoginErrorContext = "signin" | "signup" | "oauth";
+export type LoginErrorContext = "signin" | "signup" | "oauth" | "reset";
 export type LoginCredentials = { email: string; password: string };
 
-/** An error message to show, or nothing on success. A callback may also throw. */
-type CallbackResult = string | void;
+/**
+ * An error message to show, `{ notice }` for a success message such as
+ * "Check your email", or nothing on success. A callback may also throw.
+ */
+type CallbackResult = string | { notice: string } | void;
 
 export type LoginFormProps = {
   onPasswordSignIn: (credentials: LoginCredentials) => Promise<CallbackResult>;
@@ -25,6 +28,10 @@ export type LoginFormProps = {
   defaultMode?: LoginMode;
   onModeChange?: (mode: LoginMode) => void;
   forgotPasswordHref?: string;
+  /** Sends a reset link for the typed email; renders the forgot-password control as a button when no `forgotPasswordHref` is given. */
+  onForgotPassword?: (email: string) => Promise<CallbackResult>;
+  /** Renders the forgot-password link; pass `next/link`'s `Link` for client-side navigation. */
+  LinkComponent?: React.ComponentType<LoginFormLinkProps>;
   /**
    * Turns a returned error string, or a thrown error's `code` (else its
    * `message`), into copy for the vendor. Raw provider messages can leak
@@ -40,7 +47,20 @@ const FALLBACK: Record<LoginErrorContext, string> = {
   signin: "Could not sign in. Try again.",
   signup: "Could not create your account. Try again.",
   oauth: "Could not sign in with Google. Try again.",
+  reset: "Could not send the reset link. Try again.",
 };
+
+const ENTER_EMAIL = "Enter your email first.";
+
+export type LoginFormLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+};
+
+const ERROR_ID = "login-form-error";
+
+function DefaultLink(props: LoginFormLinkProps) {
+  return <a {...props} />;
+}
 
 type Job = { context: LoginErrorContext; run: () => Promise<CallbackResult> };
 
@@ -92,6 +112,87 @@ function ModeToggle({
   );
 }
 
+function splitResult(result: CallbackResult): { error: string | null; notice: string | null } {
+  if (typeof result === "string") return { error: result || null, notice: null };
+  if (typeof result === "object") return { error: null, notice: result.notice };
+  return { error: null, notice: null };
+}
+
+const FORGOT_CLASS =
+  "inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-4 hover:underline disabled:opacity-50";
+const LABEL_CLASS = "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
+
+function CredentialFields({
+  pending,
+  invalid,
+  isSignin,
+  forgotHref,
+  onForgot,
+  Link,
+  onChange,
+}: {
+  pending: boolean;
+  invalid: boolean;
+  isSignin: boolean;
+  forgotHref: string | undefined;
+  onForgot: (() => void) | undefined;
+  Link: React.ComponentType<LoginFormLinkProps>;
+  onChange: () => void;
+}) {
+  const aria = {
+    "aria-invalid": invalid ? (true as const) : undefined,
+    "aria-describedby": invalid ? ERROR_ID : undefined,
+  };
+  return (
+    <>
+      <div className="space-y-2">
+        <Label htmlFor="login-email" className={LABEL_CLASS}>
+          Email
+        </Label>
+        <Input
+          id="login-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          disabled={pending}
+          {...aria}
+          onChange={onChange}
+          className="h-11 rounded-xl text-base"
+        />
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <Label htmlFor="login-password" className={LABEL_CLASS}>
+            Password
+          </Label>
+          {isSignin && forgotHref ? (
+            <Link href={forgotHref} className={FORGOT_CLASS}>
+              Forgot password?
+            </Link>
+          ) : null}
+          {isSignin && !forgotHref && onForgot ? (
+            <button type="button" disabled={pending} onClick={onForgot} className={FORGOT_CLASS}>
+              Forgot password?
+            </button>
+          ) : null}
+        </div>
+        <Input
+          id="login-password"
+          name="password"
+          type="password"
+          autoComplete={isSignin ? "current-password" : "new-password"}
+          required
+          disabled={pending}
+          {...aria}
+          onChange={onChange}
+          className="h-11 rounded-xl text-base"
+        />
+      </div>
+    </>
+  );
+}
+
 export function LoginForm({
   onPasswordSignIn,
   onPasswordSignUp,
@@ -100,6 +201,8 @@ export function LoginForm({
   defaultMode = "signin",
   onModeChange,
   forgotPasswordHref,
+  onForgotPassword,
+  LinkComponent,
   mapError,
   initialError,
   className,
@@ -108,13 +211,18 @@ export function LoginForm({
     onPasswordSignUp ? defaultMode : "signin",
   );
   const [message, setMessage] = React.useState<string | null | undefined>(initialError);
+  const [notice, setNotice] = React.useState<string | null>(null);
   const [lastContext, setLastContext] = React.useState<LoginErrorContext>("signin");
 
+  const Link = LinkComponent ?? DefaultLink;
+  const inflight = React.useRef(false);
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  // Provider strings and thrown errors can leak account state, so without a
+  // kit-supplied mapError only the generic line is ever shown.
   const translate = React.useCallback(
-    (raw: string | null, context: LoginErrorContext) => {
-      if (raw === null) return FALLBACK[context];
-      return mapError ? mapError(raw, context) : raw;
-    },
+    (raw: string | null, context: LoginErrorContext) =>
+      mapError && raw !== null ? mapError(raw, context) : FALLBACK[context],
     [mapError],
   );
 
@@ -124,16 +232,22 @@ export function LoginForm({
     async (job: Job) => {
       setLastContext(job.context);
       setMessage(null);
-      const result = await job.run();
-      if (result) setMessage(translate(result, job.context));
+      setNotice(null);
+      const { error: text, notice: success } = splitResult(await job.run());
+      if (text) setMessage(translate(text, job.context));
+      setNotice(success);
     },
     [translate],
   );
-  const { pending, error, run } = useAsyncAction(execute);
+  const { pending, error, run, reset } = useAsyncAction(execute);
 
-  const submit = (job: Job) => {
-    run(job).catch(() => {});
-  };
+  const submit = (job: Job) => runOnce(inflight, run, job);
+
+  function clearError() {
+    setMessage(null);
+    setNotice(null);
+    reset();
+  }
 
   const thrown = error === null ? null : translate(rawErrorText(error), lastContext);
   const shown = message ?? thrown;
@@ -157,14 +271,18 @@ export function LoginForm({
     }
   }
 
+  function forgot() {
+    const email = String(new FormData(formRef.current ?? undefined).get("email") ?? "").trim();
+    if (!email) setMessage(ENTER_EMAIL);
+    else submit({ context: "reset", run: () => onForgotPassword!(email) });
+  }
+
   function switchMode() {
     const next: LoginMode = isSignin ? "signup" : "signin";
     setMode(next);
     setMessage(null);
     onModeChange?.(next);
   }
-
-  const labelClass = "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
 
   return (
     <div className={className}>
@@ -175,48 +293,24 @@ export function LoginForm({
         />
       ) : null}
 
-      <form onSubmit={onSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="login-email" className={labelClass}>
-            Email
-          </Label>
-          <Input
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            disabled={pending}
-            className="h-11 rounded-xl text-base"
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="login-password" className={labelClass}>
-              Password
-            </Label>
-            {isSignin && forgotPasswordHref ? (
-              <a
-                href={forgotPasswordHref}
-                className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-4 hover:underline"
-              >
-                Forgot password?
-              </a>
-            ) : null}
-          </div>
-          <Input
-            id="login-password"
-            name="password"
-            type="password"
-            autoComplete={isSignin ? "current-password" : "new-password"}
-            required
-            disabled={pending}
-            className="h-11 rounded-xl text-base"
-          />
-        </div>
+      <form ref={formRef} onSubmit={onSubmit} className="space-y-5">
+        <CredentialFields
+          pending={pending}
+          invalid={Boolean(shown)}
+          isSignin={isSignin}
+          forgotHref={forgotPasswordHref}
+          onForgot={onForgotPassword ? forgot : undefined}
+          Link={Link}
+          onChange={clearError}
+        />
         {shown ? (
-          <p role="alert" className="text-sm font-medium text-destructive">
+          <p id={ERROR_ID} role="alert" className="text-sm font-medium text-destructive">
             {shown}
+          </p>
+        ) : null}
+        {notice ? (
+          <p role="status" className="text-sm font-medium text-foreground">
+            {notice}
           </p>
         ) : null}
         <Button

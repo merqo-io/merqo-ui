@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MfaForm } from "./mfa-form";
 import { navigatingAway } from "./use-async-action";
@@ -14,7 +14,6 @@ describe("MfaForm with an enrolled factor", () => {
     const input = screen.getByLabelText("6-digit code");
     expect(input).toHaveAttribute("inputmode", "numeric");
     expect(input).toHaveAttribute("autocomplete", "one-time-code");
-    expect(input).toHaveAttribute("maxlength", "6");
   });
 
   it("rejects a short code without calling onVerify", async () => {
@@ -45,13 +44,79 @@ describe("MfaForm with an enrolled factor", () => {
     await waitFor(() => expect(onVerify).toHaveBeenCalledWith("123456", {}));
   });
 
-  it("shows a returned error and re-enables the button", async () => {
+  it("never renders a raw returned string without mapError", async () => {
     const user = userEvent.setup();
-    render(<MfaForm hasFactor onVerify={vi.fn().mockResolvedValue("That code did not work.")} />);
+    render(<MfaForm hasFactor onVerify={vi.fn().mockResolvedValue("factor f-123 expired in gotrue")} />);
     await user.type(screen.getByLabelText("6-digit code"), "123456");
     await user.click(screen.getByRole("button", { name: "Verify" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("That code did not work.");
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("That code did not work. Check the time on your phone and try again.");
+    expect(alert).not.toHaveTextContent("gotrue");
     expect(screen.getByRole("button", { name: "Verify" })).toBeEnabled();
+  });
+
+  it("routes returned strings through mapError", async () => {
+    const user = userEvent.setup();
+    render(
+      <MfaForm
+        hasFactor
+        onVerify={vi.fn().mockResolvedValue("bad_code")}
+        mapError={(raw) => (raw === "bad_code" ? "Wrong code." : "Other")}
+      />,
+    );
+    await user.type(screen.getByLabelText("6-digit code"), "123456");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Wrong code.");
+  });
+
+  it("never renders a thrown message without mapError", async () => {
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn().mockRejectedValue(new Error("secret internals"))} />);
+    await user.type(screen.getByLabelText("6-digit code"), "123456");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    expect(await screen.findByRole("alert")).not.toHaveTextContent("secret internals");
+  });
+
+  it("normalises a pasted code with spaces or dashes", async () => {
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn()} />);
+    const input = screen.getByLabelText("6-digit code");
+    expect(input).not.toHaveAttribute("maxlength");
+    expect(input).toHaveAttribute("pattern", "[0-9]*");
+    expect(input).toHaveAttribute("name", "code");
+    await user.click(input);
+    await user.paste("123 456");
+    expect(input).toHaveValue("123456");
+    await user.clear(input);
+    await user.paste("123-456");
+    expect(input).toHaveValue("123456");
+    await user.clear(input);
+    await user.paste("1234567890");
+    expect(input).toHaveValue("123456");
+  });
+
+  it("links the input to the error and clears it on typing", async () => {
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn()} />);
+    const input = screen.getByLabelText("6-digit code");
+    await user.type(input, "12");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    const alert = screen.getByRole("alert");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute("aria-describedby", alert.id);
+    await user.type(input, "3");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("calls onVerify once for overlapping submits", async () => {
+    const onVerify = vi.fn(() => new Promise<void>(() => {}));
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={onVerify} />);
+    await user.type(screen.getByLabelText("6-digit code"), "123456");
+    const form = screen.getByLabelText("6-digit code").closest("form")!;
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    expect(onVerify).toHaveBeenCalledTimes(1);
   });
 
   it("maps a thrown error and falls back for opaque throws", async () => {
@@ -113,7 +178,35 @@ describe("MfaForm with an enrolled factor", () => {
       />,
     );
     await user.click(screen.getByRole("button", { name: "Use a different account" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign out.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign out. Try again.");
+  });
+
+  it("does not render a QR image for a non data:image URL", async () => {
+    const user = userEvent.setup();
+    render(
+      <MfaForm
+        hasFactor={false}
+        onVerify={vi.fn()}
+        onEnrol={vi.fn().mockResolvedValue({ qr: "https://evil.example/q.png", secret: "KEY123" })}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Set up authenticator" }));
+    expect(await screen.findByText("KEY123")).toBeInTheDocument();
+    expect(screen.queryByAltText("Authenticator QR code")).toBeNull();
+  });
+
+  it("routes an enrolment error string through mapError", async () => {
+    const user = userEvent.setup();
+    render(
+      <MfaForm
+        hasFactor={false}
+        onVerify={vi.fn()}
+        onEnrol={vi.fn().mockResolvedValue("raw_enrol")}
+        mapError={() => "Mapped enrol"}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Set up authenticator" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Mapped enrol");
   });
 
   it("has no cancel button without a handler", () => {
@@ -150,13 +243,13 @@ describe("MfaForm enrolment", () => {
     await waitFor(() => expect(onVerify).toHaveBeenCalledWith("654321", { factorId: "f1" }));
   });
 
-  it("shows an enrolment error and stays on the prompt", async () => {
+  it("shows the generic enrolment error and stays on the prompt", async () => {
     const user = userEvent.setup();
     render(
       <MfaForm
         hasFactor={false}
         onVerify={vi.fn()}
-        onEnrol={vi.fn().mockResolvedValue("Could not start setup. Try again.")}
+        onEnrol={vi.fn().mockResolvedValue("raw provider text")}
       />,
     );
     await user.click(screen.getByRole("button", { name: "Set up authenticator" }));

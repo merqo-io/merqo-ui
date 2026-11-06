@@ -112,6 +112,7 @@ export type {
   LoginMode,
   LoginErrorContext,
   LoginCredentials,
+  LoginFormLinkProps,
 } from "./login-form";
 export { MfaForm } from "./mfa-form";
 export type { MfaFormProps, MfaEnrolment } from "./mfa-form";

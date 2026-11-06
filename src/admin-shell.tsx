@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "./lib/utils";
@@ -15,6 +13,8 @@ export type AdminShellProps = {
   pathname: string;
   /** Right side of the header, e.g. an attention bell and sign-out. */
   actions?: React.ReactNode;
+  /** Label beside the wordmark. Defaults to "Admin". */
+  badge?: React.ReactNode;
   backHref?: string;
   backLabel?: string;
   /** Pass `next/link`'s `Link` to keep client-side navigation. */
@@ -43,6 +43,7 @@ export function AdminShell({
   tabs,
   pathname,
   actions,
+  badge = "Admin",
   backHref,
   backLabel = "Back to dashboard",
   LinkComponent,
@@ -59,7 +60,7 @@ export function AdminShell({
           <div className="flex items-center">
             {wordmark}
             <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Admin
+              {badge}
             </span>
           </div>
           {actions ? <div className="flex items-center gap-2">{actions}</div> : null}

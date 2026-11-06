@@ -26,6 +26,12 @@ describe("AdminShell", () => {
     expect(screen.getByText("page")).toBeInTheDocument();
   });
 
+  it("shows a custom badge instead of Admin", () => {
+    setup("/admin", { badge: "Staff" });
+    expect(screen.getByText("Staff")).toBeInTheDocument();
+    expect(screen.queryByText("Admin")).toBeNull();
+  });
+
   it("marks only Overview active on the exact path", () => {
     setup("/admin");
     expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");

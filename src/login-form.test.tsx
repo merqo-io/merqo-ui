@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import * as React from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "./login-form";
 import { navigatingAway } from "./use-async-action";
@@ -39,13 +40,97 @@ describe("LoginForm", () => {
     await waitFor(() => expect(onPasswordSignIn).toHaveBeenCalledTimes(1));
   });
 
-  it("shows a returned error string and re-enables the form", async () => {
+  it("never renders a raw returned string without mapError", async () => {
     const user = userEvent.setup();
-    render(<LoginForm onPasswordSignIn={vi.fn().mockResolvedValue("Wrong email or password.")} />);
+    render(<LoginForm onPasswordSignIn={vi.fn().mockResolvedValue("User jo@x.sg not found in auth.users")} />);
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Wrong email or password.");
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Could not sign in. Try again.");
+    expect(alert).not.toHaveTextContent("auth.users");
     expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
+  });
+
+  it("never renders a thrown error's message or code without mapError", async () => {
+    const user = userEvent.setup();
+    render(
+      <LoginForm
+        onPasswordSignIn={vi
+          .fn()
+          .mockRejectedValue(Object.assign(new Error("db password leaked"), { code: "pg_boom" }))}
+      />,
+    );
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Could not sign in. Try again.");
+    expect(alert).not.toHaveTextContent(/leaked|pg_boom/);
+  });
+
+  it("points the inputs at the error and clears it on typing", async () => {
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn().mockResolvedValue("x")} />);
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    const alert = await screen.findByRole("alert");
+    const email = screen.getByLabelText("Email");
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAttribute("aria-describedby", alert.id);
+    expect(screen.getByLabelText("Password")).toHaveAttribute("aria-describedby", alert.id);
+    await user.type(email, "z");
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(email).not.toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("clears a thrown error on typing too", async () => {
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn().mockRejectedValue(new Error("x"))} />);
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await screen.findByRole("alert");
+    await user.type(screen.getByLabelText("Password"), "z");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("names the inputs", () => {
+    render(<LoginForm onPasswordSignIn={vi.fn()} />);
+    expect(screen.getByLabelText("Email")).toHaveAttribute("name", "email");
+    expect(screen.getByLabelText("Password")).toHaveAttribute("name", "password");
+  });
+
+  it("calls the handler once when a password submit and a Google tap overlap", async () => {
+    const onPasswordSignIn = vi.fn(() => new Promise<void>(() => {}));
+    const onGoogleSignIn = vi.fn(() => new Promise<void>(() => {}));
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={onPasswordSignIn} onGoogleSignIn={onGoogleSignIn} />);
+    await fill(user);
+    const form = screen.getByLabelText("Email").closest("form")!;
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    fireEvent.click(screen.getByRole("button", { name: "Continue with Google" }));
+    expect(onPasswordSignIn).toHaveBeenCalledTimes(1);
+    expect(onGoogleSignIn).not.toHaveBeenCalled();
+  });
+
+  it("allows a retry after a failed submit", async () => {
+    const onPasswordSignIn = vi.fn().mockResolvedValue("x");
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={onPasswordSignIn} />);
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await screen.findByRole("alert");
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await waitFor(() => expect(onPasswordSignIn).toHaveBeenCalledTimes(2));
+  });
+
+  it("renders the forgot-password link through LinkComponent", () => {
+    function Custom(props: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) {
+      return <a data-custom="1" {...props} />;
+    }
+    render(
+      <LoginForm onPasswordSignIn={vi.fn()} forgotPasswordHref="/forgot" LinkComponent={Custom} />,
+    );
+    expect(screen.getByRole("link", { name: "Forgot password?" })).toHaveAttribute("data-custom", "1");
   });
 
   it("maps a thrown error code through mapError", async () => {
@@ -130,7 +215,9 @@ describe("LoginForm", () => {
       keys: "[TouchA]",
       target: screen.getByRole("button", { name: "Continue with Google" }),
     });
-    expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign in with Google.");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not sign in with Google. Try again.",
+    );
   });
 
   it("toggles to signup by touch and submits through onPasswordSignUp", async () => {
@@ -181,6 +268,48 @@ describe("LoginForm", () => {
   it("renders the forgot-password link in signin mode", () => {
     render(<LoginForm onPasswordSignIn={vi.fn()} forgotPasswordHref="/forgot" />);
     expect(screen.getByRole("link", { name: "Forgot password?" })).toHaveAttribute("href", "/forgot");
+  });
+
+  it("shows a notice returned by sign-up, such as a confirmation-email prompt", async () => {
+    const user = userEvent.setup();
+    render(
+      <LoginForm
+        onPasswordSignIn={vi.fn()}
+        onPasswordSignUp={vi.fn().mockResolvedValue({ notice: "Check your email." })}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Create an account" }));
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Check your email.");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("sends a reset link for the typed email from a button", async () => {
+    const onForgotPassword = vi.fn().mockResolvedValue({ notice: "Reset link sent." });
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn()} onForgotPassword={onForgotPassword} />);
+    await user.type(screen.getByLabelText("Email"), "a@b.sg");
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("button", { name: "Forgot password?" }) });
+    await waitFor(() => expect(onForgotPassword).toHaveBeenCalledWith("a@b.sg"));
+    expect(await screen.findByRole("status")).toHaveTextContent("Reset link sent.");
+  });
+
+  it("asks for an email before resetting and does not call onForgotPassword", async () => {
+    const onForgotPassword = vi.fn();
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn()} onForgotPassword={onForgotPassword} />);
+    await user.click(screen.getByRole("button", { name: "Forgot password?" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter your email first.");
+    expect(onForgotPassword).not.toHaveBeenCalled();
+  });
+
+  it("falls back to a generic reset error", async () => {
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn()} onForgotPassword={vi.fn().mockResolvedValue("rate limit hit")} />);
+    await user.type(screen.getByLabelText("Email"), "a@b.sg");
+    await user.click(screen.getByRole("button", { name: "Forgot password?" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Could not send the reset link. Try again.");
   });
 
   it("shows an initial error such as one passed back from the auth callback", () => {

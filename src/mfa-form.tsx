@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { rawErrorText } from "./auth-form-utils";
+import { rawErrorText, runOnce } from "./auth-form-utils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -45,7 +45,28 @@ const COPY = {
   cancel: "Could not sign out. Try again.",
 };
 
-type Job = { kind: keyof typeof COPY; run: () => Promise<void> };
+type Job = { kind: keyof typeof COPY; run: (kind: keyof typeof COPY) => Promise<void> };
+
+const ERROR_ID = "mfa-form-error";
+
+function isImageDataUrl(value: string): boolean {
+  return value.startsWith("data:image/");
+}
+
+function EnrolmentDetails({ enrolment }: { enrolment: MfaEnrolment }) {
+  return (
+    <div className="space-y-2">
+      {/* Only data:image/ sources render: the value comes from a callback, and any other URL would load a remote image. */}
+      {isImageDataUrl(enrolment.qr) ? (
+        <img src={enrolment.qr} alt="Authenticator QR code" className="mx-auto size-44" />
+      ) : null}
+      <p className="text-center text-xs text-muted-foreground">
+        Can&rsquo;t scan? Enter this key instead:
+      </p>
+      <code className="block break-all text-center text-sm">{enrolment.secret}</code>
+    </div>
+  );
+}
 
 export function MfaForm({
   hasFactor,
@@ -62,29 +83,37 @@ export function MfaForm({
   const [message, setMessage] = React.useState<string | null>(null);
   const [lastKind, setLastKind] = React.useState<keyof typeof COPY>("verify");
 
-  const translate = (raw: string | null, kind: keyof typeof COPY) => {
-    if (raw === null) return COPY[kind];
-    return mapError ? mapError(raw) : raw;
-  };
+  const inflight = React.useRef(false);
+
+  // Provider strings and thrown errors can leak account state, so without a
+  // kit-supplied mapError only the generic line is ever shown.
+  const translate = React.useCallback(
+    (raw: string | null, kind: keyof typeof COPY) =>
+      mapError && raw !== null ? mapError(raw) : COPY[kind],
+    [mapError],
+  );
 
   // A redirect thrown by a callback is left to useAsyncAction so `pending`
   // stays true while the page leaves.
   const execute = React.useCallback(async (job: Job) => {
     setLastKind(job.kind);
     setMessage(null);
-    await job.run();
+    await job.run(job.kind);
   }, []);
-  const { pending, error, run } = useAsyncAction(execute);
+  const { pending, error, run, reset } = useAsyncAction(execute);
 
-  const submit = (job: Job) => {
-    run(job).catch(() => {});
-  };
+  const submit = (job: Job) => runOnce(inflight, run, job);
+
+  function clearError() {
+    setMessage(null);
+    reset();
+  }
 
   const shown =
     message ?? (error !== null ? translate(rawErrorText(error), lastKind) : null);
 
-  const showMessage = (result: string | void) => {
-    if (typeof result === "string" && result) setMessage(result);
+  const showMessage = (result: string | void, kind: keyof typeof COPY) => {
+    if (typeof result === "string" && result) setMessage(translate(result, kind));
   };
 
   const hasForm = hasFactor || enrolment !== null;
@@ -97,9 +126,10 @@ export function MfaForm({
     }
     submit({
       kind: "verify",
-      run: async () =>
+      run: async (kind) =>
         showMessage(
           await onVerify(code, enrolment?.factorId ? { factorId: enrolment.factorId } : {}),
+          kind,
         ),
     });
   }
@@ -110,7 +140,7 @@ export function MfaForm({
       variant="ghost"
       disabled={pending}
       onClick={() =>
-        submit({ kind: "cancel", run: async () => showMessage(await onCancel()) })
+        submit({ kind: "cancel", run: async (kind) => showMessage(await onCancel(), kind) })
       }
       className="h-11 w-full rounded-xl"
     >
@@ -119,7 +149,7 @@ export function MfaForm({
   ) : null;
 
   const alert = shown ? (
-    <p role="alert" className="text-sm text-destructive">
+    <p id={ERROR_ID} role="alert" className="text-sm text-destructive">
       {shown}
     </p>
   ) : null;
@@ -136,9 +166,9 @@ export function MfaForm({
               if (!onEnrol) return;
               submit({
                 kind: "enrol",
-                run: async () => {
+                run: async (kind) => {
                   const result = await onEnrol();
-                  if (typeof result === "string") setMessage(result);
+                  if (typeof result === "string") showMessage(result, kind);
                   else setEnrolment(result);
                 },
               });
@@ -158,26 +188,25 @@ export function MfaForm({
     <div className={className}>
       <form onSubmit={onSubmit} className="space-y-4">
         {enrolment ? (
-          <div className="space-y-2">
-            {/* A plain img: providers return a data: URL, so there is nothing to optimise. */}
-            <img src={enrolment.qr} alt="Authenticator QR code" className="mx-auto size-44" />
-            <p className="text-center text-xs text-muted-foreground">
-              Can&rsquo;t scan? Enter this key instead:
-            </p>
-            <code className="block break-all text-center text-sm">{enrolment.secret}</code>
-          </div>
+          <EnrolmentDetails enrolment={enrolment} />
         ) : null}
         <div className="space-y-2">
           <Label htmlFor="mfa-code">6-digit code</Label>
           <Input
             id="mfa-code"
+            name="code"
             inputMode="numeric"
+            pattern="[0-9]*"
             autoComplete="one-time-code"
-            maxLength={6}
             placeholder="123456"
             disabled={pending}
             value={code}
-            onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
+            aria-invalid={shown ? true : undefined}
+            aria-describedby={shown ? ERROR_ID : undefined}
+            onChange={(event) => {
+              setCode(event.target.value.replace(/\D/g, "").slice(0, 6));
+              clearError();
+            }}
             className="h-11 rounded-xl text-base"
           />
         </div>

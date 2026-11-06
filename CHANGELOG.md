@@ -5,9 +5,9 @@
 ### Added
 
 - `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})`: the centred sign-in card shared by login, MFA and reset pages. Server-renderable.
-- `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?, showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?, mapError?, initialError?})`: email and password form with an optional Google button and sign in / create account toggle. Callbacks return an error string or throw; a redirect keeps the form pending with no error flash. No auth library dependency.
-- `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?, enrolIntro?, mapError?})`: six-digit authenticator code entry with optional enrolment (QR code and manual key) and a sign-out action.
-- `AdminShell({wordmark, tabs, pathname, actions?, backHref?, backLabel?, LinkComponent?, children?})`: sticky header with an "Admin" label and a horizontally scrolling tab bar whose active tab is the longest matching prefix.
+- `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?, showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?, onForgotPassword?, LinkComponent?, mapError?, initialError?})`: email and password form with an optional Google button and sign in / create account toggle. Callbacks return an error string, `{notice}` or nothing, or throw; a redirect keeps the form pending with no error flash. Without `mapError` only generic copy is shown, never a provider string. Inputs carry `name`, `aria-invalid` and `aria-describedby`; typing clears the error and overlapping taps run once. No auth library dependency.
+- `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?, enrolIntro?, mapError?})`: six-digit authenticator code entry with optional enrolment (QR code and manual key) and a sign-out action. Pasted codes with spaces or dashes are normalised, returned strings go through `mapError`, and the QR image renders only for `data:image/` sources.
+- `AdminShell({wordmark, tabs, pathname, actions?, badge?, backHref?, backLabel?, LinkComponent?, children?})`: header with a badge (default "Admin") and a horizontally scrolling tab bar whose active tab is the longest matching prefix. No client boundary.
 
 ## [0.42.1] - 2026-11-06
 
@@ -15,8 +15,11 @@
 
 - v0.42.0 could not be installed from git: the `buttonVariants` declaration emit failed with TS2742 when pnpm prepared the package. It now has an explicit type.
 - Radix and 
-ext-themes are now peer dependencies (adix-ui ^1.4.3, 
-ext-themes ^0.4.6) instead of bundled dependencies, so a kit no longer installs a second Radix copy with its own DismissableLayer stack (a shared dialog opened from a kit menu left ody with pointer-events: none). Kits must provide adix-ui themselves. All @radix-ui/react-* imports now come from the adix-ui umbrella.
+ext-themes are now peer dependencies (
+adix-ui ^1.4.3, 
+ext-themes ^0.4.6) instead of bundled dependencies, so a kit no longer installs a second Radix copy with its own DismissableLayer stack (a shared dialog opened from a kit menu left ody with pointer-events: none). Kits must provide 
+adix-ui themselves. All @radix-ui/react-* imports now come from the 
+adix-ui umbrella.
 
 ## [0.42.0] - 2026-11-06
 

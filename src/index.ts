@@ -10,7 +10,8 @@ export { FeedbackSheet } from "./feedback-sheet";
 export type { FeedbackSheetProps, FeedbackData } from "./feedback-sheet";
 export { HelpSheet } from "./help-sheet";
 export type { HelpSheetProps, SupportRequest } from "./help-sheet";
-export { AccountMenu, tierLabel } from "./account-menu";
+export { AccountMenu } from "./account-menu";
+export { tierLabel } from "./tier-label";
 export type {
   AccountMenuProps,
   AccountMenuGetHelp,
@@ -75,6 +76,21 @@ export { AboutMerqo } from "./about-merqo";
 export type { AboutMerqoProps } from "./about-merqo";
 export { BackButton } from "./back-button";
 export type { BackButtonProps } from "./back-button";
+export { PageHeader } from "./page-header";
+export type { PageHeaderProps } from "./page-header";
+export { SegmentedControl } from "./segmented-control";
+export type {
+  SegmentedControlProps,
+  SegmentedOption,
+} from "./segmented-control";
+export { StatCard } from "./stat-card";
+export type { StatCardProps } from "./stat-card";
+export { ConfirmDialog } from "./confirm-dialog";
+export type { ConfirmDialogProps } from "./confirm-dialog";
+export { EmptyState } from "./empty-state";
+export type { EmptyStateProps } from "./empty-state";
+export { TierChip } from "./tier-chip";
+export type { TierChipProps } from "./tier-chip";
 export { ElevatedCard } from "./elevated-card";
 export type { ElevatedCardProps } from "./elevated-card";
 export { SOCIAL_LINK_FIELDS } from "./social-icons";

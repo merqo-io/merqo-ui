@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-11-06
+
+### Added
+
+- `PageHeader({eyebrow?, title, description?, children?, action?, back?, responsive?, className, ...rest})`: eyebrow, display-font h1, muted line (`description`, or `children`), right-aligned `action` and a `back` slot above. Replaces the five kit-local copies.
+- `SegmentedControl<T>({ariaLabel, options, value, onChange, size?, variant?, className?, optionClassName?})` and `SegmentedOption`: a radiogroup with roving tabindex and arrow/Home/End keys. Options may carry `disabled` and `ariaLabel`; `value` may be `null`. `variant="track"` (default) is qkit's bordered pill row, `"pill"` the bordered-button grid.
+- `StatCard`: `StatTile` inside the `ElevatedCard` shell. Takes every `StatTile` prop, plus `icon`, `featured` and a card-level `className`.
+- `ConfirmDialog` (backed by a new private `AlertDialog` primitive in `src/ui/`): `trigger`, `title`, `description`, `confirmLabel`, `cancelLabel?`, `pendingLabel?`, `variant?`, `onConfirm`, optional controlled `open`/`onOpenChange`. Stays open and busy while `onConfirm` runs, shows the thrown message inline and stays open on failure, closes on success. No toast dependency.
+- `EmptyState({icon?, title, description?, children?, actions?, className})`.
+- `TierChip({tier, className?})`: the plan badge for `AccountMenu`'s `tierBadge` slot, labelled with `tierLabel`.
+
+### Changed
+
+- `tierLabel` now lives in a directive-free `tier-label` module (still exported from the package root), so Server Components can call it; `TierChip` uses it.
+- `FeedbackSheet` and `HelpSheet` now use `SegmentedControl variant="pill"`. `PillRadioGroup` was never exported and is removed; its tests moved to `SegmentedControl`. Rendering is unchanged.
+
 ## [0.41.0] - 2026-11-04
 
 ### Added

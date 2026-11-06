@@ -13,7 +13,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "next-themes";
-import { AccountMenu, tierLabel } from "./account-menu";
+import { AccountMenu } from "./account-menu";
+import { tierLabel } from "./tier-label";
 
 const signOutAction = vi.fn().mockResolvedValue(undefined);
 const onFeedbackSubmit = vi.fn().mockResolvedValue(undefined);

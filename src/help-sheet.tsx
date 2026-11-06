@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { AsyncSubmitButton } from "./async-submit-button";
-import { PillRadioGroup } from "./pill-radio-group";
+import { SegmentedControl } from "./segmented-control";
 import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import {
@@ -119,9 +119,10 @@ function HelpForm({
     >
       {categories && categories.length > 0 && (
         <div className="flex flex-col gap-2">
-          <PillRadioGroup
+          <SegmentedControl
+                variant="pill"
             ariaLabel="What's it about?"
-            gridClassName="grid-cols-2 gap-1.5"
+            className="grid-cols-2 gap-1.5"
             value={category ?? null}
             onChange={setCategory}
             options={categories.map((c) => ({ value: c.value, label: c.label }))}

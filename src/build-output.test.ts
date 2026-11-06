@@ -130,6 +130,40 @@ describe("build output", () => {
     }
   });
 
+  it("dist/tier-chip.js and dist/tier-label.js carry no \"use client\" and TierChip renders server-side (regression guard: tierLabel imported from a client module is an opaque reference in a Server Component)", { timeout: 60_000 }, () => {
+    const distDir = path.dirname(distIndexPath);
+    for (const name of ["tier-chip", "tier-label"]) {
+      expect(readFileSync(path.resolve(distDir, `${name}.js`), "utf-8")).not.toMatch(
+        /["']use client["']/,
+      );
+    }
+    const script = `const m = await import(process.argv[1]);
+      const { renderToStaticMarkup } = await import("react-dom/server");
+      const { createElement } = await import("react");
+      console.log(renderToStaticMarkup(createElement(m.TierChip, { tier: "qkit" })));`;
+    const stdout = execFileSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        script,
+        pathToFileURL(path.resolve(distDir, "tier-chip.js")).href,
+      ],
+      {
+        encoding: "utf8",
+        cwd: path.resolve(distDir, ".."),
+        env: {
+          NODE_ENV: "test",
+          ...(process.env.SystemRoot
+            ? { SystemRoot: process.env.SystemRoot }
+            : {}),
+        },
+        timeout: 30_000,
+      },
+    );
+    expect(stdout).toContain(">Pro<");
+  });
+
   it("every sibling module dist/index.d.ts re-exports from actually exists (regression guard: a Linux-only rollup-plugin-dts failure once left dist/index.d.ts pointing at sibling .d.ts files that were never emitted, silently degrading every @merqo/ui import to `any` in consumers - see tsup.config.ts's dts:false comment)", () => {
     const contents = readFileSync(distDtsPath, "utf-8");
     const distDir = path.dirname(distDtsPath);

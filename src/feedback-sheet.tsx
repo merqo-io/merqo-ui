@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { AsyncSubmitButton } from "./async-submit-button";
-import { PillRadioGroup } from "./pill-radio-group";
+import { SegmentedControl } from "./segmented-control";
 import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import {
@@ -94,9 +94,10 @@ export function FeedbackSheet({
         >
           {showNps && (
             <div className="flex flex-col gap-2">
-              <PillRadioGroup
+              <SegmentedControl
+                variant="pill"
                 ariaLabel="Recommend score, 0 to 10"
-                gridClassName="grid-cols-11 gap-1"
+                className="grid-cols-11 gap-1"
                 optionClassName="tabular-nums"
                 value={score === null ? null : String(score)}
                 onChange={(v) => {

@@ -122,6 +122,20 @@ describe("checkLegalAcceptance", () => {
     expect(console.error).toHaveBeenCalled();
   });
 
+  it("logs a failed cache read and still asks merqo", async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const eq = vi.fn(() => ({
+      maybeSingle: async () => ({ data: null, error: { message: "relation missing" } }),
+    }));
+    const client = { from: () => ({ select: () => ({ eq }), upsert }) } as unknown as LegalGateClient;
+    const fetchImpl = okFetch(CURRENT);
+    expect(await checkLegalAcceptance("a@b.co", options(client, fetchImpl))).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(console.error).toHaveBeenCalledWith("checkLegalAcceptance: cache select failed", {
+      message: "relation missing",
+    });
+  });
+
   it("is false for an outdated acceptance and caches that", async () => {
     const upsert = vi.fn().mockResolvedValue({ error: null });
     const { client } = makeClient(null, upsert);

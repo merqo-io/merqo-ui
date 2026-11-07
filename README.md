@@ -826,6 +826,8 @@ to `path` instead of `next`; printkit mints its recovery-window cookie in
 URL, `//host`, `/\host` or a control character falls back to `defaultNext`.
 A missing code, a failed or thrown exchange, or a throwing `afterSignIn`
 redirects to the login error.
+Redirects are built from the request origin, so a kit behind a proxy must make
+sure that origin is the public one.
 
 `checkLegalAcceptance` asks merqo's `/api/merqo/legal-status` and compares
 the answer with `LEGAL_VERSIONS`. The answer is cached per lower-cased email

@@ -127,6 +127,20 @@ describe("updateSupabaseSession", () => {
     expect(noDomain.cookies.get("sb-x-auth-token")).toBeUndefined();
   });
 
+  it("carries a cleared dead session onto the login redirect", async () => {
+    getUser.mockImplementation(async () => {
+      state.captured?.cookies.setAll([
+        { name: "sb-x-auth-token", value: "", options: { path: "/", maxAge: 0 } },
+      ]);
+      return { data: { user: null }, error: { message: "jwt expired" } };
+    });
+    const res = await updateSupabaseSession(req("/dashboard", "sb-x-auth-token=dead"), base);
+    expect(res.headers.get("location")).not.toBeNull();
+    const cleared = res.cookies.get("sb-x-auth-token");
+    expect(cleared?.value).toBe("");
+    expect(cleared?.maxAge).toBe(0);
+  });
+
   it("omits the schema when none is configured", async () => {
     await updateSupabaseSession(req("/"), { url: "u", publishableKey: "pk", protectedPrefixes: [] });
     expect(state.captured?.db).toBeUndefined();

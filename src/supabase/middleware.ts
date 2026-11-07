@@ -104,6 +104,10 @@ export async function updateSupabaseSession(
     const url = request.nextUrl.clone();
     url.pathname = loginPath;
     const redirectResponse = NextResponse.redirect(url);
+    // Carry over what @supabase/ssr wrote (a cleared dead session) so the
+    // redirect does not leave the stale cookie in the browser. Names the
+    // duplicate cleanup below overwrites are replaced by it.
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
     clearHostOnlyDuplicates(request, redirectResponse, written, options.cookieDomain);
     return redirectResponse;
   }

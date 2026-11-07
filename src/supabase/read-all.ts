@@ -5,6 +5,8 @@ type Page<T> = PromiseLike<{
 
 // PostgREST caps a response at 1000 rows by default.
 const PAGE_SIZE = 1000;
+// A runaway query (a page function that ignores its range) must fail, not loop forever.
+const MAX_PAGES = 1000;
 
 /**
  * Reads a deterministically ordered query to the end instead of silently
@@ -14,15 +16,17 @@ const PAGE_SIZE = 1000;
  */
 export async function readAllRows<T>(page: (from: number, to: number) => Page<T>): Promise<T[]> {
   const rows: T[] = [];
-  while (true) {
+  for (let pageNumber = 0; pageNumber < MAX_PAGES; pageNumber++) {
     const { data, error } = await page(rows.length, rows.length + PAGE_SIZE - 1);
     if (error || !data) {
       console.error("readAllRows: page failed", error?.message ?? "no data");
       throw new Error("Could not load complete query results");
     }
-    if (data.length === 0) return rows;
     rows.push(...data);
+    if (data.length < PAGE_SIZE) return rows;
   }
+  console.error("readAllRows: page limit reached", MAX_PAGES);
+  throw new Error("Could not load complete query results");
 }
 
 /** `readAllRows` for route handlers that map a read failure to HTTP 503. */

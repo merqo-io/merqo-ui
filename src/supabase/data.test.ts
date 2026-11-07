@@ -7,20 +7,36 @@ describe("readAllRows", () => {
   });
   afterEach(() => vi.restoreAllMocks());
 
-  it("pages with inclusive 1000-row ranges until an empty page", async () => {
+  it("pages with inclusive 1000-row ranges and stops at the first short page", async () => {
     const full = Array.from({ length: 1000 }, (_, i) => i);
     const page = vi
       .fn()
       .mockResolvedValueOnce({ data: full, error: null })
-      .mockResolvedValueOnce({ data: [1000, 1001], error: null })
-      .mockResolvedValueOnce({ data: [], error: null });
+      .mockResolvedValueOnce({ data: [1000, 1001], error: null });
     const rows = await readAllRows<number>(page);
     expect(rows).toHaveLength(1002);
     expect(page.mock.calls).toEqual([
       [0, 999],
       [1000, 1999],
-      [1002, 2001],
     ]);
+  });
+
+  it("reads one more page after an exactly full one", async () => {
+    const full = Array.from({ length: 1000 }, (_, i) => i);
+    const page = vi
+      .fn()
+      .mockResolvedValueOnce({ data: full, error: null })
+      .mockResolvedValueOnce({ data: [], error: null });
+    expect(await readAllRows<number>(page)).toHaveLength(1000);
+    expect(page).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws at the page cap instead of looping forever", async () => {
+    const full = Array.from({ length: 1000 }, (_, i) => i);
+    const page = vi.fn().mockResolvedValue({ data: full, error: null });
+    await expect(readAllRows<number>(page)).rejects.toThrow("Could not load complete query results");
+    expect(page).toHaveBeenCalledTimes(1000);
+    expect(console.error).toHaveBeenCalledWith("readAllRows: page limit reached", 1000);
   });
 
   it("returns an empty list for an empty first page", async () => {
@@ -30,7 +46,7 @@ describe("readAllRows", () => {
   it("throws instead of returning a partial list when a page errors", async () => {
     const page = vi
       .fn()
-      .mockResolvedValueOnce({ data: [1], error: null })
+      .mockResolvedValueOnce({ data: Array.from({ length: 1000 }, (_, i) => i), error: null })
       .mockResolvedValueOnce({ data: null, error: { message: "timeout" } });
     await expect(readAllRows(page)).rejects.toThrow("Could not load complete query results");
     expect(console.error).toHaveBeenCalledWith("readAllRows: page failed", "timeout");
@@ -51,8 +67,7 @@ describe("readAllRowsResult", () => {
   it("wraps success", async () => {
     const page = vi
       .fn()
-      .mockResolvedValueOnce({ data: [1], error: null })
-      .mockResolvedValueOnce({ data: [], error: null });
+      .mockResolvedValueOnce({ data: [1], error: null });
     expect(await readAllRowsResult<number>(page)).toEqual({ data: [1], error: null });
   });
 

@@ -9,7 +9,7 @@ type CacheRow = { checked_at: string; is_current: boolean };
 /** The table shape the cache needs: email, checked_at and is_current columns. */
 type LegalCacheTable = {
   select(columns: string): {
-    eq(column: string, value: string): { maybeSingle(): PromiseLike<{ data: CacheRow | null }> };
+    eq(column: string, value: string): { maybeSingle(): PromiseLike<{ data: CacheRow | null; error?: unknown }> };
   };
   upsert(row: {
     email: string;
@@ -47,11 +47,14 @@ async function readLegalAcceptance(email: string, options: LegalGateOptions): Pr
   const client = await options.createClient();
   const supabase = client as unknown as { from(table: string): LegalCacheTable };
 
-  const { data: cached } = await supabase
+  const { data: cached, error: cacheError } = await supabase
     .from(CACHE_TABLE)
     .select("checked_at, is_current")
     .eq("email", normalized)
     .maybeSingle();
+
+  // A failed read is only a cache miss; merqo stays the source of truth.
+  if (cacheError) console.error("checkLegalAcceptance: cache select failed", cacheError);
 
   if (cached) {
     const age = Date.now() - new Date(cached.checked_at).getTime();

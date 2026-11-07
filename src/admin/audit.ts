@@ -1,7 +1,7 @@
 /** Smallest slice of a Supabase client the audit writers use. */
 export type AuditClient = {
   from(table: string): {
-    insert(row: never): PromiseLike<{
+    insert(row: Record<string, unknown>): PromiseLike<{
       error: { message?: string; code?: string } | null;
     }>;
   };
@@ -50,9 +50,13 @@ function failureMessage(err: unknown): string {
   return "unknown";
 }
 
+function logFailure(table: string, err: unknown): void {
+  console.error(`${table} insert failed`, failureMessage(err), failureCode(err));
+}
+
 /**
  * Appends a row to `admin_audit`. The trail is best-effort: a failure is
- * logged (message only, never the row) and swallowed, so it can never fail
+ * logged (message and code, never the row) and swallowed, so it can never fail
  * the action it records. The table has no INSERT policy for authenticated or
  * anon users, so pass a service-role client. `A` keeps each kit's own action
  * names type-checked locally.
@@ -68,17 +72,17 @@ export async function recordAudit<A extends string = string>(
       action: entry.action,
       target_id: entry.targetId,
       detail: entry.detail,
-    } as never);
-    if (error) console.error("admin_audit insert failed", failureMessage(error));
+    });
+    if (error) logFailure("admin_audit", error);
   } catch (err) {
-    console.error("admin_audit insert failed", failureMessage(err));
+    logFailure("admin_audit", err);
   }
 }
 
 /**
  * Appends one failure row to `ops_events`. Never throws, so the failing
  * request keeps its own error. `ref` and `code` are cut to 64 characters to
- * satisfy the table's length checks; only the failure code is logged.
+ * satisfy the table's length checks; the row itself is never logged.
  */
 export async function recordOpsEvent<K extends string = string>(
   source: AuditClientSource,
@@ -91,9 +95,9 @@ export async function recordOpsEvent<K extends string = string>(
       kind: event.kind,
       ref: event.ref.slice(0, OPS_EVENT_MAX_FIELD),
       code: event.code.slice(0, OPS_EVENT_MAX_FIELD),
-    } as never);
-    if (error) console.error("ops_events insert failed", failureCode(error));
+    });
+    if (error) logFailure("ops_events", error);
   } catch (err) {
-    console.error("ops_events insert failed", failureCode(err));
+    logFailure("ops_events", err);
   }
 }

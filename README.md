@@ -540,12 +540,14 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   treated as ours to delete. Plain function, no React. Added v0.31.4.
 
 - `removeStorageObjects(client, bucket, paths, {label?})`,
-  `removeImagesByUrl(client, bucket, urls, {ownerFolder?, label?})`,
-  `replacedImageTarget({buckets, before, after, ownerFolder?})` and
-  `removeReplacedImage(client, {buckets, before, after, ownerFolder?, label?})`:
+  `removeImagesByUrl(client, bucket, urls, {ownerFolder, label?})`,
+  `replacedImageTarget({buckets, before, after, ownerFolder})` and
+  `removeReplacedImage(client, {buckets, before, after, ownerFolder, label?})`:
   best-effort storage cleanup built on `storagePathFromPublicUrl`. They never
-  throw and log failures. Pass `ownerFolder` (the vendor id) whenever the
-  client is service role, since no storage policy bounds it. `client` is any
+  throw and log failures. `ownerFolder` is required: pass the vendor id (essential
+  when the client is service role, since no storage policy bounds it), or
+  `null` only when the caller already scoped the URLs. `removeStorageObjects`
+  takes raw paths and applies no ownership check. `client` is any
   object with `storage.from(bucket).remove(paths)`.
 
   ```ts

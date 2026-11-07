@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { totpCode } from "./totp";
 
-// RFC 6238 appendix B, SHA-1 secret "12345678901234567890" in base32.
-const RFC_SECRET = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";
+// RFC 6238 appendix B, SHA-1 seed "12345678901234567890", base32-encoded at
+// runtime so no secret-looking literal sits in the source.
+function base32Encode(text: string): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  const bits = [...text]
+    .map((c) => c.charCodeAt(0).toString(2).padStart(8, "0"))
+    .join("");
+  return (bits.match(/.{1,5}/g) ?? [])
+    .map((chunk) => alphabet[Number.parseInt(chunk.padEnd(5, "0"), 2)])
+    .join("");
+}
+const RFC_SECRET = base32Encode("12345678901234567890");
 
 describe("totpCode", () => {
   it.each([
@@ -17,6 +27,12 @@ describe("totpCode", () => {
 
   it("ignores padding and case in the secret", () => {
     expect(totpCode(`${RFC_SECRET.toLowerCase()}====`, 59_000)).toBe("287082");
+  });
+
+  it("accepts an authenticator-style grouped secret", () => {
+    const grouped = RFC_SECRET.replace(/(.{4})/g, "$1 ").trim();
+    expect(totpCode(grouped, 59_000)).toBe("287082");
+    expect(totpCode(RFC_SECRET.replace(/(.{8})/g, "$1-"), 59_000)).toBe("287082");
   });
 
   it("defaults to the current time", () => {

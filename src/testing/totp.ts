@@ -4,7 +4,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 function base32Decode(input: string): Buffer {
   let bits = "";
-  for (const char of input.replaceAll("=", "").toUpperCase()) {
+  for (const char of input.replace(/[\s=-]/g, "").toUpperCase()) {
     const index = ALPHABET.indexOf(char);
     if (index === -1) throw new Error("Invalid base32 TOTP secret");
     bits += index.toString(2).padStart(5, "0");

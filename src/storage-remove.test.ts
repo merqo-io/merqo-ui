@@ -60,11 +60,11 @@ describe("removeImagesByUrl", () => {
       "https://lh3.googleusercontent.com/a.png",
       null,
       undefined,
-    ]);
+    ], { ownerFolder: null });
     expect(remove).toHaveBeenCalledWith(["v1/a.png"]);
   });
 
-  it("keeps only the owner's folder when ownerFolder is set", async () => {
+  it("keeps only the owner's folder", async () => {
     const { client, remove } = fakeClient();
     await removeImagesByUrl(
       client,
@@ -77,7 +77,7 @@ describe("removeImagesByUrl", () => {
 
   it("makes no call when nothing qualifies", async () => {
     const { client, from } = fakeClient();
-    await removeImagesByUrl(client, "b", ["nope"]);
+    await removeImagesByUrl(client, "b", ["nope"], { ownerFolder: "v1" });
     expect(from).not.toHaveBeenCalled();
   });
 });
@@ -87,8 +87,8 @@ describe("replacedImageTarget", () => {
 
   it("returns null when there is no previous or the same image", () => {
     const url = `${base}/vendor-images/v1/a.png`;
-    expect(replacedImageTarget({ buckets, before: null, after: url })).toBeNull();
-    expect(replacedImageTarget({ buckets, before: url, after: url })).toBeNull();
+    expect(replacedImageTarget({ buckets, before: null, after: url, ownerFolder: "v1" })).toBeNull();
+    expect(replacedImageTarget({ buckets, before: url, after: url, ownerFolder: "v1" })).toBeNull();
   });
 
   it("finds the owning bucket in order", () => {
@@ -102,6 +102,17 @@ describe("replacedImageTarget", () => {
     ).toEqual({ bucket: "booth-images", path: "v1/a.png" });
   });
 
+  it("skips the owner check only when ownerFolder is null", () => {
+    expect(
+      replacedImageTarget({
+        buckets,
+        before: `${base}/vendor-images/v2/a.png`,
+        after: null,
+        ownerFolder: null,
+      }),
+    ).toEqual({ bucket: "vendor-images", path: "v2/a.png" });
+  });
+
   it("refuses another owner's object and foreign URLs", () => {
     expect(
       replacedImageTarget({
@@ -112,7 +123,7 @@ describe("replacedImageTarget", () => {
       }),
     ).toBeNull();
     expect(
-      replacedImageTarget({ buckets, before: "https://elsewhere.test/a.png", after: null }),
+      replacedImageTarget({ buckets, before: "https://elsewhere.test/a.png", after: null, ownerFolder: null }),
     ).toBeNull();
   });
 });
@@ -132,7 +143,7 @@ describe("removeReplacedImage", () => {
 
   it("does nothing when nothing was replaced", async () => {
     const { client, from } = fakeClient();
-    await removeReplacedImage(client, { buckets: ["b"], before: null, after: null });
+    await removeReplacedImage(client, { buckets: ["b"], before: null, after: null, ownerFolder: "v1" });
     expect(from).not.toHaveBeenCalled();
   });
 });

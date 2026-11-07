@@ -39,7 +39,7 @@ describe("recordAudit", () => {
     await expect(
       recordAudit(client, { actorId: "u", action: "a", targetId: "t", detail: {} }),
     ).resolves.toBeUndefined();
-    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "rls");
+    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "rls", "unknown");
   });
 
   it("swallows a thrown error and a failing client factory", async () => {
@@ -58,8 +58,8 @@ describe("recordAudit", () => {
     );
     await recordAudit(() => throwing, { actorId: "u", action: "a", targetId: null, detail: 1 });
     expect(spy).toHaveBeenCalledTimes(3);
-    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "boom");
-    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "no key");
+    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "boom", "Error");
+    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "no key", "Error");
   });
 
   it("logs an unknown message for a non-error throw", async () => {
@@ -70,7 +70,7 @@ describe("recordAudit", () => {
       },
     } as unknown as AuditClient;
     await recordAudit(throwing, { actorId: "u", action: "a", targetId: null, detail: 1 });
-    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "unknown");
+    expect(spy).toHaveBeenCalledWith("admin_audit insert failed", "unknown", "unknown");
   });
 
   it("accepts an async client factory", async () => {
@@ -119,11 +119,11 @@ describe("recordOpsEvent", () => {
     });
   });
 
-  it("logs only the error code and never throws", async () => {
+  it("logs message and code and never throws", async () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { client } = fakeClient({ error: { message: "secret detail", code: "42501" } });
     await recordOpsEvent(client, { vendorId: "v", kind: "k", ref: "r", code: "c" });
-    expect(spy).toHaveBeenCalledWith("ops_events insert failed", "42501");
+    expect(spy).toHaveBeenCalledWith("ops_events insert failed", "secret detail", "42501");
 
     const throwing = {
       from: () => {
@@ -131,7 +131,7 @@ describe("recordOpsEvent", () => {
       },
     } as unknown as AuditClient;
     await recordOpsEvent(throwing, { vendorId: "v", kind: "k", ref: "r", code: "c" });
-    expect(spy).toHaveBeenLastCalledWith("ops_events insert failed", "TypeError");
+    expect(spy).toHaveBeenLastCalledWith("ops_events insert failed", "x", "TypeError");
 
     const odd = {
       from: () => {
@@ -139,6 +139,6 @@ describe("recordOpsEvent", () => {
       },
     } as unknown as AuditClient;
     await recordOpsEvent(odd, { vendorId: "v", kind: "k", ref: "r", code: "c" });
-    expect(spy).toHaveBeenLastCalledWith("ops_events insert failed", "unknown");
+    expect(spy).toHaveBeenLastCalledWith("ops_events insert failed", "unknown", "unknown");
   });
 });

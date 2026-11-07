@@ -5,9 +5,8 @@
 ### Added
 
 - `@merqo/ui/admin` (new subpath, server only): `recordAudit` and `recordOpsEvent`, the never-throwing service-role writers for `admin_audit` and `ops_events` that the kits each copied, with the action and kind names as generic parameters.
-- `removeStorageObjects`, `removeImagesByUrl`, `replacedImageTarget` and `removeReplacedImage`: best-effort Supabase Storage cleanup over `storagePathFromPublicUrl`, with an `ownerFolder` guard for service-role clients.
+- `removeStorageObjects`, `removeImagesByUrl`, `replacedImageTarget` and `removeReplacedImage`: best-effort Supabase Storage cleanup over `storagePathFromPublicUrl`. `ownerFolder` is required on the URL-based helpers (`null` opts out when the caller already scoped the paths).
 - `@merqo/ui/testing`: `totpCode` and `createAuthenticatedGlobalSetup` (sign in, enrol TOTP through `/mfa`, save the aal2 storage state). `@playwright/test` stays an optional peer.
-
 - `@merqo/ui/security`: `buildSecurityHeaders({isDev, nonce?, supabaseUrl?, vercelEnv?, themeScriptHash?})` (the CSP source lists each kit kept in `security-headers.ts`), `needsNonce(pathname, prefixes?)` with the shared `NONCE_PREFIXES`, and `THEME_SCRIPT_HASH`. `needsNonce` matches whole path segments.
 - `@merqo/ui/next` (new subpath, server only): `createProxy({updateSession, noncePrefixes?, supabaseUrl?})` for each kit's `proxy.ts`, `themeProps`, `buildRobots({vercelEnv, indexable?})` and `readPublicEnv({...})`.
 - `@merqo/ui/kit-api` (server only, no "use client", not re-exported from the root): shared kit plumbing, replacing copies in the kits.
@@ -36,7 +35,6 @@
 ### Changed
 
 - `merqoBaseUrl(env?)` takes `Readonly<Record<string, string | undefined>>`, so `merqoBaseUrl(process.env)` type-checks in a Next app whose `global.d.ts` augments `ProcessEnv`.
-
 - `StatCard` is deprecated in favour of `<StatTile card />` and now delegates to it.
 - `HelpSheet` and `FeedbackSheet` share a private sheet shell; behaviour is unchanged.
 - `useMoneyField`/`MoneyInput`, `formatCatalogPrice` and `VendorTelegramSection` now use the shared helpers. Money input parsing is stricter: exponent and hex forms such as `1e3` are rejected, and rounding uses the decimal digits (`1.005` is 101 cents).

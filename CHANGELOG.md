@@ -31,6 +31,13 @@
 - `@merqo/ui/contracts` now exports the entitlement wire enum (`ENTITLEMENT_TIERS`, `entitlementTierSchema`, `EntitlementTier`) and `ENTITLEMENT_TIER_LABELS`.
 - `@merqo/ui/supabase`, `@merqo/ui/supabase/server` and `@merqo/ui/supabase/middleware`: shared browser, server, service-role and session-refresh client factories, plus `readAllRows`, `readAllRowsResult` and `listAllUsers` with tested pagination. `@supabase/ssr` and `@supabase/supabase-js` are optional peer dependencies.
 - `@merqo/ui/auth`: `handleAuthCallback` (code exchange, open-redirect-safe `next`, optional next cookie, post-sign-in hook and recovery routing) and `checkLegalAcceptance` (5-minute cache that fails open only when the cache write fails).
+- `ErrorPage`, `GlobalError` and `NotFound`: shared `app/error.tsx`, `app/global-error.tsx` and `app/not-found.tsx` bodies with title, description and action slots. `GlobalError` takes its colours as a required `colors` prop. `NotFound` takes `LinkComponent`.
+- `brandIcon`, `ICON_SIZE` and `APPLE_ICON_SIZE`: the favicon and apple-touch tile, colours and monogram supplied by the kit.
+- `kitMetadata(kitName, overrides?)`: Next `Metadata` with the `%s | <kit>` title template.
+- `ThemeProvider`, `Toaster` and `Providers`: next-themes (with the family `themeProps`) and a theme-aware sonner toaster. New peer dependency `sonner` (`>=1.7.1 <3`).
+- `Wordmark` shell with `size`, `href` and `LinkComponent`; the kit supplies the letters and accent classes.
+- `LegalPage` and `legalPageMetadata`: wrapper for the terms and privacy pages around `LegalDocument`.
+- `AcceptTermsPage` and `AcceptTermsForm`: the accept-updated-terms page and form over `TermsAcceptanceCheckbox`, with a submit `action` prop.
 
 ### Changed
 

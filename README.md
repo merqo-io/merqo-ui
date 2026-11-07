@@ -184,6 +184,8 @@ works locally.
 ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
   default bg-card/border/shadow classes don't apply.
+  `surface?: "default" | "elevated" | "none"` picks the default shell: the existing
+  bordered card, the `ElevatedCard` look, or no chrome (ignored with `wrapper`).
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -438,6 +440,19 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
 - `TierChip({tier, className?})` — plan badge for `AccountMenu`/`DashboardNav`
   `tierBadge`, labelled by `tierLabel(tier)`: muted for free, primary tint
   for starter, filled for any paid tier.
+- `AccountMenu` also takes `tier?: string`, rendered as a `TierChip` in the dropdown header
+  (needs `vendor.subtitle`); `tierBadge` still works and wins when both are set. The trigger
+  is an `AvatarIdentity`.
+- `StatTile` takes `card?: boolean` for the `ElevatedCard` shell (`className` then styles the
+  card). `StatCard` is deprecated: use `<StatTile card />`; it stays as an alias that adds `icon` and `featured`.
+- `Avatar({name, avatarUrl?, className?})` — photo when `avatarUrl` is set, else initials in a tinted tile.
+  `initials(name)`: one word gives its first two letters, several give first and last initial, empty gives a bullet.
+- `AvatarIdentity({name, avatarUrl?, label?, className?})` — avatar with the label (default `name`; `null` for none)
+  on its right, hidden below `sm` and truncated. The side is fixed across kits; there is no prop to flip it.
+- `AsyncSubmitButton({pending, pendingChildren?, className?, children})` — submit button with a spinner,
+  `aria-busy` and disabled state while pending. Also used inside `FeedbackSheet` and `HelpSheet`.
+- `FORM_LABEL_CLASS` — small-caps field label classes. `FormError({message, id?, className?})` — inline
+  `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
 - `ElevatedCard({as?, className, children})` — the polished lifted-shadow
   card shell used across profile/dashboard/setup pages, deliberately not
   qkit's own scalloped `Ticket` theme (that stays local to qkit). `as`
@@ -556,6 +571,98 @@ These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server
 Component rather than an opaque client-reference stub.
+
+### Sign-in and admin chrome
+
+These four are presentational: none imports Supabase or any auth library.
+The kit passes async callbacks that return an error message (or nothing on
+success) or throw. A thrown Next.js redirect, or a callback that ends with
+`await navigatingAway()`, keeps the form pending with no error shown.
+
+Security duties that stay with the kit:
+
+- **Map errors.** Without `mapError` the forms never render a returned
+  string or a thrown error's `code` or `message`, only a generic line such as
+  "Could not sign in. Try again." Provider text can reveal whether an account
+  exists, so the kit decides which codes get friendly copy.
+- **Validate redirects.** The forms never navigate. The kit's callbacks do,
+  so a `next` or `redirect` value from the URL must go through
+  `safeRedirectPath` (or an equivalent same-origin check) before it reaches
+  `router.push` or an OAuth `redirectTo`.
+- **Render QR codes safely.** `MfaForm` shows the QR image only when
+  `qr` starts with `data:image/`; anything else leaves just the manual key.
+
+- `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})` -
+  centred card with a wordmark slot above, an `h1` title, optional subtitle
+  and a footer slot (legal links) under the card. Server-renderable.
+- `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?,
+  showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?,
+  onForgotPassword?, LinkComponent?, mapError?, initialError?})` - email and
+  password with correct `autocomplete` (`current-password` or
+  `new-password`), `name` attributes, and `aria-invalid` /
+  `aria-describedby` tied to the error. Typing clears the error, and
+  overlapping taps run a callback once. The Google button needs
+  `onGoogleSignIn` and `showGoogle` (default true). The "Create an account"
+  toggle shows only with `onPasswordSignUp`; `onModeChange` lets the kit
+  update the `AuthShell` title or `?mode=signup`. A callback may return
+  `{notice}` instead of an error to show a status message such as "Check
+  your email" (sign-up confirmation, reset link sent).
+  `forgotPasswordHref` renders a link (pass `next/link`'s `Link` as
+  `LinkComponent`); `onForgotPassword(email)` renders a button instead and
+  asks for an email first. `mapError(raw, context)` turns a returned string,
+  or a thrown error's `code` (else `message`), into vendor copy; context is
+  `"signin" | "signup" | "oauth" | "reset"`. Controls are 44px or taller and
+  the whole form works by touch.
+- `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?,
+  enrolIntro?, mapError?})` - six-digit code (`inputMode="numeric"`,
+  `pattern="[0-9]*"`, `autocomplete="one-time-code"`). Typed or pasted text
+  is reduced to its first six digits, so "123 456" and "123-456" work. With
+  `hasFactor` false it first shows "Set up authenticator"; `onEnrol` returns
+  `{qr, secret, factorId?}` or an error string, and `factorId` is handed back
+  as `onVerify(code, {factorId})`. `onCancel` adds a secondary button
+  (default label "Sign out"). Returned strings from all three callbacks go
+  through `mapError(raw)` like thrown errors. Covers the qkit, loopkit and
+  merqo form and the paykit and stockkit variants, which differ only in
+  radius and error copy.
+- `AdminShell({wordmark, tabs, pathname, actions?, badge?, backHref?,
+  backLabel?, LinkComponent?, children?})` - header with the wordmark and a
+  badge (default "Admin"), then a tab bar that scrolls sideways on phones.
+  The active tab is the longest `href` that is a prefix of `pathname`, so an
+  Overview tab at `/admin` is not active on `/admin/vendors`. `backHref` adds
+  a leading back link (stockkit). Pass `next/link`'s `Link` as
+  `LinkComponent`. It needs no client boundary, so a server layout can render
+  it. It does not render `DashboardNav`, which needs an account menu the admin
+  header does not have; put sign-out and the like in `actions`.
+
+Wiring example in a Next.js kit:
+
+```tsx
+// app/login/page.tsx (client component)
+<AuthShell wordmark={<Wordmark />} title="Welcome back" footer={<LegalFooterLinks />}>
+  <LoginForm
+    onPasswordSignIn={async (c) => {
+      const { error } = await supabase.auth.signInWithPassword(c);
+      if (error) return friendlyAuthError(error, "signin");
+      router.push("/dashboard");
+      router.refresh();
+      await navigatingAway();
+    }}
+    onGoogleSignIn={signInWithGoogle}
+    forgotPasswordHref="/forgot-password"
+  />
+</AuthShell>
+
+// app/admin/layout.tsx (client wrapper)
+<AdminShell
+  wordmark={<Wordmark />}
+  tabs={[{ href: "/admin", label: "Overview" }, { href: "/admin/vendors", label: "Vendors" }]}
+  pathname={usePathname()}
+  LinkComponent={Link}
+  actions={<SignOutButton />}
+>
+  {children}
+</AdminShell>
+```
 
 ## Money, time and entitlement helpers
 

@@ -9,7 +9,7 @@ const DEFAULT_TIMEOUT_MS = 5000;
  * falls back to the default.
  */
 export function merqoBaseUrl(
-  env: { MERQO_BASE_URL?: string } = process.env,
+  env: Readonly<Record<string, string | undefined>> = process.env,
 ): string {
   return env.MERQO_BASE_URL || DEFAULT_MERQO_BASE_URL;
 }

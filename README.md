@@ -664,6 +664,121 @@ Wiring example in a Next.js kit:
 </AdminShell>
 ```
 
+## App chrome (error pages, icons, metadata, providers, legal pages)
+
+Everything a kit's `app/` folder repeats: the error and 404 pages, favicon,
+root metadata, theme and toast providers, the wordmark frame and the legal
+pages. The package ships no colours or fonts; each kit passes its own text,
+colour classes and colour values. Links use a `LinkComponent` prop (pass
+`next/link`'s `Link`) so the package never imports a router.
+
+- `ErrorPage({error, reset, wordmark?, eyebrow?, title?, description?,
+  resetLabel?, actions?, onError?})` - client body for `app/error.tsx`. Logs
+  the error once (`onError` replaces `console.error`), shows a full-width
+  44px "Try again" button and Next's digest as a reference line. Replaces the
+  qkit, paykit and stockkit pages.
+- `GlobalError({reset, colors, fontFamily?, lang?, title?, description?,
+  resetLabel?})` - client body for `app/global-error.tsx`; renders its own
+  `html` and `body` with inline styles because the stylesheet has not loaded
+  when the root layout throws. `colors` (`background`, `foreground`,
+  `mutedForeground`, `primary`, `primaryForeground`) is required and takes any
+  CSS colour; paykit and printkit can now add the file they lack.
+- `NotFound({wordmark?, code?, title?, description?, homeHref?, homeLabel?,
+  action?, LinkComponent?})` - server-safe body for `app/not-found.tsx`.
+  `code="404"` shows the big number (qkit, stockkit); `action` replaces the
+  default link home.
+- `brandIcon(size, {monogram, background, foreground})` with `ICON_SIZE`
+  (32) and `APPLE_ICON_SIZE` (180) - the tile for `icon.tsx` and
+  `apple-icon.tsx`. Server-safe; the kit owns the `next/og` import and the
+  colour values. The tile uses a system serif, not the kit font.
+- `kitMetadata(kitName, overrides?)` - Next `Metadata` with title
+  `{default: kitName, template: "%s | kitName"}`. A string `title` override
+  becomes the default title; every other field is passed through.
+- `ThemeProvider`, `Toaster` and `Providers({children, theme?, toaster?})` -
+  `ThemeProvider` is next-themes preloaded with `themeProps` from
+  `@merqo/ui/next`; `Toaster` is sonner (top-right, `richColors`) that follows
+  the resolved theme. `Providers` is both together. Needs the `next-themes`
+  and `sonner` peers; replaces stockkit's local `theme-provider`.
+- `Wordmark({children, size?, href?, label?, LinkComponent?, className?})` -
+  the frame only: display font, weight, tracking, a `size` of `sm`
+  (`text-lg`), `md` (default, `text-xl`), `lg` or `xl` (`text-3xl`), and an
+  optional link (44px tall) when `href` is set. The kit supplies the letters
+  and any accent classes as children.
+- `LegalPage({doc, kit?, wordmark?, homeHref?, LinkComponent?, className?})`
+  and `legalPageMetadata(doc)` - page body and `metadata` for
+  `app/legal/terms` and `app/legal/privacy`, around `LegalDocument`.
+- `AcceptTermsPage({action, next, wordmark?, title?, description?, basePath?,
+  submitLabel?})` and `AcceptTermsForm` - client body for
+  `app/legal/accept/page.tsx`: an `AuthShell` card with the
+  `TermsAcceptanceCheckbox` and a submit that stays disabled until the box is
+  ticked. `action` is the kit's server action and receives `FormData` with a
+  `next` field; pass an already sanitised `next` (`safeRedirectPath`). The
+  page must not run the kit's own legal gate.
+
+```tsx
+// app/error.tsx
+"use client";
+import { ErrorPage } from "@merqo/ui";
+export default function Error(props: { error: Error & { digest?: string }; reset: () => void }) {
+  return <ErrorPage {...props} wordmark={<Wordmark size="lg" />} />;
+}
+
+// app/global-error.tsx
+"use client";
+import { GlobalError } from "@merqo/ui";
+export default function Global(props: { reset: () => void }) {
+  return (
+    <GlobalError
+      {...props}
+      colors={{
+        background: "#f5efe4",
+        foreground: "#2b2620",
+        mutedForeground: "#6b6152",
+        primary: "#c2410c",
+        primaryForeground: "#fff",
+      }}
+    />
+  );
+}
+
+// app/not-found.tsx
+import Link from "next/link";
+import { NotFound } from "@merqo/ui";
+export default function Page() {
+  return <NotFound code="404" wordmark={<Wordmark />} LinkComponent={Link} />;
+}
+
+// app/icon.tsx (apple-icon.tsx: APPLE_ICON_SIZE and size 180)
+import { ImageResponse } from "next/og";
+import { brandIcon, ICON_SIZE } from "@merqo/ui";
+export const size = ICON_SIZE;
+export const contentType = "image/png";
+export default function Icon() {
+  return new ImageResponse(
+    brandIcon(size.width, { monogram: "Q", background: "#bc892b", foreground: "#efe3c8" }),
+    { ...size },
+  );
+}
+
+// app/layout.tsx
+export const metadata = kitMetadata("qkit", { description: "Queues for events" });
+// <body><Providers>{children}</Providers></body>
+
+// components/wordmark.tsx
+export const Wordmark = (p: { size?: WordmarkSize }) => (
+  <MerqoWordmark {...p} href="/" LinkComponent={Link}>
+    <span className="text-primary">q</span>kit
+  </MerqoWordmark>
+);
+
+// app/legal/terms/page.tsx
+export const metadata = legalPageMetadata("terms");
+export default () => <LegalPage doc="terms" kit="qkit" wordmark={<Wordmark />} LinkComponent={Link} />;
+
+// app/legal/accept/page.tsx
+<AcceptTermsPage action={acceptLegalTerms} next={safeRedirectPath(next, "/dashboard")} wordmark={<Wordmark />} />
+```
+
 ## Money, time and entitlement helpers
 
 Pure functions with no `"use client"`, safe to import from Server Components.

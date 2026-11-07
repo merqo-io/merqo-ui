@@ -67,6 +67,14 @@ const ENTRIES = {
   "use-async-action": "src/use-async-action.ts",
   "use-money-field": "src/use-money-field.ts",
   "vendor-telegram-section": "src/vendor-telegram-section.tsx",
+  "error-page": "src/error-page.tsx",
+  "not-found-page": "src/not-found-page.tsx",
+  "brand-icon": "src/brand-icon.tsx",
+  "kit-metadata": "src/kit-metadata.ts",
+  providers: "src/providers.tsx",
+  wordmark: "src/wordmark.tsx",
+  "legal-page": "src/legal-page.tsx",
+  "accept-terms": "src/accept-terms.tsx",
 };
 
 export default defineConfig([

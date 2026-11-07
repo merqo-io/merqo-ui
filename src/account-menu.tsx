@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
+import { AvatarIdentity } from "./avatar";
 import { FeedbackSheet, type FeedbackData } from "./feedback-sheet";
+import { TierChip } from "./tier-chip";
 import { HelpSheet, type SupportRequest } from "./help-sheet";
 import { isRedirectError } from "./redirect-error";
 import { tierLabel } from "./tier-label";
@@ -75,7 +77,9 @@ export interface AccountMenuProps {
     icon?: React.ComponentType<{ className?: string }>;
     placement?: "top" | "default";
   };
-  /** Optional slot rendered next to the vendor name in the dropdown header (only shown when vendor.subtitle is also set). */
+  /** Plan shown as a `TierChip` next to the vendor name in the dropdown header (only shown when vendor.subtitle is also set). Raw plan value or display label. */
+  tier?: string;
+  /** Replaces the default `TierChip` with your own badge; takes precedence over `tier`. */
   tierBadge?: React.ReactNode;
   /** Other kits in the Merqo family this vendor can switch to — SSO
    * already signs them in everywhere, this just adds the navigation.
@@ -101,37 +105,14 @@ function toErrorMessage(error: unknown): string {
     : "Something went wrong. Please try again.";
 }
 
-function initials(name: string): string {
-  const parts = name
-    .trim()
-    .split(/[\s._-]+/)
-    .filter(Boolean);
-  if (parts.length === 0) return "•";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+function TierSlot({ tier, tierBadge }: { tier?: string; tierBadge?: React.ReactNode }) {
+  if (tierBadge) return <>{tierBadge}</>;
+  return tier ? <TierChip tier={tier} /> : null;
 }
 
 function DefaultLink({ href, ...rest }: AccountMenuLinkProps) {
   return <a href={href} {...rest} />;
 }
-
-function AvatarInitial({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
-  if (avatarUrl) {
-    return (
-      <img
-        src={avatarUrl}
-        alt=""
-        className="size-8 rounded-md object-cover ring-1 ring-inset ring-primary/25"
-      />
-    );
-  }
-  return (
-    <span className="bg-primary/12 text-primary flex size-8 items-center justify-center rounded-md font-mono text-xs font-semibold tracking-tight ring-1 ring-inset ring-primary/25">
-      {initials(name)}
-    </span>
-  );
-}
-
 
 function themePresentation(theme: string | undefined) {
   if (theme === "light") return { label: "Light", Icon: Sun };
@@ -201,6 +182,7 @@ export function AccountMenu({
   showNps,
   onError,
   extraLink,
+  tier,
   tierBadge,
   switchKits,
   LinkComponent,
@@ -235,12 +217,11 @@ export function AccountMenu({
             data-tour="nav-account"
             className="focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-full outline-none focus-visible:ring-2"
           >
-            <AvatarInitial name={vendor.name} avatarUrl={vendor.avatarUrl} />
-            {vendor.subtitle && (
-              <span className="hidden max-w-[12rem] truncate text-sm font-medium sm:inline">
-                {vendor.subtitle}
-              </span>
-            )}
+            <AvatarIdentity
+              name={vendor.name}
+              avatarUrl={vendor.avatarUrl}
+              label={vendor.subtitle ?? null}
+            />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -248,7 +229,7 @@ export function AccountMenu({
             <>
               <DropdownMenuLabel className="text-muted-foreground flex items-center gap-2 truncate text-xs font-normal">
                 <span className="truncate">{vendor.subtitle}</span>
-                {tierBadge}
+                <TierSlot tier={tier} tierBadge={tierBadge} />
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
             </>

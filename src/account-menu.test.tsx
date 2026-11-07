@@ -301,8 +301,7 @@ describe("AccountMenu", () => {
 
   it("avatar fallback uses a rounded-md ring shape, not a plain circle", () => {
     render(<AccountMenu {...baseProps} vendor={{ name: "Kopi Corner" }} />);
-    const trigger = screen.getByRole("button", { name: /account menu/i });
-    const avatar = trigger.querySelector("span");
+    const avatar = screen.getByText("KC");
     expect(avatar).toHaveClass("rounded-md", "ring-1", "ring-inset", "ring-primary/25");
   });
 
@@ -562,5 +561,50 @@ describe("AccountMenu plan label", () => {
   it("shows the mapped label for a raw tier", async () => {
     await openMenu({ showPlanItem: true, vendor: { name: "Manfred", tier: "qkit" } });
     expect(await screen.findByRole("menuitem", { name: "Plan · Pro" })).toBeInTheDocument();
+  });
+});
+
+describe("AccountMenu identity and tier", () => {
+  it("renders the shared AvatarIdentity: initials, with the subtitle on the right", () => {
+    render(
+      <AccountMenu
+        {...baseProps}
+        vendor={{ name: "Ada Lovelace", subtitle: "ada@x.com" }}
+      />,
+    );
+    const trigger = screen.getByRole("button", { name: /account menu/i });
+    const identity = trigger.firstElementChild as HTMLElement;
+    expect(identity.firstElementChild).toHaveTextContent("AL");
+    const label = screen.getByText("ada@x.com");
+    expect(label).toHaveClass("hidden", "sm:inline", "truncate");
+    expect(identity.lastElementChild).toBe(label);
+  });
+
+  it("renders a TierChip for the tier prop", async () => {
+    await openMenu({
+      vendor: { ...baseProps.vendor, subtitle: "a@b.com" },
+      tier: "starter",
+    });
+    expect(screen.getByText("Starter")).toHaveClass("bg-primary/12");
+  });
+
+  it("lets tierBadge override the tier chip", async () => {
+    await openMenu({
+      vendor: { ...baseProps.vendor, subtitle: "a@b.com" },
+      tier: "starter",
+      tierBadge: <span data-testid="tier-badge-slot">Custom</span>,
+    });
+    expect(screen.getByTestId("tier-badge-slot")).toBeInTheDocument();
+    expect(screen.queryByText("Starter")).not.toBeInTheDocument();
+  });
+
+  it("opens the menu by touch", async () => {
+    const user = userEvent.setup();
+    render(<AccountMenu {...baseProps} />);
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: /account menu/i }),
+    });
+    expect(await screen.findByRole("menuitem", { name: /profile/i })).toBeInTheDocument();
   });
 });

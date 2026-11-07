@@ -1,12 +1,9 @@
 import * as React from "react";
 
-import { ElevatedCard } from "./elevated-card";
 import { cn } from "./lib/utils";
 import { StatTile, type StatTileProps } from "./stat-tile";
 
-export interface StatCardProps extends Omit<StatTileProps, "className"> {
-  /** Class names for the card shell; `StatTile` itself takes none here. */
-  className?: string;
+export interface StatCardProps extends Omit<StatTileProps, "card"> {
   /** Icon shown in the label row where the delta pill would sit. Ignored when `delta` or `deltaSlot` is given. */
   icon?: React.ReactNode;
   /** Highlights the card as the lead figure on the page: tinted card, primary-coloured value. */
@@ -14,8 +11,8 @@ export interface StatCardProps extends Omit<StatTileProps, "className"> {
 }
 
 /**
- * A stat tile wrapped in the family's card shell. Takes every `StatTile` prop;
- * adds an `icon` and a `featured` treatment.
+ * @deprecated Use `<StatTile card />`. Kept so existing kits keep working;
+ * adds `icon` and `featured` on top of the card shell.
  */
 export function StatCard({
   className,
@@ -33,18 +30,12 @@ export function StatCard({
       </span>
     ) : undefined);
   return (
-    <ElevatedCard
-      className={cn(
-        "p-4",
-        featured && "border-primary/30 bg-primary/[0.05]",
-        className,
-      )}
-    >
-      <StatTile
-        {...tile}
-        deltaSlot={slot}
-        valueClassName={cn(featured && "text-primary", valueClassName)}
-      />
-    </ElevatedCard>
+    <StatTile
+      {...tile}
+      card
+      className={cn(featured && "border-primary/30 bg-primary/[0.05]", className)}
+      deltaSlot={slot}
+      valueClassName={cn(featured && "text-primary", valueClassName)}
+    />
   );
 }

@@ -126,3 +126,20 @@ describe("StatTile presentation overrides", () => {
     },
   );
 });
+
+describe("StatTile card", () => {
+  it("renders the ElevatedCard chrome on the root when card is set", () => {
+    const { container } = render(
+      <StatTile card label="Orders" value="4" className="mine" hint="h" />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root).toHaveClass("bg-card", "border", "p-4", "mine");
+    expect(root).toHaveAttribute("title", "h");
+    expect(screen.getByText("4")).toBeInTheDocument();
+  });
+
+  it("has no card chrome by default", () => {
+    const { container } = render(<StatTile label="Orders" value="4" />);
+    expect(container.firstElementChild).not.toHaveClass("bg-card");
+  });
+});

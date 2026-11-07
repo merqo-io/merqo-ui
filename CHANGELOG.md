@@ -24,6 +24,8 @@
 - Shared SGT time helpers: `formatDate`, `formatTime`, `formatDateTime`, `formatRelativeTime`, `sgDayKey`, `startOfSgDay`, `SGT_TIME_ZONE`. All output is pinned to Asia/Singapore. Time of day is 12-hour lower-case ("1:30 pm"), unlike the kits' `toLocaleTimeString` output.
 - Telegram link helpers: `normalizeTelegramHandle` (also accepts `t.me/x` and `telegram.me/x`), `telegramLink`, `isTelegramLink` (only `https://t.me/...`).
 - `@merqo/ui/contracts` now exports the entitlement wire enum (`ENTITLEMENT_TIERS`, `entitlementTierSchema`, `EntitlementTier`) and `ENTITLEMENT_TIER_LABELS`.
+- `@merqo/ui/supabase`, `@merqo/ui/supabase/server` and `@merqo/ui/supabase/middleware`: shared browser, server, service-role and session-refresh client factories, plus `readAllRows`, `readAllRowsResult` and `listAllUsers` with tested pagination. `@supabase/ssr` and `@supabase/supabase-js` are optional peer dependencies.
+- `@merqo/ui/auth`: `handleAuthCallback` (code exchange, open-redirect-safe `next`, optional next cookie, post-sign-in hook and recovery routing) and `checkLegalAcceptance` (5-minute cache that fails open only when the cache write fails).
 
 ### Changed
 

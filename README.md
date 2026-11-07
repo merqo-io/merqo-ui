@@ -742,6 +742,102 @@ install only what the entries you import need.
   (default selector `[data-error-boundary="true"]`), `pageerror`, or a CSP
   violation in the console. An empty array means every route rendered.
 
+## Supabase and auth plumbing
+
+Four server-safe subpath entries replace the copies in each kit's
+`src/lib/supabase/*`, `src/lib/legal-gate.ts` and `auth/callback/route.ts`.
+`@supabase/ssr` and `@supabase/supabase-js` are optional peer dependencies;
+`next` is needed for everything except `@merqo/ui/supabase`. None of these
+entries carries `"use client"`. Each takes the kit's public settings as
+arguments, so the package reads no environment variables.
+
+- `@merqo/ui/supabase` (no `next` import): `createSupabaseBrowserClient<Database, "schema">({ url, publishableKey, schema?, cookieDomain? })`,
+  `readAllRows(page)`, `readAllRowsResult(page)` and `listAllUsers(client)`.
+  `page(from, to)` receives an inclusive range for `.range(from, to)`;
+  `readAllRows` pages 1000 rows at a time until an empty page and throws on
+  any failed page instead of returning a partial list, and `readAllRowsResult`
+  maps that throw to `{ data: null, error }` for routes that answer 503.
+  `listAllUsers` walks every `auth.admin.listUsers` page (1000 each, 50-page
+  ceiling) and returns `{ data: { users: { id, email }[] } | null, error }`.
+- `@merqo/ui/supabase/server` (imports `next/headers`):
+  `createSupabaseServerClient(config)` for the signed-in user, and
+  `createSupabaseServiceClient({ url, secretKey, schema? })`, which bypasses
+  RLS, attaches no request cookies and throws when `secretKey` is empty.
+- `@merqo/ui/supabase/middleware` (imports `next/server`):
+  `updateSupabaseSession(request, { url, publishableKey, schema?, cookieDomain?, protectedPrefixes, loginPath?, refreshPublicRoutes? })`
+  refreshes the session cookies, redirects an anonymous visitor on a
+  protected prefix to `loginPath` (default `/login`), treats a `getUser`
+  error or throw as signed out, and expires a host-only duplicate of a shared
+  domain auth cookie. Public paths skip the auth call unless
+  `refreshPublicRoutes` is set (merqo uses it so a returning visitor's token
+  keeps rotating).
+- `@merqo/ui/auth` (imports `next/server`): `handleAuthCallback(request, options)`
+  and `checkLegalAcceptance(email, options)`.
+
+```ts
+// src/lib/supabase/server.ts
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceClient,
+} from "@merqo/ui/supabase/server";
+
+const config = {
+  url: publicEnv.supabaseUrl,
+  publishableKey: publicEnv.supabasePublishableKey,
+  schema: "qkit",
+  cookieDomain: process.env.NEXT_PUBLIC_AUTH_COOKIE_DOMAIN,
+};
+export const createServerClient = () => createSupabaseServerClient<Database, "qkit">(config);
+export const createServiceClient = () =>
+  createSupabaseServiceClient<Database, "qkit">({
+    url: config.url,
+    secretKey: process.env.SUPABASE_SECRET_KEY,
+    schema: "qkit",
+  });
+
+// src/app/auth/callback/route.ts
+import { handleAuthCallback } from "@merqo/ui/auth";
+
+export const GET = (request: Request) =>
+  handleAuthCallback(request, {
+    createClient: createServerClient,
+    defaultNext: "/dashboard",
+  });
+
+// src/lib/legal-gate.ts
+import { checkLegalAcceptance as check } from "@merqo/ui/auth";
+
+export const checkLegalAcceptance = (email: string) =>
+  check(email, {
+    createClient: createServiceClient,
+    customerSecret: process.env.MERQO_CUSTOMER_SECRET,
+    merqoBaseUrl: process.env.MERQO_BASE_URL,
+  });
+```
+
+`handleAuthCallback` options: `createClient`, `defaultNext` (the kit's
+post-login target: `/dashboard`, `/post-login`, ...), `loginPath` (default
+`/login`; failures go to `loginPath?error=oauth`), and the optional
+`nextCookie: { name, path }` (read when the query has no `next`, cleared on
+every redirect), `afterSignIn(supabase)` (stockkit creates the vendor row
+here) and `recovery: { path, onRecovery? }` (a password-reset exchange goes
+to `path` instead of `next`; printkit mints its recovery-window cookie in
+`onRecovery`). `next` always goes through `safeRedirectPath`, so an absolute
+URL, `//host`, `/\host` or a control character falls back to `defaultNext`.
+A missing code, a failed or thrown exchange, or a throwing `afterSignIn`
+redirects to the login error.
+Redirects are built from the request origin, so a kit behind a proxy must make
+sure that origin is the public one.
+
+`checkLegalAcceptance` asks merqo's `/api/merqo/legal-status` and compares
+the answer with `LEGAL_VERSIONS`. The answer is cached per lower-cased email
+in the kit's `legal_check_state` table (`email`, `checked_at`, `is_current`)
+for 5 minutes; a stale, invalid or future-dated row is a miss. It fails
+closed (returns `false`) for a missing secret, an unreachable merqo, a
+non-2xx or malformed response and a client error. Only the cache write fails
+open: if the upsert returns `{ error }` or throws, the error is logged and a
+vendor merqo reported as current is still `true`.
+
 ## Kit API helpers
 
 `@merqo/ui/kit-api` is a server-only subpath (no React, no `"use client"`,

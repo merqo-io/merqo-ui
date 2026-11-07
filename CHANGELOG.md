@@ -4,6 +4,8 @@
 
 ### Added
 
+- `@merqo/ui/security`: `buildSecurityHeaders({isDev, nonce?, supabaseUrl?, vercelEnv?, themeScriptHash?})` (the CSP source lists each kit kept in `security-headers.ts`), `needsNonce(pathname, prefixes?)` with the shared `NONCE_PREFIXES`, and `THEME_SCRIPT_HASH`. `needsNonce` matches whole path segments.
+- `@merqo/ui/next` (new subpath, server only): `createProxy({updateSession, noncePrefixes?, supabaseUrl?})` for each kit's `proxy.ts`, `themeProps`, `buildRobots({vercelEnv, indexable?})` and `readPublicEnv({...})`.
 - `@merqo/ui/kit-api` (server only, no "use client", not re-exported from the root): shared kit plumbing, replacing copies in the kits.
 - `createMerqoClient({secret, baseUrl?, timeoutMs?, development?, fetch?})` with `get(path, query?)` and `post(path, body)` for Merqo's `/api/merqo/*` routes, plus `merqoBaseUrl()`, `merqoUrl()` and `callMerqoRpc()`. Results are typed and never thrown; non-https bases and paths that leave the origin are refused; redirects are refused.
 - `postKitCallback({url, secret}, body, {development?, timeoutMs?, fetch?})`: signed kit callback POST. Refuses non-https URLs (and URLs with credentials), allows `http://localhost` only with `development: true`, uses `redirect: "error"`, and never throws.

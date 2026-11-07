@@ -4,6 +4,10 @@
 
 ### Added
 
+- `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})`: the centred sign-in card shared by login, MFA and reset pages. Server-renderable.
+- `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?, showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?, onForgotPassword?, LinkComponent?, mapError?, initialError?})`: email and password form with an optional Google button and sign in / create account toggle. Callbacks return an error string, `{notice}` or nothing, or throw; a redirect keeps the form pending with no error flash. Without `mapError` only generic copy is shown, never a provider string. Inputs carry `name`, `aria-invalid` and `aria-describedby`; typing clears the error and overlapping taps run once. No auth library dependency.
+- `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?, enrolIntro?, mapError?})`: six-digit authenticator code entry with optional enrolment (QR code and manual key) and a sign-out action. Pasted codes with spaces or dashes are normalised, returned strings go through `mapError`, and the QR image renders only for `data:image/` sources.
+- `AdminShell({wordmark, tabs, pathname, actions?, badge?, backHref?, backLabel?, LinkComponent?, children?})`: header with a badge (default "Admin") and a horizontally scrolling tab bar whose active tab is the longest matching prefix. No client boundary.
 - `Avatar`, `AvatarIdentity` and `initials`: shared identity pieces moved out of `AccountMenu`. The name sits on the right of the avatar, hidden below `sm`; the side is not configurable.
 - `AsyncSubmitButton` is now a public export.
 - `FORM_LABEL_CLASS` and `FormError` (`role="alert"`, `text-destructive`).

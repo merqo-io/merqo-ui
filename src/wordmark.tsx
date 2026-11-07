@@ -49,7 +49,7 @@ export function Wordmark({
     );
   }
   return (
-    <span aria-label={label} role={label ? "img" : undefined} className={classes}>
+    <span aria-label={label} className={classes}>
       {children}
     </span>
   );

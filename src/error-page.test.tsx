@@ -53,12 +53,14 @@ describe("ErrorPage", () => {
 describe("GlobalError", () => {
   it("renders its own html and body with the kit colours", () => {
     const html = renderToStaticMarkup(
-      <GlobalError reset={() => {}} colors={colors} fontFamily="serif" lang="en-SG" />,
+      <GlobalError reset={() => {}} colors={colors} fontFamily="serif" radius="4px" lang="en-SG" />,
     );
     expect(html).toContain('<html lang="en-SG">');
     expect(html).toContain("background:white");
     expect(html).toContain("color:black");
     expect(html).toContain("font-family:serif");
+    expect(html).toContain("border-radius:4px");
+    expect(html).toContain("<main");
     expect(html).toContain("Something went wrong");
   });
 

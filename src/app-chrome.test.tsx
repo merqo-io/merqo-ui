@@ -34,7 +34,13 @@ describe("NotFound", () => {
 
 describe("brandIcon", () => {
   it("scales the tile and takes colours from the kit", () => {
-    const el = brandIcon(100, { monogram: "Q", background: "red", foreground: "blue" });
+    const el = brandIcon(100, {
+      monogram: "Q",
+      background: "red",
+      foreground: "blue",
+      fontFamily: "serif",
+      radius: 22,
+    });
     const style = (el.props as { style: Record<string, unknown>; children: string }).style;
     expect(style).toMatchObject({
       width: 100,
@@ -42,7 +48,12 @@ describe("brandIcon", () => {
       color: "blue",
       fontSize: 62,
       borderRadius: 22,
+      fontFamily: "serif",
     });
+    const bare = brandIcon(10, { monogram: "A", background: "a", foreground: "b" });
+    const bareStyle = (bare.props as { style: Record<string, unknown> }).style;
+    expect(bareStyle.fontFamily).toBeUndefined();
+    expect(bareStyle.borderRadius).toBeUndefined();
     expect((el.props as { children: string }).children).toBe("Q");
   });
 
@@ -55,6 +66,18 @@ describe("brandIcon", () => {
 describe("kitMetadata", () => {
   it("sets the title template and default", () => {
     expect(kitMetadata("qkit")).toEqual({ title: { default: "qkit", template: "%s | qkit" } });
+  });
+
+  it("merges an object title over the kit defaults", () => {
+    expect(kitMetadata("qkit", { title: { default: "Home", template: "%s - Q" } }).title).toEqual({
+      default: "Home",
+      template: "%s - Q",
+    });
+    expect(kitMetadata("qkit", { title: { absolute: "Only" } }).title).toEqual({
+      default: "qkit",
+      template: "%s | qkit",
+      absolute: "Only",
+    });
   });
 
   it("merges overrides and honours a string title", () => {
@@ -102,8 +125,9 @@ describe("Wordmark", () => {
         <span>q</span>kit
       </Wordmark>,
     );
-    const el = screen.getByRole("img", { name: "qkit" });
+    const el = screen.getByLabelText("qkit");
     expect(el).toHaveClass("text-3xl", "extra", "font-display");
+    expect(el).not.toHaveAttribute("role");
   });
 
   it("defaults to the md size", () => {

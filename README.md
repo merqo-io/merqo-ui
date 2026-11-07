@@ -677,23 +677,30 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
   the error once (`onError` replaces `console.error`), shows a full-width
   44px "Try again" button and Next's digest as a reference line. Replaces the
   qkit, paykit and stockkit pages.
-- `GlobalError({reset, colors, fontFamily?, lang?, title?, description?,
+- `GlobalError({reset, colors, fontFamily?, radius?, lang?, title?, description?,
   resetLabel?})` - client body for `app/global-error.tsx`; renders its own
   `html` and `body` with inline styles because the stylesheet has not loaded
   when the root layout throws. `colors` (`background`, `foreground`,
-  `mutedForeground`, `primary`, `primaryForeground`) is required and takes any
-  CSS colour; paykit and printkit can now add the file they lack.
+  `mutedForeground`, `primary`, `primaryForeground`) is required. Pass the
+  kit's own token values (copies of its CSS variable values), not new ad-hoc
+  colours. `fontFamily` and `radius` (a CSS length for the button) are
+  optional and unset by default, so the kit passes its own. The content sits
+  in a `main` landmark. paykit and printkit can now add the file they lack.
 - `NotFound({wordmark?, code?, title?, description?, homeHref?, homeLabel?,
   action?, LinkComponent?})` - server-safe body for `app/not-found.tsx`.
   `code="404"` shows the big number (qkit, stockkit); `action` replaces the
   default link home.
-- `brandIcon(size, {monogram, background, foreground})` with `ICON_SIZE`
+- `brandIcon(size, {monogram, background, foreground, fontFamily?, radius?})` with `ICON_SIZE`
   (32) and `APPLE_ICON_SIZE` (180) - the tile for `icon.tsx` and
   `apple-icon.tsx`. Server-safe; the kit owns the `next/og` import and the
-  colour values. The tile uses a system serif, not the kit font.
+  colour values. `fontFamily` and `radius` (px number or CSS length) are
+  optional and unset by default; pass a system family rather than the kit
+  display font so no font data ships to the icon route.
 - `kitMetadata(kitName, overrides?)` - Next `Metadata` with title
   `{default: kitName, template: "%s | kitName"}`. A string `title` override
-  becomes the default title; every other field is passed through.
+  becomes the default title; an object `title` (`default`, `template`,
+  `absolute`) is merged over those defaults; every other field is passed
+  through.
 - `ThemeProvider`, `Toaster` and `Providers({children, theme?, toaster?})` -
   `ThemeProvider` is next-themes preloaded with `themeProps` from
   `@merqo/ui/next`; `Toaster` is sonner (top-right, `richColors`) that follows
@@ -702,11 +709,14 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
 - `Wordmark({children, size?, href?, label?, LinkComponent?, className?})` -
   the frame only: display font, weight, tracking, a `size` of `sm`
   (`text-lg`), `md` (default, `text-xl`), `lg` or `xl` (`text-3xl`), and an
-  optional link (44px tall) when `href` is set. The kit supplies the letters
+  optional link (44px tall) when `href` is set. Without `href`, `label` sets
+  an `aria-label` on the plain span. The kit supplies the letters
   and any accent classes as children.
 - `LegalPage({doc, kit?, wordmark?, homeHref?, LinkComponent?, className?})`
   and `legalPageMetadata(doc)` - page body and `metadata` for
   `app/legal/terms` and `app/legal/privacy`, around `LegalDocument`.
+  `LegalPage` is a server component that renders the client `LegalDocument`,
+  so it carries no `"use client"` itself.
 - `AcceptTermsPage({action, next, wordmark?, title?, description?, basePath?,
   submitLabel?})` and `AcceptTermsForm` - client body for
   `app/legal/accept/page.tsx`: an `AuthShell` card with the
@@ -731,12 +741,14 @@ export default function Global(props: { reset: () => void }) {
     <GlobalError
       {...props}
       colors={{
-        background: "#f5efe4",
-        foreground: "#2b2620",
-        mutedForeground: "#6b6152",
-        primary: "#c2410c",
-        primaryForeground: "#fff",
+        background: KIT_TOKENS.background,
+        foreground: KIT_TOKENS.foreground,
+        mutedForeground: KIT_TOKENS.mutedForeground,
+        primary: KIT_TOKENS.primary,
+        primaryForeground: KIT_TOKENS.primaryForeground,
       }}
+      fontFamily="Georgia, serif"
+      radius="0.5rem"
     />
   );
 }
@@ -755,7 +767,13 @@ export const size = ICON_SIZE;
 export const contentType = "image/png";
 export default function Icon() {
   return new ImageResponse(
-    brandIcon(size.width, { monogram: "Q", background: "#bc892b", foreground: "#efe3c8" }),
+    brandIcon(size.width, {
+      monogram: "Q",
+      background: KIT_TOKENS.primary,
+      foreground: KIT_TOKENS.primaryForeground,
+      fontFamily: "Georgia, serif",
+      radius: 6,
+    }),
     { ...size },
   );
 }

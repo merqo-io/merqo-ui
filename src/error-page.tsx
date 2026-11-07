@@ -65,9 +65,12 @@ export interface GlobalErrorColors {
 export interface GlobalErrorProps {
   error?: ErrorWithDigest;
   reset: () => void;
-  /** Any CSS colour values. Required because the app stylesheet has not
-   *  loaded when the root layout itself has thrown. */
+  /** The kit's own token values (copies of its CSS variable values), not new
+   *  ad-hoc colours. Required because the app stylesheet has not loaded when
+   *  the root layout itself has thrown. */
   colors: GlobalErrorColors;
+  /** CSS border-radius for the button. Unset gives square corners. */
+  radius?: string;
   /** Omit to inherit the browser default. */
   fontFamily?: string;
   lang?: string;
@@ -84,6 +87,7 @@ export function GlobalError({
   reset,
   colors,
   fontFamily,
+  radius,
   lang = "en",
   title = "Something went wrong",
   description = "An unexpected error interrupted the page. Try again, and if it keeps happening, refresh in a moment.",
@@ -104,7 +108,7 @@ export function GlobalError({
           padding: "1.5rem",
         }}
       >
-        <div style={{ maxWidth: "24rem", textAlign: "center" }}>
+        <main style={{ maxWidth: "24rem", textAlign: "center" }}>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.5rem" }}>{title}</h1>
           <p
             style={{
@@ -122,7 +126,7 @@ export function GlobalError({
             style={{
               cursor: "pointer",
               border: "none",
-              borderRadius: "0.625rem",
+              borderRadius: radius,
               background: colors.primary,
               color: colors.primaryForeground,
               fontSize: "0.9rem",
@@ -133,7 +137,7 @@ export function GlobalError({
           >
             {resetLabel}
           </button>
-        </div>
+        </main>
       </body>
     </html>
   );

@@ -6,6 +6,12 @@
 
 - `@merqo/ui/security`: `buildSecurityHeaders({isDev, nonce?, supabaseUrl?, vercelEnv?, themeScriptHash?})` (the CSP source lists each kit kept in `security-headers.ts`), `needsNonce(pathname, prefixes?)` with the shared `NONCE_PREFIXES`, and `THEME_SCRIPT_HASH`. `needsNonce` matches whole path segments.
 - `@merqo/ui/next` (new subpath, server only): `createProxy({updateSession, noncePrefixes?, supabaseUrl?})` for each kit's `proxy.ts`, `themeProps`, `buildRobots({vercelEnv, indexable?})` and `readPublicEnv({...})`.
+- `@merqo/ui/kit-api` (server only, no "use client", not re-exported from the root): shared kit plumbing, replacing copies in the kits.
+- `createMerqoClient({secret, baseUrl?, timeoutMs?, development?, fetch?})` with `get(path, query?)` and `post(path, body)` for Merqo's `/api/merqo/*` routes, plus `merqoBaseUrl()`, `merqoUrl()` and `callMerqoRpc()`. Results are typed and never thrown; non-https bases and paths that leave the origin are refused; redirects are refused.
+- `postKitCallback({url, secret}, body, {development?, timeoutMs?, fetch?})`: signed kit callback POST. Refuses non-https URLs (and URLs with credentials), allows `http://localhost` only with `development: true`, uses `redirect: "error"`, and never throws.
+- `hashApiKey(secret)` and `verifyKitAuth(request, {store, rateLimit?})`: `Bearer <kit_slug>:<secret>` check with a constant-time hash compare. The key table and failure log are an injected `KitKeyStore`; an optional per-IP attempt limit fails closed by default.
+- `rateLimit`, `rateLimitStrict`, `rateLimitCheck`, `clientIp`, `digest` and `createMemoryRateLimitStore` over an injected `RateLimitStore`, and the `ActionResult` type with `isActionError`.
+- `clientIp(headers, {trustedHeaders?})` reads only the listed headers (default `x-vercel-forwarded-for`; `x-forwarded-for` uses the last hop) and no longer reads `x-real-ip` by default. `verifyKitAuth` accepts `trustedHeaders` and adds a per-slug attempt bucket (`slugLimit`) beside the per-IP one.
 - `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})`: the centred sign-in card shared by login, MFA and reset pages. Server-renderable.
 - `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?, showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?, onForgotPassword?, LinkComponent?, mapError?, initialError?})`: email and password form with an optional Google button and sign in / create account toggle. Callbacks return an error string, `{notice}` or nothing, or throw; a redirect keeps the form pending with no error flash. Without `mapError` only generic copy is shown, never a provider string. Inputs carry `name`, `aria-invalid` and `aria-describedby`; typing clears the error and overlapping taps run once. No auth library dependency.
 - `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?, enrolIntro?, mapError?})`: six-digit authenticator code entry with optional enrolment (QR code and manual key) and a sign-out action. Pasted codes with spaces or dashes are normalised, returned strings go through `mapError`, and the QR image renders only for `data:image/` sources.
@@ -20,6 +26,8 @@
 - Shared SGT time helpers: `formatDate`, `formatTime`, `formatDateTime`, `formatRelativeTime`, `sgDayKey`, `startOfSgDay`, `SGT_TIME_ZONE`. All output is pinned to Asia/Singapore. Time of day is 12-hour lower-case ("1:30 pm"), unlike the kits' `toLocaleTimeString` output.
 - Telegram link helpers: `normalizeTelegramHandle` (also accepts `t.me/x` and `telegram.me/x`), `telegramLink`, `isTelegramLink` (only `https://t.me/...`).
 - `@merqo/ui/contracts` now exports the entitlement wire enum (`ENTITLEMENT_TIERS`, `entitlementTierSchema`, `EntitlementTier`) and `ENTITLEMENT_TIER_LABELS`.
+- `@merqo/ui/supabase`, `@merqo/ui/supabase/server` and `@merqo/ui/supabase/middleware`: shared browser, server, service-role and session-refresh client factories, plus `readAllRows`, `readAllRowsResult` and `listAllUsers` with tested pagination. `@supabase/ssr` and `@supabase/supabase-js` are optional peer dependencies.
+- `@merqo/ui/auth`: `handleAuthCallback` (code exchange, open-redirect-safe `next`, optional next cookie, post-sign-in hook and recovery routing) and `checkLegalAcceptance` (5-minute cache that fails open only when the cache write fails).
 
 ### Changed
 

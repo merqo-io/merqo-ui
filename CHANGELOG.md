@@ -14,11 +14,18 @@
 - `StatTile` `card` prop renders the `ElevatedCard` shell.
 - `AccountMenu` `tier` prop renders a `TierChip`; `tierBadge` still overrides it.
 - `Section` `surface` prop: `"default"` (unchanged), `"elevated"` or `"none"`.
+- Shared money helpers: `formatMoney`, `centsToDollarString`, `parseDollarsToCents`, `dollarsToCents`, `MAX_MONEY_CENTS`. Integer SGD cents shown as `S$12.50`; replaces the per-kit `formatPrice`, `formatCents` and money parsers.
+- Shared SGT time helpers: `formatDate`, `formatTime`, `formatDateTime`, `formatRelativeTime`, `sgDayKey`, `startOfSgDay`, `SGT_TIME_ZONE`. All output is pinned to Asia/Singapore. Time of day is 12-hour lower-case ("1:30 pm"), unlike the kits' `toLocaleTimeString` output.
+- Telegram link helpers: `normalizeTelegramHandle` (also accepts `t.me/x` and `telegram.me/x`), `telegramLink`, `isTelegramLink` (only `https://t.me/...`).
+- `@merqo/ui/contracts` now exports the entitlement wire enum (`ENTITLEMENT_TIERS`, `entitlementTierSchema`, `EntitlementTier`) and `ENTITLEMENT_TIER_LABELS`.
 
 ### Changed
 
 - `StatCard` is deprecated in favour of `<StatTile card />` and now delegates to it.
 - `HelpSheet` and `FeedbackSheet` share a private sheet shell; behaviour is unchanged.
+- `useMoneyField`/`MoneyInput`, `formatCatalogPrice` and `VendorTelegramSection` now use the shared helpers. Money input parsing is stricter: exponent and hex forms such as `1e3` are rejected, and rounding uses the decimal digits (`1.005` is 101 cents).
+- `formatCatalogPrice` now adds thousands separators (`S$1,600` where it used to print `S$1600`).
+- `tierLabel("paid")` now returns "Pro" (was "Paid"), matching the entitlement wire enum.
 
 ## [0.42.1] - 2026-11-06
 

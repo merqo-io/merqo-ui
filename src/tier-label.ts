@@ -5,6 +5,7 @@ const TIER_LABELS: Record<string, string> = {
   starter: "Starter",
   pro: "Pro",
   qkit: "Pro",
+  paid: "Pro",
 };
 
 /**

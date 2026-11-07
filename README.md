@@ -664,6 +664,44 @@ Wiring example in a Next.js kit:
 </AdminShell>
 ```
 
+## Money, time and entitlement helpers
+
+Pure functions with no `"use client"`, safe to import from Server Components.
+Kits must use these instead of local copies.
+
+**Enforced rules:** money is integer SGD cents shown as `S$12.50` (always an
+`S$` prefix); every date and time is shown in Singapore time (`Asia/Singapore`)
+whatever the server or browser zone.
+
+- `formatMoney(cents, { trimWholeDollars? })`: `1250` -> `S$12.50`, `-5` ->
+  `-S$0.05`, `0` -> `S$0.00`, large values grouped (`S$1,234,567.89`).
+  `trimWholeDollars` gives `S$16` for whole amounts. Non-finite input gives `-`.
+- `centsToDollarString(cents)`: `650` -> `6.50`, for input values.
+- `parseDollarsToCents(input, { allowNegative? })`: accepts a string (FormData
+  value, `S$`/`$` prefix and `1,234.50` grouping allowed) or a number. Returns
+  `{ ok: true, cents }` (`cents` is `undefined` for blank input) or
+  `{ ok: false }`. Rounds on the decimal digits, so `1.005` is 101 cents.
+- `dollarsToCents(input, opts?)`: the same, collapsed to `number | null`.
+- `MAX_MONEY_CENTS`: the one cap, `Number.MAX_SAFE_INTEGER` (what `MoneyInput`
+  always accepted). A kit that needs a lower business limit checks it itself.
+- `formatDate`, `formatTime`, `formatDateTime`, `formatRelativeTime(input, now?)`:
+  `7 Nov 2026`, `1:30 am`, `7 Nov 2026, 1:30 am`, `5m ago` / `in 3h` / `just
+  now`, falling back to the date after a week. Input is an ISO string, epoch
+  milliseconds or a `Date`; invalid input gives `-`.
+- `sgDayKey(input)` (`2026-11-07`), `startOfSgDay(input)` (the 00:00 SGT
+  instant) and `SGT_TIME_ZONE`.
+- `normalizeTelegramHandle`, `telegramLink(handle)`, `isTelegramLink(url)`:
+  `normalizeTelegramHandle` accepts `@handle`, `handle`, `t.me/handle`,
+  `telegram.me/handle` and `https://t.me/handle`; `telegramLink` only ever
+  produces `https://t.me/<handle>` and `isTelegramLink` accepts only that
+  host; `@` is stripped
+  and the handle must be 5-32 letters, digits or underscores starting with a
+  letter.
+- `@merqo/ui/contracts`: `ENTITLEMENT_TIERS`, `entitlementTierSchema` (zod),
+  `EntitlementTier` and `ENTITLEMENT_TIER_LABELS` for the wire enum
+  `free | starter | qkit | paid`. `qkit` and `paid` both display as "Pro"
+  (`tierLabel` agrees). stockkit's `free`/`pro` maps to wire `free`/`paid`.
+
 ## Shared tooling entries (since v0.35.0)
 
 Four subpath exports with no React. Their peer dependencies are optional;

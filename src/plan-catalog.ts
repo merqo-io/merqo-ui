@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatMoney } from "./money";
 
 const cents = z.number().int().nonnegative();
 
@@ -58,8 +59,5 @@ export async function fetchPlanCatalog(
 /** 1600 -> "S$16", 1333 -> "S$13.33", 15 -> "15c". */
 export function formatCatalogPrice(valueCents: number): string {
   if (valueCents > 0 && valueCents < 100) return `${valueCents}c`;
-  const dollars = valueCents / 100;
-  return Number.isInteger(dollars)
-    ? `S$${dollars}`
-    : `S$${dollars.toFixed(2)}`;
+  return formatMoney(valueCents, { trimWholeDollars: true });
 }

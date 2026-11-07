@@ -742,6 +742,68 @@ install only what the entries you import need.
   (default selector `[data-error-boundary="true"]`), `pageerror`, or a CSP
   violation in the console. An empty array means every route rendered.
 
+## Next.js server helpers (`@merqo/ui/next`)
+
+Server-only; it carries no `"use client"` and is not re-exported from the
+package root. Replaces each kit's copies of `security-headers.ts`,
+`proxy.ts` plumbing, `theme-props.ts`, `app/robots.ts` and `lib/env.ts`.
+
+- `@merqo/ui/security` also exports `buildSecurityHeaders({ isDev, nonce?,
+  supabaseUrl?, vercelEnv?, themeScriptHash? })`, which returns the
+  `connectSrc`, `imgSrc`, `frameSrc` and `scriptSrc` lists to give
+  `buildCsp`. It reads no environment: pass `process.env.*` literals.
+  `nonce: true` adds `THEME_SCRIPT_HASH` (next-themes' inline bootstrap).
+  `needsNonce(pathname, prefixes = NONCE_PREFIXES)` decides which routes
+  render per request and so get a nonce; it matches whole path segments, so
+  `/c` covers `/c/shop` and not `/contact`.
+  It returns only the CSP source lists. HSTS, `X-Content-Type-Options:
+  nosniff` and `Referrer-Policy` are not set here; they stay in each kit's
+  `next.config.ts`.
+- `createProxy({ updateSession, noncePrefixes?, supabaseUrl?, isDev?, vercelEnv? })`
+  returns the kit's `proxy`: nonce CSP on per-request routes, static CSP
+  elsewhere and in dev, `noindex` off production. Pass `noncePrefixes`
+  explicitly with the kit's own per-request routes. The default
+  `NONCE_PREFIXES` is the union of every kit's prefixes, so a statically
+  prerendered page under a prefix the kit did not nonce before would lose its
+  scripts. Matching is by whole path segment: `"/pay"` covers `/pay/abc` but
+  no longer matches `/payments`. The kit keeps its own `config.matcher`
+  because Next reads it statically:
+
+  ```ts
+  // src/proxy.ts
+  import { createProxy } from "@merqo/ui/next";
+  import { updateSession } from "@/lib/supabase/middleware";
+
+  export const proxy = createProxy({
+    updateSession,
+    noncePrefixes: ["/admin", "/dashboard", "/login"],
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  });
+
+  export const config = {
+    matcher: [
+      "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    ],
+  };
+  ```
+
+- `themeProps`: spread onto next-themes' `ThemeProvider`
+  (`attribute: "class"`, system default, no transition on change).
+- `buildRobots({ vercelEnv, indexable? })`: body of `src/app/robots.ts`.
+  Only `production` is crawlable; `indexable: false` keeps a kit closed
+  even there.
+
+  ```ts
+  export default function robots() {
+    return buildRobots({ vercelEnv: process.env.VERCEL_ENV });
+  }
+  ```
+
+- `readPublicEnv({ NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY })`:
+  throws naming the missing variable, else returns `{ supabaseUrl,
+  supabasePublishableKey }`. Write the `process.env.NEXT_PUBLIC_*`
+  references literally in the kit so Next inlines them.
+
 ## Z-index scale
 
 This package has no shared z-index token or constant — each component picks

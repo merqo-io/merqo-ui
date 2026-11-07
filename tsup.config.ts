@@ -106,7 +106,8 @@ export default defineConfig([
     // Non-React subpath entries: lint preset, CSP builder, contracts, smoke helper.
     entry: {
       eslint: "src/eslint/preset.ts",
-      security: "src/security/csp.ts",
+      security: "src/security/index.ts",
+      next: "src/next/index.ts",
       contracts: "src/contracts/vendor-activity.ts",
       testing: "src/testing/render-smoke.ts",
     },

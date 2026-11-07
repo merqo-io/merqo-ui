@@ -29,8 +29,12 @@
       "import": "./dist/eslint.js"
     },
     "./security": {
-      "types": "./dist/security/csp.d.ts",
+      "types": "./dist/security/index.d.ts",
       "import": "./dist/security.js"
+    },
+    "./next": {
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next.js"
     },
     "./contracts": {
       "types": "./dist/contracts/vendor-activity.d.ts",

@@ -756,10 +756,18 @@ package root. Replaces each kit's copies of `security-headers.ts`,
   `needsNonce(pathname, prefixes = NONCE_PREFIXES)` decides which routes
   render per request and so get a nonce; it matches whole path segments, so
   `/c` covers `/c/shop` and not `/contact`.
+  It returns only the CSP source lists. HSTS, `X-Content-Type-Options:
+  nosniff` and `Referrer-Policy` are not set here; they stay in each kit's
+  `next.config.ts`.
 - `createProxy({ updateSession, noncePrefixes?, supabaseUrl?, isDev?, vercelEnv? })`
   returns the kit's `proxy`: nonce CSP on per-request routes, static CSP
-  elsewhere and in dev, `noindex` off production. The kit keeps its own
-  `config.matcher` because Next reads it statically:
+  elsewhere and in dev, `noindex` off production. Pass `noncePrefixes`
+  explicitly with the kit's own per-request routes. The default
+  `NONCE_PREFIXES` is the union of every kit's prefixes, so a statically
+  prerendered page under a prefix the kit did not nonce before would lose its
+  scripts. Matching is by whole path segment: `"/pay"` covers `/pay/abc` but
+  no longer matches `/payments`. The kit keeps its own `config.matcher`
+  because Next reads it statically:
 
   ```ts
   // src/proxy.ts
@@ -768,6 +776,7 @@ package root. Replaces each kit's copies of `security-headers.ts`,
 
   export const proxy = createProxy({
     updateSession,
+    noncePrefixes: ["/admin", "/dashboard", "/login"],
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
   });
 

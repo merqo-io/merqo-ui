@@ -37,6 +37,23 @@ describe("merqoUrl", () => {
     expect(merqoUrl("//evil.test/x", undefined, "https://m.test")).toBeNull();
     expect(merqoUrl("https://evil.test/x", undefined, "https://m.test")).toBeNull();
     expect(merqoUrl("relative", undefined, "https://m.test")).toBeNull();
+    expect(merqoUrl("/\\evil.test/x", undefined, "https://m.test")).toBeNull();
+  });
+
+  it.each([
+    "http://localhost.evil.com",
+    "http://localhost@evil.com",
+    "http://localhost.",
+    "http://[::1]:3000",
+  ])("refuses base %s even in development", (base) => {
+    expect(merqoUrl("/a", undefined, base, { development: true })).toBeNull();
+    expect(merqoUrl("/a", undefined, base)).toBeNull();
+  });
+
+  it("allows an upper-case LOCALHOST base in development", () => {
+    expect(
+      merqoUrl("/a", undefined, "HTTP://LOCALHOST:3000", { development: true })?.href,
+    ).toBe("http://localhost:3000/a");
   });
 
   it("refuses plain http except localhost in development", () => {

@@ -60,24 +60,45 @@ export async function rateLimitStrict(
   return (await rateLimitCheck(store, key, limit, windowSeconds)) === "ok";
 }
 
-/**
- * Best-effort client IP without trusting spoofable input. Order: first hop of
- * `x-vercel-forwarded-for` (set by Vercel's edge), `x-real-ip`, then the LAST
- * `x-forwarded-for` hop (the one a proxy appended; earlier hops are whatever
- * the client claimed). A value that is not an IP address yields null, so a
- * caller cannot mint a fresh bucket per garbage string. Callers decide what
- * null means: a shared strict bucket, or skipping the per-IP check.
- */
-export function clientIp(headers: Headers): string | null {
-  const vercel = headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
-  const real = headers.get("x-real-ip")?.trim();
-  const hops = (headers.get("x-forwarded-for") ?? "")
+export interface ClientIpOptions {
+  /**
+   * Header names to read, in priority order. Only list headers that your
+   * platform's proxy sets or overwrites: any other header is client-controlled
+   * and lets a caller rotate its IP to get a fresh bucket. For
+   * `x-forwarded-for` the LAST hop is used (the one a proxy appended); for
+   * every other header the first hop. Default: `["x-vercel-forwarded-for"]`,
+   * which assumes the app is deployed on Vercel, where the edge overwrites it.
+   */
+  trustedHeaders?: string[];
+}
+
+const DEFAULT_TRUSTED_HEADERS: string[] = ["x-vercel-forwarded-for"];
+
+function headerIp(headers: Headers, name: string): string | undefined {
+  const hops = (headers.get(name) ?? "")
     .split(",")
     .map((hop) => hop.trim())
     .filter(Boolean);
-  const chosen = vercel || real || hops[hops.length - 1];
-  if (!chosen || isIP(chosen) === 0) return null;
-  return chosen;
+  return name.toLowerCase() === "x-forwarded-for" ? hops.at(-1) : hops[0];
+}
+
+/**
+ * Best-effort client IP read only from the trusted headers (see
+ * `ClientIpOptions`). It is only as trustworthy as those headers: behind a
+ * proxy that does not overwrite them, a client can forge them. A value that
+ * is not an IP address yields null, so a caller cannot mint a fresh bucket per
+ * garbage string. Callers decide what null means: a shared strict bucket, or
+ * skipping the per-IP check.
+ */
+export function clientIp(
+  headers: Headers,
+  options: ClientIpOptions = {},
+): string | null {
+  for (const name of options.trustedHeaders ?? DEFAULT_TRUSTED_HEADERS) {
+    const value = headerIp(headers, name);
+    if (value) return isIP(value) === 0 ? null : value;
+  }
+  return null;
 }
 
 /** Counter keys carry digests only, so the store holds no raw IPs or ids. */

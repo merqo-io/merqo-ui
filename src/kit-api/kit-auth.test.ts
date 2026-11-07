@@ -56,7 +56,7 @@ describe("verifyKitAuth", () => {
   it("rejects a wrong secret and logs it", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const { store, failures } = makeStore();
-    const out = await verifyKitAuth(req("Bearer qkit:bad", { "x-real-ip": "1.2.3.4" }), { store });
+    const out = await verifyKitAuth(req("Bearer qkit:bad", { "x-vercel-forwarded-for": "1.2.3.4" }), { store });
     expect(out).toBeNull();
     expect(failures).toEqual([
       { kitSlug: "qkit", reason: "secret mismatch", ip: "1.2.3.4" },
@@ -119,9 +119,58 @@ describe("verifyKitAuth", () => {
       limit: 1,
       windowSeconds: 60,
     };
-    const r = () => req("Bearer qkit:good-secret", { "x-real-ip": "1.2.3.4" });
+    const r = () =>
+      req("Bearer qkit:good-secret", { "x-vercel-forwarded-for": "1.2.3.4" });
     expect(await verifyKitAuth(r(), { store, rateLimit })).toEqual({ kitSlug: "qkit" });
     expect(await verifyKitAuth(r(), { store, rateLimit })).toBeNull();
+  });
+
+  it("limits per slug even when the IP rotates", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { store } = makeStore();
+    const rateLimit = {
+      store: createMemoryRateLimitStore(() => 0),
+      limit: 100,
+      slugLimit: 2,
+      windowSeconds: 60,
+    };
+    const r = (ip: string) =>
+      req("Bearer qkit:good-secret", { "x-vercel-forwarded-for": ip });
+    expect(await verifyKitAuth(r("1.1.1.1"), { store, rateLimit })).not.toBeNull();
+    expect(await verifyKitAuth(r("1.1.1.2"), { store, rateLimit })).not.toBeNull();
+    expect(await verifyKitAuth(r("1.1.1.3"), { store, rateLimit })).toBeNull();
+  });
+
+  it("does not let a spoofed x-real-ip rotate the IP bucket by default", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { store } = makeStore();
+    const rateLimit = {
+      store: createMemoryRateLimitStore(() => 0),
+      limit: 1,
+      slugLimit: 100,
+      windowSeconds: 60,
+    };
+    const r = (ip: string) =>
+      req("Bearer qkit:good-secret", { "x-real-ip": ip });
+    expect(await verifyKitAuth(r("1.1.1.1"), { store, rateLimit })).not.toBeNull();
+    expect(await verifyKitAuth(r("1.1.1.2"), { store, rateLimit })).toBeNull();
+  });
+
+  it("honours trustedHeaders", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { store } = makeStore();
+    const rateLimit = {
+      store: createMemoryRateLimitStore(() => 0),
+      limit: 1,
+      slugLimit: 100,
+      windowSeconds: 60,
+    };
+    const opts = { store, rateLimit, trustedHeaders: ["x-real-ip"] };
+    const r = (ip: string) =>
+      req("Bearer qkit:good-secret", { "x-real-ip": ip });
+    expect(await verifyKitAuth(r("1.1.1.1"), opts)).not.toBeNull();
+    expect(await verifyKitAuth(r("1.1.1.2"), opts)).not.toBeNull();
+    expect(await verifyKitAuth(r("1.1.1.2"), opts)).toBeNull();
   });
 
   it("fails closed on a limiter outage unless told otherwise", async () => {

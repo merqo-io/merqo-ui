@@ -771,13 +771,25 @@ injected dependency, and none throws to the caller except `callMerqoRpc`.
   `Authorization: Bearer <kit_slug>:<secret>` against a `KitKeyStore`
   (`getSecretHash`, optional `touch` and `logFailure`) using a constant-time
   compare, and resolves to `{kitSlug}` or `null`. The optional `rateLimit`
-  counts attempts per client IP and fails closed unless `failOpen: true`.
+  counts attempts per client IP (`limit`) and per kit slug (`slugLimit`,
+  defaults to `limit`) and fails closed unless `failOpen: true`. The slug
+  bucket stops a rotating IP from bypassing the limit, at the cost that a
+  flood naming a real slug can lock that kit out for one window. Pass
+  `trustedHeaders` to choose the IP headers (see `clientIp`). `KitKeyStore.
+  logFailure` receives the request's `kitSlug`, which is untrusted: sanitise
+  it before writing it anywhere.
 - `rateLimit`, `rateLimitStrict` and `rateLimitCheck` over a
   `RateLimitStore` (`hit(key, limit, windowSeconds)` resolves true while
   within the limit). `rateLimit` fails open on a store error,
   `rateLimitStrict` fails closed, `rateLimitCheck` returns
-  `"ok" | "limited" | "error"`. `clientIp(headers)` returns a validated IP or
-  `null`; `digest(value)` is sha256 hex for counter keys;
+  `"ok" | "limited" | "error"`. `clientIp(headers, {trustedHeaders?})` returns a
+  valid IP from the first trusted header present, or `null`. The default is
+  `["x-vercel-forwarded-for"]`, which is trustworthy only on Vercel, where
+  the edge overwrites it. Behind any proxy that does not overwrite the
+  headers you list, a client can forge its IP: set `trustedHeaders` to
+  what your proxy sets (`x-forwarded-for` uses the last hop) or treat the
+  result as spoofable. `x-real-ip` is never read unless listed.
+  `digest(value)` is sha256 hex for counter keys;
   `createMemoryRateLimitStore()` is a per-process fixed-window store for
   tests.
 - `ActionResult<T>` and `isActionError(result)`: the Server Action result

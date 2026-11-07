@@ -1,6 +1,7 @@
 export { isActionError, type ActionResult } from "./action-result";
 export {
   clientIp,
+  type ClientIpOptions,
   createMemoryRateLimitStore,
   digest,
   rateLimit,

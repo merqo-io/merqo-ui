@@ -26,7 +26,10 @@ export interface KitKeyStore {
   getSecretHash(kitSlug: string): Promise<string | null>;
   /** Records a successful use. Best effort. */
   touch?(kitSlug: string): Promise<void>;
-  /** Appends an audit row for a failed attempt. Best effort. */
+  /**
+   * Appends an audit row for a failed attempt. Best effort. `kitSlug` comes
+   * from the request and is untrusted: sanitise it before logging.
+   */
   logFailure?(failure: KitAuthFailure): Promise<void>;
 }
 
@@ -34,6 +37,8 @@ export interface KitAuthRateLimit {
   store: RateLimitStore;
   /** Attempts per client IP per window, failed or not. Default 300. */
   limit?: number;
+  /** Attempts per kit slug per window, across all IPs. Defaults to `limit`. */
+  slugLimit?: number;
   /** Window length in seconds. Default 60. */
   windowSeconds?: number;
   /** Allow requests when the store is down. Default false (fail closed). */
@@ -43,12 +48,16 @@ export interface KitAuthRateLimit {
 export interface VerifyKitAuthOptions {
   store: KitKeyStore;
   rateLimit?: KitAuthRateLimit;
+  /** Forwarded to `clientIp`; see `ClientIpOptions.trustedHeaders`. */
+  trustedHeaders?: string[];
 }
 
 export function hashApiKey(secret: string): string {
   return createHash("sha256").update(secret, "utf8").digest("hex");
 }
 
+// Constant-time for the fixed-length hex digests the store holds; the length
+// check only short-circuits on a malformed stored value, never on the secret.
 function hashesMatch(provided: string, expected: string): boolean {
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);
@@ -84,12 +93,13 @@ function parseBearer(
 
 async function underAttemptLimit(
   limiter: KitAuthRateLimit,
-  ip: string | null,
+  key: string,
+  limit: number | undefined,
 ): Promise<boolean> {
   const verdict = await rateLimitCheck(
     limiter.store,
-    `kit-auth:${ip ?? "unknown"}`,
-    limiter.limit ?? DEFAULT_ATTEMPT_LIMIT,
+    key,
+    limit ?? DEFAULT_ATTEMPT_LIMIT,
     limiter.windowSeconds ?? DEFAULT_WINDOW_SECONDS,
   );
   if (verdict === "limited") return false;
@@ -119,10 +129,17 @@ export async function verifyKitAuth(
   request: Request,
   options: VerifyKitAuthOptions,
 ): Promise<{ kitSlug: string } | null> {
-  const { store, rateLimit } = options;
-  const ip = clientIp(request.headers);
+  const { store, rateLimit, trustedHeaders } = options;
+  const ip = clientIp(request.headers, { trustedHeaders });
 
-  if (rateLimit && !(await underAttemptLimit(rateLimit, ip))) {
+  if (
+    rateLimit &&
+    !(await underAttemptLimit(
+      rateLimit,
+      `kit-auth:${ip ?? "unknown"}`,
+      rateLimit.limit,
+    ))
+  ) {
     console.warn("verifyKitAuth rate limited");
     return null;
   }
@@ -137,6 +154,19 @@ export async function verifyKitAuth(
   }
 
   const { kitSlug, secret } = parsed;
+  // A second bucket per slug keeps rotating IPs from bypassing the limit.
+  // The cost: a flood naming a real slug can lock that kit out for a window.
+  if (
+    rateLimit &&
+    !(await underAttemptLimit(
+      rateLimit,
+      `kit-auth-slug:${kitSlug}`,
+      rateLimit.slugLimit ?? rateLimit.limit,
+    ))
+  ) {
+    console.warn("verifyKitAuth rate limited");
+    return null;
+  }
   const stored = await lookupHash(store, kitSlug);
   const matches = hashesMatch(hashApiKey(secret), stored ?? DECOY_HASH);
   if (stored === null) {

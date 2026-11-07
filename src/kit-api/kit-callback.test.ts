@@ -50,6 +50,32 @@ describe("postKitCallback", () => {
     ).toEqual({ ok: false, reason: "invalid_url" });
   });
 
+  it.each([
+    "http://localhost.evil.com/hook",
+    "http://localhost@evil.com/hook",
+    "http://localhost./hook",
+    "http://[::1]:3000/hook",
+  ])("refuses %s even in development", async (url) => {
+    const fetchImpl = okFetch();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = await postKitCallback(
+      { ...target, url },
+      {},
+      { fetch: fetchImpl, development: true },
+    );
+    expect(result).toEqual({ ok: false, reason: "invalid_url" });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("allows an upper-case LOCALHOST host in development", async () => {
+    const result = await postKitCallback(
+      { ...target, url: "HTTP://LOCALHOST:3001/hook" },
+      {},
+      { fetch: okFetch(), development: true },
+    );
+    expect(result).toEqual({ ok: true });
+  });
+
   it("refuses a missing secret", async () => {
     const fetchImpl = okFetch();
     vi.spyOn(console, "error").mockImplementation(() => {});

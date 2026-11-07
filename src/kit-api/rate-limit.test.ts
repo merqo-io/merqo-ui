@@ -76,16 +76,31 @@ describe("clientIp", () => {
     ).toBe("1.1.1.1");
   });
 
-  it("falls back to x-real-ip then the last forwarded hop", () => {
-    expect(clientIp(h({ "x-real-ip": "3.3.3.3" }))).toBe("3.3.3.3");
-    expect(clientIp(h({ "x-forwarded-for": "9.9.9.9, 4.4.4.4" }))).toBe(
-      "4.4.4.4",
-    );
+  it("ignores x-real-ip and x-forwarded-for by default", () => {
+    expect(clientIp(h({ "x-real-ip": "3.3.3.3" }))).toBeNull();
+    expect(clientIp(h({ "x-forwarded-for": "9.9.9.9, 4.4.4.4" }))).toBeNull();
+  });
+
+  it("reads only the named trusted headers, in order", () => {
+    const opts = { trustedHeaders: ["x-real-ip", "x-forwarded-for"] };
+    expect(clientIp(h({ "x-real-ip": "3.3.3.3" }), opts)).toBe("3.3.3.3");
+    expect(
+      clientIp(h({ "x-forwarded-for": "9.9.9.9, 4.4.4.4" }), opts),
+    ).toBe("4.4.4.4");
+    expect(
+      clientIp(
+        h({ "x-real-ip": "3.3.3.3", "x-vercel-forwarded-for": "1.1.1.1" }),
+        opts,
+      ),
+    ).toBe("3.3.3.3");
   });
 
   it("returns null for missing or non-IP values", () => {
     expect(clientIp(h({}))).toBeNull();
-    expect(clientIp(h({ "x-real-ip": "not-an-ip" }))).toBeNull();
+    expect(clientIp(h({ "x-vercel-forwarded-for": "not-an-ip" }))).toBeNull();
+    expect(
+      clientIp(h({ "x-real-ip": "not-an-ip" }), { trustedHeaders: ["x-real-ip"] }),
+    ).toBeNull();
   });
 });
 

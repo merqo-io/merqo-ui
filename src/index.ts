@@ -122,6 +122,15 @@ export { safeRedirectPath } from "./safe-redirect";
 export { resizeToWebp } from "./image-resize";
 export type { ResizeResult } from "./image-resize";
 export { storagePathFromPublicUrl } from "./storage-path";
+export {
+  removeImagesByUrl,
+  removeReplacedImage,
+  removeStorageObjects,
+  replacedImageTarget,
+  type RemoveStorageOptions,
+  type ReplacedImageTarget,
+  type StorageRemover,
+} from "./storage-remove";
 export { AsyncSubmitButton } from "./async-submit-button";
 export type { AsyncSubmitButtonProps } from "./async-submit-button";
 export { Avatar, AvatarIdentity, initials } from "./avatar";

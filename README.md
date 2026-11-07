@@ -539,6 +539,27 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   profile picture lands in the same `avatar_url` field), which must never be
   treated as ours to delete. Plain function, no React. Added v0.31.4.
 
+- `removeStorageObjects(client, bucket, paths, {label?})`,
+  `removeImagesByUrl(client, bucket, urls, {ownerFolder, label?})`,
+  `replacedImageTarget({buckets, before, after, ownerFolder})` and
+  `removeReplacedImage(client, {buckets, before, after, ownerFolder, label?})`:
+  best-effort storage cleanup built on `storagePathFromPublicUrl`. They never
+  throw and log failures. `ownerFolder` is required: pass the vendor id (essential
+  when the client is service role, since no storage policy bounds it), or
+  `null` only when the caller already scoped the URLs. `removeStorageObjects`
+  takes raw paths and applies no ownership check. `client` is any
+  object with `storage.from(bucket).remove(paths)`.
+
+  ```ts
+  await removeReplacedImage(supabase, {
+    buckets: ["vendor-images", "booth-images"],
+    before: previousQrUrl,
+    after: savedQrUrl,
+    ownerFolder: vendorId,
+    label: "QR image cleanup",
+  });
+  ```
+
 - `commitPendingImages(values)`, `isPendingImage(url)`,
   `PendingImageUploadError` — the save side of `ImageUploader`'s
   `deferUpload` mode. With `deferUpload`, picking an image resizes it and
@@ -741,6 +762,45 @@ install only what the entries you import need.
   signed-in Playwright page and returns the failures: 5xx, error boundary
   (default selector `[data-error-boundary="true"]`), `pageerror`, or a CSP
   violation in the console. An empty array means every route rendered.
+- `@merqo/ui/testing` also exports `totpCode(secret, now?)` (RFC 6238, SHA-1,
+  30 s, 6 digits; throws on a non-base32 secret) and
+  `createAuthenticatedGlobalSetup({stateFile, email, password, ...})`, a
+  Playwright `globalSetup` that signs a seeded account in, enrols an
+  authenticator through the real `/mfa` page and saves the aal2
+  `storageState`. `enabled` defaults to `MERQO_E2E_AUTH === "1"`; routes,
+  selectors and URL patterns are overridable and `launch` can be injected.
+  `@playwright/test` stays an optional peer, loaded only when the setup runs
+  and never from the package root.
+
+  ```ts
+  // e2e/global-setup.ts
+  import { createAuthenticatedGlobalSetup } from "@merqo/ui/testing";
+
+  export const TEAM_STATE = "e2e/.auth/team.json";
+  export default createAuthenticatedGlobalSetup({
+    stateFile: TEAM_STATE,
+    email: process.env.MERQO_E2E_TEAM_EMAIL,
+    password: process.env.MERQO_E2E_TEAM_PASSWORD,
+  });
+  ```
+- `@merqo/ui/admin` (server only, no "use client", not re-exported from the
+  root): `recordAudit(client, {actorId, action, targetId, detail})` appends
+  to `admin_audit` and `recordOpsEvent(client, {vendorId, kind, ref, code})`
+  to `ops_events` (`ref` and `code` cut to 64 characters). `client` is a
+  service-role Supabase client or a (possibly async) factory for one. Neither
+  ever throws; failures are logged by message or code only. The action and
+  kind names are generic parameters, so each kit keeps its own union. Kit
+  queries (`summarizeIncidents`, stuck-job incidents, `order_status_events`)
+  stay in the kit.
+
+  ```ts
+  import { recordAudit } from "@merqo/ui/admin";
+  import { createServiceClient } from "@/lib/supabase/server";
+
+  type Action = "order.advance" | "booth.create";
+  export const audit = (actorId: string, action: Action, targetId: string | null, detail: Json) =>
+    recordAudit<Action>(createServiceClient, { actorId, action, targetId, detail });
+  ```
 
 ## Next.js server helpers (`@merqo/ui/next`)
 

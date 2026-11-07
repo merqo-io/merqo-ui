@@ -39,6 +39,10 @@
     "./testing": {
       "types": "./dist/testing/render-smoke.d.ts",
       "import": "./dist/testing.js"
+    },
+    "./kit-api": {
+      "types": "./dist/kit-api/index.d.ts",
+      "import": "./dist/kit-api.js"
     }
   },
   "files": [

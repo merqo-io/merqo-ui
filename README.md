@@ -742,6 +742,59 @@ install only what the entries you import need.
   (default selector `[data-error-boundary="true"]`), `pageerror`, or a CSP
   violation in the console. An empty array means every route rendered.
 
+## Kit API helpers
+
+`@merqo/ui/kit-api` is a server-only subpath (no React, no `"use client"`,
+not re-exported from the package root) holding the plumbing the kits used to
+copy. Every helper that talks to a store or the network takes it as an
+injected dependency, and none throws to the caller except `callMerqoRpc`.
+
+- `merqoBaseUrl(env?)`: `MERQO_BASE_URL` or `https://www.merqo.io`, read per
+  call. `merqoUrl(path, query?, base?, {development?})` builds an absolute
+  URL and returns `null` for a non-https base (`http://localhost` only with
+  `development: true`) or a `path` that would leave the base origin.
+- `createMerqoClient({secret, baseUrl?, timeoutMs?, development?, fetch?})`:
+  `get(path, query?)` and `post(path, body)` with a bearer secret, a 5 second
+  default timeout and `redirect: "error"`. Both resolve to
+  `{ok: true, status, data}` or `{ok: false, status, error}` where `error` is
+  `missing_secret`, `invalid_url`, `http_error`, `invalid_json`, `timeout` or
+  `network_error`. Map the result to the kit's own fail-closed policy.
+- `callMerqoRpc<Args, Returns>(supabase, fnName, args)`: calls
+  `supabase.schema("merqo").rpc(...)` and throws `"<fn> failed: <message>"`.
+- `postKitCallback({url, secret}, body, {development?, timeoutMs?, fetch?})`:
+  the signed kit callback. Refuses anything but https (and URLs with
+  credentials); `http://localhost` is allowed only with `development: true`.
+  Uses `redirect: "error"` and a 5 second timeout. Resolves to `{ok: true}` or
+  `{ok: false, reason, status?}`; failures are logged by error name only.
+- `hashApiKey(secret)` (sha256 hex) and
+  `verifyKitAuth(request, {store, rateLimit?})`: checks
+  `Authorization: Bearer <kit_slug>:<secret>` against a `KitKeyStore`
+  (`getSecretHash`, optional `touch` and `logFailure`) using a constant-time
+  compare, and resolves to `{kitSlug}` or `null`. The optional `rateLimit`
+  counts attempts per client IP (`limit`) and per kit slug (`slugLimit`,
+  defaults to `limit`) and fails closed unless `failOpen: true`. The slug
+  bucket stops a rotating IP from bypassing the limit, at the cost that a
+  flood naming a real slug can lock that kit out for one window. Pass
+  `trustedHeaders` to choose the IP headers (see `clientIp`). `KitKeyStore.
+  logFailure` receives the request's `kitSlug`, which is untrusted: sanitise
+  it before writing it anywhere.
+- `rateLimit`, `rateLimitStrict` and `rateLimitCheck` over a
+  `RateLimitStore` (`hit(key, limit, windowSeconds)` resolves true while
+  within the limit). `rateLimit` fails open on a store error,
+  `rateLimitStrict` fails closed, `rateLimitCheck` returns
+  `"ok" | "limited" | "error"`. `clientIp(headers, {trustedHeaders?})` returns a
+  valid IP from the first trusted header present, or `null`. The default is
+  `["x-vercel-forwarded-for"]`, which is trustworthy only on Vercel, where
+  the edge overwrites it. Behind any proxy that does not overwrite the
+  headers you list, a client can forge its IP: set `trustedHeaders` to
+  what your proxy sets (`x-forwarded-for` uses the last hop) or treat the
+  result as spoofable. `x-real-ip` is never read unless listed.
+  `digest(value)` is sha256 hex for counter keys;
+  `createMemoryRateLimitStore()` is a per-process fixed-window store for
+  tests.
+- `ActionResult<T>` and `isActionError(result)`: the Server Action result
+  shape, `{success: true} & T` or `{success: false, error}`.
+
 ## Z-index scale
 
 This package has no shared z-index token or constant — each component picks

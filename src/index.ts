@@ -58,7 +58,21 @@ export type { StatTileProps, DeltaPillProps } from "./stat-tile";
 export { StatusBadge } from "./status-badge";
 export type { StatusBadgeProps, StatusBadgeConfig } from "./status-badge";
 export { DataTable } from "./data-table";
-export type { DataTableProps, DataTableColumn } from "./data-table";
+export type { DataTableProps, DataTableColumn, DataTablePagination } from "./data-table";
+export { DataTablePager, useDataTablePage } from "./data-table-pager";
+export type { DataTablePagerProps, DataTablePagerLabels } from "./data-table-pager";
+export { Faq } from "./faq";
+export type { FaqProps, FaqItem } from "./faq";
+export { readTourSeen, writeTourSeen } from "./tour-seen";
+export type { TourSeenStorage } from "./tour-seen";
+export { TourActions } from "./tour-actions";
+export type { TourActionsProps, TourActionsLabels } from "./tour-actions";
+export { ProLock } from "./pro-lock";
+export type { ProLockProps } from "./pro-lock";
+export { CustomerTelegramConnect } from "./customer-telegram-connect";
+export type { CustomerTelegramConnectProps } from "./customer-telegram-connect";
+export { feedbackSchema } from "./feedback-schema";
+export type { FeedbackInput } from "./feedback-schema";
 export {
   LEGAL_VERSIONS,
   getLegalDocSource,

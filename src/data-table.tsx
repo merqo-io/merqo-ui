@@ -12,6 +12,7 @@ export interface DataTableColumn<T> {
 export interface DataTablePagination extends Pick<DataTablePagerProps, "onPageChange" | "labels"> {
   /** 1-based; clamped to the last page. */
   page: number;
+  /** Rows per page; anything below 1 or not a number is treated as 1. */
   pageSize: number;
 }
 
@@ -43,47 +44,49 @@ export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination 
   // The pager lives in its own client module and is mounted only when the
   // caller paginates, so a table without `pagination` stays usable from a
   // Server Component.
-  const pageCount = pagination ? Math.max(1, Math.ceil(rows.length / pagination.pageSize)) : 1;
-  const page = pagination ? Math.min(Math.max(1, pagination.page), pageCount) : 1;
-  const visible = pagination ? rows.slice((page - 1) * pagination.pageSize, page * pagination.pageSize) : rows;
+  const pageSize = pagination ? Math.max(1, Math.floor(pagination.pageSize) || 1) : rows.length;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const requested = pagination && Number.isFinite(pagination.page) ? pagination.page : 1;
+  const page = Math.min(Math.max(1, requested), pageCount);
+  const visible = pagination ? rows.slice((page - 1) * pageSize, page * pageSize) : rows;
 
   return (
     <div>
-    <div className="relative w-full overflow-x-auto">
-      <table className="w-full caption-bottom text-sm">
-        <thead className="[&_tr]:border-b">
-          <tr className="border-b transition-colors hover:bg-muted/50">
-            {columns.map((col) => (
-              <th
-                key={col.header}
-                className={cn("h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground", col.className)}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="[&_tr:last-child]:border-0">
-          {visible.map((row) => (
-            <tr key={getRowKey(row)} className="border-b transition-colors hover:bg-muted/50">
+      <div className="relative w-full overflow-x-auto">
+        <table className="w-full caption-bottom text-sm">
+          <thead className="[&_tr]:border-b">
+            <tr className="border-b transition-colors hover:bg-muted/50">
               {columns.map((col) => (
-                <td key={col.header} className={cn("p-2 align-middle whitespace-nowrap", col.className)}>
-                  {col.cell(row)}
-                </td>
+                <th
+                  key={col.header}
+                  className={cn("h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground", col.className)}
+                >
+                  {col.header}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-    {pagination && pageCount > 1 && (
-      <DataTablePager
-        page={page}
-        pageCount={pageCount}
-        onPageChange={pagination.onPageChange}
-        labels={pagination.labels}
-      />
-    )}
+          </thead>
+          <tbody className="[&_tr:last-child]:border-0">
+            {visible.map((row) => (
+              <tr key={getRowKey(row)} className="border-b transition-colors hover:bg-muted/50">
+                {columns.map((col) => (
+                  <td key={col.header} className={cn("p-2 align-middle whitespace-nowrap", col.className)}>
+                    {col.cell(row)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {pagination && pageCount > 1 && (
+        <DataTablePager
+          page={page}
+          pageCount={pageCount}
+          onPageChange={pagination.onPageChange}
+          labels={pagination.labels}
+        />
+      )}
     </div>
   );
 }

@@ -11,6 +11,18 @@ export interface CustomerTelegramConnectProps {
   className?: string;
 }
 
+// The link is minted by another service, so a scheme such as javascript: must
+// never reach an href.
+function isSafeDeepLink(value: string | null | undefined): value is string {
+  if (!value) return false;
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "https:" || protocol === "tg:";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Order-page prompt that opens a Telegram bot via a deep link. Renders
  * nothing when the link could not be minted, so an outage upstream never
@@ -22,7 +34,7 @@ export function CustomerTelegramConnect({
   disclosure,
   className,
 }: CustomerTelegramConnectProps): React.ReactElement | null {
-  if (!deepLink) return null;
+  if (!isSafeDeepLink(deepLink)) return null;
   return (
     <div className={cn("text-center", className)}>
       <a

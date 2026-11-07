@@ -36,6 +36,20 @@ describe("DataTable pagination", () => {
     expect(screen.getByText("Row 20")).toBeInTheDocument();
   });
 
+  it.each([0, -5, Number.NaN])("treats pageSize %s as 1", (pageSize) => {
+    render(
+      <DataTable
+        rows={MANY.slice(0, 3)}
+        columns={COLUMNS}
+        getRowKey={(r) => r.id}
+        pagination={{ page: Number.NaN, pageSize, onPageChange: noop }}
+      />,
+    );
+    expect(screen.getByText("Row 0")).toBeInTheDocument();
+    expect(screen.queryByText("Row 1")).not.toBeInTheDocument();
+    expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
+  });
+
   it("omits the pager when everything fits on one page", () => {
     render(
       <DataTable

@@ -5,6 +5,7 @@
 ### Added
 
 - `DataTable` `pagination` prop ({page, pageSize, onPageChange, labels?}) with touch-sized previous / next controls, `emptyState` now accepts any node, and new `DataTablePager` and `useDataTablePage`.
+- `DataTable` empty state is now wrapped in a `<div>` instead of a `<p>` so a node can be passed as `emptyState`; no kit test or CSS relies on the `<p>`.
 - `Faq({items, id?, eyebrow?, title?})`: accessible accordion FAQ shell; content stays in the kit.
 - `readTourSeen`, `writeTourSeen` (tour-seen core, key passed by the kit) and `TourActions` (back / next / skip / finish controls).
 - `ProLock`, `CustomerTelegramConnect` and `feedbackSchema` (nps and message; shared by paykit, printkit, stockkit and merqo).

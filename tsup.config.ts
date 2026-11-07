@@ -107,6 +107,10 @@ export default defineConfig([
     entry: {
       eslint: "src/eslint/preset.ts",
       security: "src/security/csp.ts",
+      supabase: "src/supabase/index.ts",
+      "supabase-server": "src/supabase/server.ts",
+      "supabase-middleware": "src/supabase/middleware.ts",
+      auth: "src/auth/index.ts",
       contracts: "src/contracts/vendor-activity.ts",
       testing: "src/testing/render-smoke.ts",
       "kit-api": "src/kit-api/index.ts",

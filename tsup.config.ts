@@ -113,6 +113,7 @@ export default defineConfig([
       auth: "src/auth/index.ts",
       contracts: "src/contracts/vendor-activity.ts",
       testing: "src/testing/render-smoke.ts",
+      "kit-api": "src/kit-api/index.ts",
     },
     format: ["esm"],
     dts: false,

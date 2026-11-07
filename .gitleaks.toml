@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "RFC 6238 appendix B public test vector (base32 of the ASCII seed 12345678901234567890), committed in an earlier commit of the S7d branch"
+regexTarget = "match"
+regexes = ['''GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ''']

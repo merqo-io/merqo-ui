@@ -57,8 +57,12 @@
       "import": "./dist/contracts.js"
     },
     "./testing": {
-      "types": "./dist/testing/render-smoke.d.ts",
+      "types": "./dist/testing/index.d.ts",
       "import": "./dist/testing.js"
+    },
+    "./admin": {
+      "types": "./dist/admin/index.d.ts",
+      "import": "./dist/admin.js"
     },
     "./kit-api": {
       "types": "./dist/kit-api/index.d.ts",

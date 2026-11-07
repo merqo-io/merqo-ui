@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ElevatedCard } from "./elevated-card";
 import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 
@@ -22,6 +23,12 @@ export interface SectionProps {
    * function itself.
    */
   wrapper?: (content: React.ReactNode) => React.ReactNode;
+  /**
+   * Card chrome of the default shell. "default" is the existing bordered
+   * card, "elevated" the `ElevatedCard` look, "none" no chrome at all.
+   * Ignored when `wrapper` is set.
+   */
+  surface?: "default" | "elevated" | "none";
 }
 
 export function Section({
@@ -32,6 +39,7 @@ export function Section({
   tooltip,
   className,
   wrapper,
+  surface = "default",
   children,
 }: SectionProps) {
   const content = (
@@ -71,10 +79,23 @@ export function Section({
     return <>{wrapper(content)}</>;
   }
 
+  if (surface === "elevated") {
+    return (
+      <ElevatedCard
+        as="section"
+        className={cn("text-card-foreground flex flex-col gap-4 p-6", className)}
+      >
+        {content}
+      </ElevatedCard>
+    );
+  }
+
   return (
     <section
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border p-6 shadow-sm",
+        surface === "default" &&
+          "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border p-6 shadow-sm",
+        surface === "none" && "flex flex-col gap-4",
         className,
       )}
     >

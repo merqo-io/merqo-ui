@@ -237,3 +237,36 @@ describe("Section", () => {
     );
   });
 });
+
+describe("Section surface", () => {
+  it("keeps the default card shell without a surface prop", () => {
+    const { container } = render(
+      <Section icon={<Info />} title="t">
+        <div />
+      </Section>,
+    );
+    expect(container.querySelector("section")).toHaveClass("bg-card", "shadow-sm");
+  });
+
+  it('surface="elevated" applies the ElevatedCard chrome', () => {
+    const { container } = render(
+      <Section icon={<Info />} title="t" surface="elevated" className="mine">
+        <div />
+      </Section>,
+    );
+    const shell = container.querySelector("section");
+    expect(shell).toHaveClass("bg-card", "border", "p-6", "mine");
+    expect(shell).not.toHaveClass("shadow-sm");
+  });
+
+  it('surface="none" drops the card chrome', () => {
+    const { container } = render(
+      <Section icon={<Info />} title="t" surface="none" className="mine">
+        <div />
+      </Section>,
+    );
+    const shell = container.querySelector("section");
+    expect(shell).not.toHaveClass("bg-card");
+    expect(shell).toHaveClass("mine");
+  });
+});

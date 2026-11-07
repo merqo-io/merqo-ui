@@ -184,6 +184,8 @@ works locally.
 ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
   default bg-card/border/shadow classes don't apply.
+  `surface?: "default" | "elevated" | "none"` picks the default shell: the existing
+  bordered card, the `ElevatedCard` look, or no chrome (ignored with `wrapper`).
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -438,6 +440,19 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
 - `TierChip({tier, className?})` — plan badge for `AccountMenu`/`DashboardNav`
   `tierBadge`, labelled by `tierLabel(tier)`: muted for free, primary tint
   for starter, filled for any paid tier.
+- `AccountMenu` also takes `tier?: string`, rendered as a `TierChip` in the dropdown header
+  (needs `vendor.subtitle`); `tierBadge` still works and wins when both are set. The trigger
+  is an `AvatarIdentity`.
+- `StatTile` takes `card?: boolean` for the `ElevatedCard` shell (`className` then styles the
+  card). `StatCard` is deprecated: use `<StatTile card />`; it stays as an alias that adds `icon` and `featured`.
+- `Avatar({name, avatarUrl?, className?})` — photo when `avatarUrl` is set, else initials in a tinted tile.
+  `initials(name)`: one word gives its first two letters, several give first and last initial, empty gives a bullet.
+- `AvatarIdentity({name, avatarUrl?, label?, className?})` — avatar with the label (default `name`; `null` for none)
+  on its right, hidden below `sm` and truncated. The side is fixed across kits; there is no prop to flip it.
+- `AsyncSubmitButton({pending, pendingChildren?, className?, children})` — submit button with a spinner,
+  `aria-busy` and disabled state while pending. Also used inside `FeedbackSheet` and `HelpSheet`.
+- `FORM_LABEL_CLASS` — small-caps field label classes. `FormError({message, id?, className?})` — inline
+  `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
 - `ElevatedCard({as?, className, children})` — the polished lifted-shadow
   card shell used across profile/dashboard/setup pages, deliberately not
   qkit's own scalloped `Ticket` theme (that stays local to qkit). `as`

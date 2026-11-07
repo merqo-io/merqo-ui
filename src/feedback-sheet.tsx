@@ -2,18 +2,10 @@
 
 import * as React from "react";
 
-import { AsyncSubmitButton } from "./async-submit-button";
 import { SegmentedControl } from "./segmented-control";
 import { isRedirectError } from "./redirect-error";
+import { SheetMessageForm, SheetShell, toErrorMessage } from "./sheet-shell";
 import { useAsyncAction } from "./use-async-action";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "./ui/sheet";
 
 export interface FeedbackData {
   message: string;
@@ -33,12 +25,6 @@ export interface FeedbackSheetProps {
   description?: string;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
-}
-
-function toErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "Something went wrong. Please try again.";
 }
 
 export function FeedbackSheet({
@@ -77,69 +63,50 @@ export function FeedbackSheet({
   });
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
-        </SheetHeader>
-        <form
-          className="flex flex-1 flex-col gap-4 px-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            run().catch((err) => {
-              if (!isRedirectError(err)) onError?.(err);
-            });
-          }}
-        >
-          {showNps && (
-            <div className="flex flex-col gap-2">
-              <SegmentedControl
-                variant="pill"
-                ariaLabel="Recommend score, 0 to 10"
-                className="grid-cols-11 gap-1"
-                optionClassName="tabular-nums"
-                value={score === null ? null : String(score)}
-                onChange={(v) => {
-                  setScore(Number(v));
-                  setNpsValidationError(false);
-                }}
-                options={Array.from({ length: 11 }, (_, i) => ({
-                  value: String(i),
-                  label: i,
-                  ariaLabel: String(i),
-                }))}
-              />
-              {npsValidationError && (
-                <p className="text-destructive text-sm" role="alert">
-                  Pick a score first
-                </p>
-              )}
-            </div>
-          )}
-          <div className="flex flex-1 flex-col gap-2">
-            <label htmlFor="feedback-message" className="text-sm font-medium">
-              Message
-            </label>
-            <textarea
-              id="feedback-message"
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              className="border-input bg-background flex-1 min-h-24 resize-none rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+    <SheetShell
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+    >
+      <SheetMessageForm
+        messageId="feedback-message"
+        message={message}
+        onMessageChange={setMessage}
+        pending={pending}
+        errorMessage={error ? toErrorMessage(error) : null}
+        onSubmit={() => {
+          run().catch((err) => {
+            if (!isRedirectError(err)) onError?.(err);
+          });
+        }}
+      >
+        {showNps && (
+          <div className="flex flex-col gap-2">
+            <SegmentedControl
+              variant="pill"
+              ariaLabel="Recommend score, 0 to 10"
+              className="grid-cols-11 gap-1"
+              optionClassName="tabular-nums"
+              value={score === null ? null : String(score)}
+              onChange={(v) => {
+                setScore(Number(v));
+                setNpsValidationError(false);
+              }}
+              options={Array.from({ length: 11 }, (_, i) => ({
+                value: String(i),
+                label: i,
+                ariaLabel: String(i),
+              }))}
             />
-            {error ? (
+            {npsValidationError && (
               <p className="text-destructive text-sm" role="alert">
-                {toErrorMessage(error)}
+                Pick a score first
               </p>
-            ) : null}
+            )}
           </div>
-          <SheetFooter className="px-0 pb-4">
-            <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2">
-              Send
-            </AsyncSubmitButton>
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
+        )}
+      </SheetMessageForm>
+    </SheetShell>
   );
 }

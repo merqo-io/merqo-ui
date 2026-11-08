@@ -894,6 +894,49 @@ whatever the server or browser zone.
   `free | starter | qkit | paid`. `qkit` and `paid` both display as "Pro"
   (`tierLabel` agrees). stockkit's `free`/`pro` maps to wire `free`/`paid`.
 
+## Shared primitives (`@merqo/ui/primitives`)
+
+The shadcn primitives the kits used to copy locally. They carry no colour, font
+or radius values, only semantic Tailwind classes, so each kit's tokens drive the
+look. The subpath is a plain re-export of per-module files: `cn`, `Button`,
+`Badge`, `Card` and the other directive-free modules stay importable from a
+Server Component, and each client primitive keeps its own `"use client"`.
+
+```tsx
+import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
+```
+
+- `cn(...classes)`: `clsx` plus `tailwind-merge`.
+- `Button`, `buttonVariants`, `ButtonProps`. Variants: `default`,
+  `destructive`, `outline`, `secondary`, `ghost`, `link`. Sizes: `default`
+  (36px), `xs` (24px), `sm` (32px), `lg` (40px), `icon`, `icon-xs`, `icon-sm`,
+  `icon-lg`. On coarse pointers (touch) every size is at least 44px (`lg` is
+  48px), so a vendor on a tablet gets a full tap target; mouse and trackpad keep
+  the compact sizes.
+- `Input` and `Label` carry shadcn's dark-mode (`dark:bg-input/30`, dark
+  invalid ring) and disabled-state classes, so `LoginForm`, `MfaForm`,
+  `SocialLinksFields` and `MoneyInput` pick them up. Internal `Button`,
+  `Input` and `SelectTrigger` uses such as `BackButton` grow to 44px on coarse
+  pointers.
+- `Input` and `SelectTrigger` are 36px (32px for `sm`) and 44px on coarse
+  pointers. `Textarea` and `Label` have no size.
+- `Badge`, `badgeVariants`, `BadgeProps`. Variants: `default`, `secondary`,
+  `destructive`, `outline`, `ghost`, `link`, `muted`, `success`. A kit that needs a gold badge wraps
+  `Badge` locally.
+- `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
+  `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
+  `SelectScrollDownButton`.
+- `Switch` (`size`: `default` or `sm`), `Checkbox`.
+- `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
+  `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
+  `DialogPortal`.
+- `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`.
+- `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`,
+  `CardContent`, `CardFooter`.
+- `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipProvider`. A tooltip
+  opens on hover and keyboard focus only, so never make it the sole place a
+  vendor can read something on touch; use `InfoTooltip` with `trigger="tap"`.
+
 ## Shared tooling entries (since v0.35.0)
 
 Four subpath exports with no React. Their peer dependencies are optional;

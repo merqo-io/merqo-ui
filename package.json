@@ -29,7 +29,7 @@
       "import": "./dist/legal.js"
     },
     "./eslint": {
-      "types": "./dist/eslint/preset.d.ts",
+      "types": "./dist/eslint/index.d.ts",
       "import": "./dist/eslint.js"
     },
     "./security": {

@@ -75,7 +75,22 @@ describe("privacy.md", () => {
     );
     expect(retention).toMatch(/\*\*request and access logs\*\*: 90 days/i);
     expect(retention).toMatch(
-      /\*\*printkit label-job data\*\*: 90 days after the label is printed/i,
+      /\*\*failed API sign-in records\*\*[\s\S]*?IP address is removed after\s+30 days/i,
+    );
+    expect(retention).toMatch(
+      /\*\*printkit label-job data\*\*[\s\S]*?90 days after the label is printed[\s\S]*?never printed/i,
+    );
+    expect(retention).toMatch(
+      /\*\*printer pairing codes\*\*[\s\S]*?10 minutes[\s\S]*?deleted a\s+day after/i,
+    );
+    expect(retention).toMatch(
+      /\*\*Telegram connect tokens\*\*[\s\S]*?30 minutes[\s\S]*?deleted as soon as\s+they are used[\s\S]*?a day after it expires/i,
+    );
+    expect(retention).toMatch(
+      /\*\*payment link tokens\*\*[\s\S]*?one-way hash/i,
+    );
+    expect(retention).toMatch(
+      /\*\*payment screenshots\*\*[\s\S]*?same terms as end customer\s+records[\s\S]*?no separate fixed period/i,
     );
   });
 

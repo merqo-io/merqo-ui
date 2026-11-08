@@ -180,8 +180,22 @@ collected for, or as required by law:
   that generated them ends, plus a short tail for support and dispute
   purposes, or until the end customer withdraws consent, whichever comes
   first;
-- **request and access logs**: 90 days; and
-- **printkit label-job data**: 90 days after the label is printed.
+- **request and access logs**: 90 days;
+- **failed API sign-in records** (paykit): the IP address is removed after
+  30 days; the rest of the record (which Kit called, the reason it failed
+  and when) is kept;
+- **printkit label-job data** (customer names and order details on a
+  label): erased 90 days after the label is printed, or 90 days after the
+  job was created if it was never printed;
+- **printer pairing codes** (printkit): valid for 10 minutes, then deleted a
+  day after they expire;
+- **Telegram connect tokens**: valid for 30 minutes and deleted as soon as
+  they are used; one that is never used is deleted a day after it expires;
+- **payment link tokens** (paykit): stored only as a one-way hash, never in
+  readable form, and kept with the payment record they belong to; and
+- **payment screenshots** (proof of payment a customer uploads): kept with
+  the order or booking record they prove, on the same terms as end customer
+  records above, with no separate fixed period.
 
 ## Audit and security logs
 

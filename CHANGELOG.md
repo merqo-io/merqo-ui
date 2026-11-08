@@ -2,9 +2,16 @@
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-11-08
+
 ### Changed (legal)
 
-- Privacy policy retention list now states the periods the kits enforce: paykit failed API sign-in IPs (30 days), printer pairing codes, Telegram connect tokens, payment link tokens and payment screenshots, and the printkit label-job line covers jobs that were never printed. Part of the unreleased `2026-11-08` legal version, so `LEGAL_VERSIONS` is unchanged.
+- Privacy policy retention list now states the periods the kits enforce: paykit failed API sign-in IPs (30 days), printer pairing codes, Telegram connect tokens, payment link tokens and payment screenshots, and the printkit label-job line covers jobs that were never printed. It is part of the `2026-11-08` legal version that 0.43.0 shipped, so `LEGAL_VERSIONS` is unchanged.
+
+### Added
+
+- `merqoNoLocalCopies({allow?})` in `@merqo/ui/eslint`: a flat-config helper (not part of `merqoEslintPreset`) that reports kit-local imports, re-exports and files that copy a piece @merqo/ui now ships, naming the replacement import. Patterns are anchored to the kit folders the copies live in, a file that itself imports from `@merqo/ui` is treated as a wrapper and not reported, and `cn` is flagged only as an import from `lib/utils`. It never flags `@merqo/ui` imports, and the wordmark, FAQ content, tour steps, help centres, guides, per-domain badge maps, legal schedules and the footer, providers, section and money wrappers stay local. `allow` takes a piece id or a path suffix (prefixes and extension ignored, case-insensitive).
+- README: the list of pieces `merqoNoLocalCopies` bans with their replacements, and a Wiring note for `DataCollectionNotice` (which customer-facing forms need it, where it goes, an example).
 
 ## [0.43.0] - 2026-11-08
 
@@ -16,8 +23,6 @@
 
 ### Added
 
-- `merqoNoLocalCopies({allow?})` in `@merqo/ui/eslint`: a flat-config helper (not part of `merqoEslintPreset`) that reports kit-local imports, re-exports and files that copy a piece @merqo/ui now ships, naming the replacement import. Patterns are anchored to the kit folders the copies live in, a file that itself imports from `@merqo/ui` is treated as a wrapper and not reported, and `cn` is flagged only as an import from `lib/utils`. It never flags `@merqo/ui` imports, and the wordmark, FAQ content, tour steps, help centres, guides, per-domain badge maps, legal schedules and the footer, providers, section and money wrappers stay local. `allow` takes a piece id or a path suffix (prefixes and extension ignored, case-insensitive).
-- README: the list of pieces `merqoNoLocalCopies` bans with their replacements, and a Wiring note for `DataCollectionNotice` (which customer-facing forms need it, where it goes, an example).
 - `@merqo/ui/primitives`: the shared shadcn primitives (`Button`, `Input`, `Textarea`, `Label`, `Select*`, `Switch`, `Checkbox`, `Badge`, `Dialog*`, `Tabs*`, `Card*`, `Tooltip*`) and `cn`, so the kits can delete their identical local copies. `Button` gains the `xs`, `icon-xs`, `icon-sm` and `icon-lg` sizes, and every size grows to at least 44px on coarse pointers; `Input` and `Select` also reach 44px there. `Badge` gains `ghost`, `link`, `muted` and `success` variants (`gold` stays kit-local: wrap `Badge` locally, since it renders nothing in kits without `--color-gold`). `Input` and `Label` now carry shadcn's dark-mode and disabled-state classes, which `LoginForm`, `MfaForm`, `SocialLinksFields` and `MoneyInput` pick up; `BackButton` and other internal `Button`, `Input` and `SelectTrigger` uses grow to 44px on coarse pointers.
 - `DataTable` `pagination` prop ({page, pageSize, onPageChange, labels?}) with touch-sized previous / next controls, `emptyState` now accepts any node, and new `DataTablePager` and `useDataTablePage`.
 - `DataTable` empty state is now wrapped in a `<div>` instead of a `<p>` so a node can be passed as `emptyState`; no kit test or CSS relies on the `<p>`.

@@ -437,6 +437,44 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   `onConfirm`.
 - `EmptyState({icon?, title, description?, children?, actions?, className})`
   — dashed "nothing here yet" card with up to two actions.
+- `DataTable` also takes `pagination?: {page, pageSize, onPageChange, labels?}`
+  (1-based, clamped): it shows one page of `rows` with previous / next
+  buttons (44px) and a "Page x of y" line, and omits the pager when
+  everything fits on one page. `emptyState` accepts text or any node. Pair it
+  with `useDataTablePage(total, pageSize)` from `DataTablePager`'s module
+  for the page state. A table without `pagination` stays free of client
+  code and can render in a Server Component.
+- `DataTablePager({page, pageCount, onPageChange, labels?})` and
+  `useDataTablePage(total, pageSize)` -> `{page, setPage, pageCount}`: the
+  pager controls and a clamped page-state hook behind `DataTable`'s
+  `pagination`. Client module.
+- `Faq({items, id?, eyebrow?, title?, className?})` — accordion FAQ on
+  native `<details>`, so it works by touch, keyboard and screen reader.
+  `items` is `{question, answer}[]` (nodes allowed); the content stays in
+  the kit. Renders nothing for an empty list. Server-safe.
+- `readTourSeen(key, storage?)` and `writeTourSeen(key, storage?, now?)` —
+  the tour-seen core. The kit passes the storage key; storage defaults to
+  `window.localStorage`, and missing or blocked storage reads as unseen and
+  never throws. Server-safe. Steps stay in the kit.
+- `TourActions({index, total, onNext, onBack, onSkip, onFinish, labels?})` —
+  back / next / skip controls for a tour step with a "x of y" line; the last
+  step shows finish instead of next and drops skip. 44px buttons.
+- `ProLock({label, href, onClick?, LinkComponent?, className?})` — inline
+  lock pill that sends a vendor to the plan page from a gated feature. Tier
+  names and copy come from `label`; `onClick` is the hook for logging which
+  gate was clicked.
+- `CustomerTelegramConnect({deepLink, linkLabel, disclosure?, className?})`
+  — order-page link that opens a Telegram bot. Minting the deep link is the
+  kit's job; a null `deepLink` renders nothing so an upstream outage never
+  breaks the page. Server-safe.
+- `feedbackSchema` and `FeedbackInput` — zod schema for vendor feedback:
+  `nps` (integer 0 to 10) and optional trimmed `message` (max 2000). Shared
+  by paykit, printkit, stockkit and merqo; qkit's wider schema (source,
+  boothId, orderNumber, token, rating) stays local. Server-safe.
+- `PageHeader` also takes `actions` (alias of `action`, which wins) and
+  `back` as `{href, label}` for a plain back link with a 44px target.
+- `EmptyState` also takes `primaryAction` and `secondaryAction`, rendered
+  in order when `actions` is not set.
 - `TierChip({tier, className?})` — plan badge for `AccountMenu`/`DashboardNav`
   `tierBadge`, labelled by `tierLabel(tier)`: muted for free, primary tint
   for starter, filled for any paid tier.

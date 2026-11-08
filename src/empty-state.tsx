@@ -12,6 +12,9 @@ export interface EmptyStateProps {
   children?: React.ReactNode;
   /** Up to two links or buttons; the first may be the primary one. */
   actions?: React.ReactNode;
+  /** Separate slots for kits that name the two steps; ignored when `actions` is set. */
+  primaryAction?: React.ReactNode;
+  secondaryAction?: React.ReactNode;
   className?: string;
 }
 
@@ -25,9 +28,19 @@ export function EmptyState({
   description,
   children,
   actions,
+  primaryAction,
+  secondaryAction,
   className,
 }: EmptyStateProps): React.ReactElement {
   const body = description ?? children;
+  const steps =
+    actions ??
+    (primaryAction || secondaryAction ? (
+      <>
+        {primaryAction}
+        {secondaryAction}
+      </>
+    ) : null);
   return (
     <div
       className={cn(
@@ -51,9 +64,9 @@ export function EmptyState({
           {body}
         </p>
       )}
-      {actions && (
+      {steps && (
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-          {actions}
+          {steps}
         </div>
       )}
     </div>

@@ -2,11 +2,11 @@
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-11-08
+
 ### Changed (legal)
 
-- Privacy policy retention list now states the periods the kits enforce: paykit failed API sign-in IPs (30 days), printer pairing codes, Telegram connect tokens, payment link tokens and payment screenshots, and the printkit label-job line covers jobs that were never printed. Part of the unreleased `2026-11-08` legal version, so `LEGAL_VERSIONS` is unchanged.
-
-## [0.44.0] - 2026-11-08
+- Privacy policy retention list now states the periods the kits enforce: paykit failed API sign-in IPs (30 days), printer pairing codes, Telegram connect tokens, payment link tokens and payment screenshots, and the printkit label-job line covers jobs that were never printed. It is part of the `2026-11-08` legal version that 0.43.0 shipped, so `LEGAL_VERSIONS` is unchanged.
 
 ### Added
 

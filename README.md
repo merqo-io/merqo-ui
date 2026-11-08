@@ -993,68 +993,71 @@ install only what the entries you import need.
   kit-local module (`@/...`, `~/...`, `src/...` or a relative path), and any
   file that lives at such a path, when @merqo/ui ships the same piece. The
   message names the replacement import. Imports from `@merqo/ui` itself are
-  never flagged. Turn it on in the pull request that deletes the copies:
+  never flagged. Patterns are anchored to the folders the copies live in
+  (a trailing `/index` and the extension are ignored), so a same-named module
+  elsewhere is left alone. A file that itself imports from `@merqo/ui` or one
+  of its subpaths is a wrapper, not a copy, and is not reported as a
+  definition (importing the wrapper is still reported). Turn the rule on in
+  the pull request that deletes the copies:
 
   ```js
   import { merqoEslintPreset, merqoNoLocalCopies } from "@merqo/ui/eslint";
 
   export default [
     ...merqoEslintPreset({ sonarjsPlugin, tsPlugin }),
-    ...merqoNoLocalCopies({ allow: ["components/landing/footer"] }),
+    ...merqoNoLocalCopies({ allow: ["components/landing/page-header"] }),
   ];
   ```
 
-  `allow` lists pieces the kit keeps on purpose, as a piece id (`"footer"`)
-  or a path suffix without extension. Either form skips both the imports of
-  that path and the file that lives there. Flagged pieces, with the id and
-  the replacement:
+  `allow` lists pieces the kit keeps on purpose. Each entry is a piece id
+  (`"page-header"`) or a path suffix (`"components/landing/page-header"`).
+  Local prefixes (`@/`, `~/`, `src/`, `./`, `../`) and the extension are
+  ignored and the match is case-insensitive. An entry skips both the imports
+  of that path and the file that lives there. Flagged pieces:
 
-  | Local module (name at the end of the path) | Id | Use instead |
+  | Local module | Id | Use instead |
   | --- | --- | --- |
-  | `use-async-action` | `use-async-action` | `useAsyncAction` from `@merqo/ui` |
-  | `tier-label` | `tier-label` | `tierLabel` from `@merqo/ui` |
-  | `segmented-control` | `segmented-control` | `SegmentedControl` from `@merqo/ui` |
-  | `page-header` | `page-header` | `PageHeader` from `@merqo/ui` |
-  | `empty-state` | `empty-state` | `EmptyState` from `@merqo/ui` |
-  | `mfa-form` | `mfa-form` | `MfaForm` from `@merqo/ui` |
-  | `brand-icon` | `brand-icon` | `brandIcon` from `@merqo/ui` |
-  | `status-badge` | `status-badge` | `StatusBadge` from `@merqo/ui` |
-  | `confirm-dialog` | `confirm-dialog` | `ConfirmDialog` from `@merqo/ui` |
-  | `audit-log`, `audit-log-table` | `audit-log` | `AuditLogTable` from `@merqo/ui` |
-  | `stat-tile` | `stat-tile` | `StatTile` from `@merqo/ui` |
-  | `stat-card` | `stat-card` | `StatCard` from `@merqo/ui` |
-  | `dashboard-nav` | `dashboard-nav` | `DashboardNav` from `@merqo/ui` |
-  | `dashboard-tour`, `dashboard-tour.server` | `dashboard-tour` | `DashboardTour` from `@merqo/ui` |
-  | `footer`, `site-footer` | `footer` | `Footer` from `@merqo/ui` |
-  | `components/section` | `section` | `Section` from `@merqo/ui` |
-  | `providers`, `components/providers`, `layout/providers` | `providers` | `Providers` from `@merqo/ui` |
-  | `elevated-card` | `elevated-card` | `ElevatedCard` from `@merqo/ui` |
-  | `pro-lock` | `pro-lock` | `ProLock` from `@merqo/ui` |
-  | `feedback-schema` | `feedback-schema` | `feedbackSchema` from `@merqo/ui` |
-  | `lib/money` | `money` | `formatMoney`, `centsToDollarString`, `parseDollarsToCents` from `@merqo/ui` |
-  | `telegram-link` | `telegram-link` | `telegramLink`, `normalizeTelegramHandle` from `@merqo/ui` |
-  | `telegram-connect` | `customer-telegram-connect` | `CustomerTelegramConnect` from `@merqo/ui` |
-  | `vendor-telegram-connect`, `vendor-telegram-section` | `vendor-telegram-section` | `VendorTelegramSection` from `@merqo/ui`, passing `onConnect` |
-  | `safe-redirect` | `safe-redirect` | `safeRedirectPath` from `@merqo/ui` |
-  | `theme-props` | `theme-props` | `themeProps` from `@merqo/ui/next` |
-  | `security-headers` | `security-headers` | `buildSecurityHeaders` from `@merqo/ui/security` |
+  | `hooks/use-async-action` | `use-async-action` | `useAsyncAction` from `@merqo/ui` |
+  | `lib/tier-label` | `tier-label` | `tierLabel` from `@merqo/ui` |
+  | `components/**/segmented-control` | `segmented-control` | `SegmentedControl` from `@merqo/ui` |
+  | `components/page-header`, `components/widgets/page-header` | `page-header` | `PageHeader` from `@merqo/ui` |
+  | `components/empty-state` | `empty-state` | `EmptyState` from `@merqo/ui` |
+  | `app/**/mfa-form`, `components/**/mfa-form` | `mfa-form` | `MfaForm` from `@merqo/ui` |
+  | `lib/brand-icon` | `brand-icon` | `brandIcon` from `@merqo/ui` |
+  | `components/**/status-badge` | `status-badge` | `StatusBadge` from `@merqo/ui` |
+  | `components/**/confirm-dialog` | `confirm-dialog` | `ConfirmDialog` from `@merqo/ui` |
+  | `app/**/audit-log`, `components/**/audit-log-table` | `audit-log` | `AuditLogTable` from `@merqo/ui` |
+  | `components/**/stat-tile` | `stat-tile` | `StatTile` from `@merqo/ui` |
+  | `components/stat-card`, `components/dashboard/stat-card` | `stat-card` | `StatCard` from `@merqo/ui` |
+  | `app/**/dashboard-nav`, `components/**/dashboard-nav` | `dashboard-nav` | `DashboardNav` from `@merqo/ui` |
+  | `components/**/dashboard-tour`, `dashboard-tour.server` | `dashboard-tour` | `DashboardTour` from `@merqo/ui` |
+  | `components/**/elevated-card` | `elevated-card` | `ElevatedCard` from `@merqo/ui` |
+  | `components/**/pro-lock` | `pro-lock` | `ProLock` from `@merqo/ui` |
+  | `lib/feedback-schema` | `feedback-schema` | `feedbackSchema` from `@merqo/ui` |
+  | `lib/telegram-link` | `telegram-link` | `telegramLink`, `normalizeTelegramHandle` from `@merqo/ui` |
+  | `app/**/telegram-connect`, `components/**/telegram-connect` | `customer-telegram-connect` | `CustomerTelegramConnect` from `@merqo/ui` |
+  | `app/**/vendor-telegram-connect`, `components/**/vendor-telegram-section` | `vendor-telegram-section` | `VendorTelegramSection` from `@merqo/ui`, passing `onConnect` |
+  | `lib/safe-redirect` | `safe-redirect` | `safeRedirectPath` from `@merqo/ui` |
+  | `lib/theme-props` | `theme-props` | `themeProps` from `@merqo/ui/next` |
+  | `lib/security-headers` | `security-headers` | `buildSecurityHeaders` from `@merqo/ui/security` |
   | `lib/supabase/client` | `supabase-client` | `createSupabaseBrowserClient` from `@merqo/ui/supabase` |
-  | `lib/supabase/server` | `supabase-server` | `@merqo/ui/supabase/server` |
-  | `lib/supabase/middleware` | `supabase-middleware` | `@merqo/ui/supabase/middleware` |
-  | `rate-limit` | `rate-limit` | `rateLimit`, `rateLimitStrict`, `clientIp` from `@merqo/ui/kit-api` |
-  | `action-result` | `action-result` | `ActionResult`, `isActionError` from `@merqo/ui/kit-api` |
-  | `kit-callback` | `kit-callback` | `postKitCallback` from `@merqo/ui/kit-api` |
-  | `kit-auth` | `kit-auth` | `verifyKitAuth`, `hashApiKey` from `@merqo/ui/kit-api` |
-  | `merqo-url` | `merqo-url` | `merqoBaseUrl`, `merqoUrl` from `@merqo/ui/kit-api` |
-  | `legal-gate` | `legal-gate` | `checkLegalAcceptance` from `@merqo/ui/auth` |
-  | `components/ui/` `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `select`, `switch`, `tabs`, `textarea`, `tooltip` | `ui-primitive` | the same names from `@merqo/ui/primitives` |
-  | `lib/utils` | `cn` | `cn` from `@merqo/ui/primitives` |
+  | `lib/supabase/server` | `supabase-server` | `createSupabaseServerClient`, `createSupabaseServiceClient` from `@merqo/ui/supabase/server` |
+  | `lib/supabase/middleware` | `supabase-middleware` | `updateSupabaseSession` from `@merqo/ui/supabase/middleware` |
+  | `lib/rate-limit` | `rate-limit` | `rateLimit`, `rateLimitStrict`, `clientIp` from `@merqo/ui/kit-api` |
+  | `lib/action-result` | `action-result` | `ActionResult`, `isActionError` from `@merqo/ui/kit-api` |
+  | `lib/kit-callback` | `kit-callback` | `postKitCallback` from `@merqo/ui/kit-api` |
+  | `lib/kit-auth` | `kit-auth` | `verifyKitAuth`, `hashApiKey` from `@merqo/ui/kit-api` |
+  | `lib/merqo-url` | `merqo-url` | `merqoBaseUrl`, `merqoUrl` from `@merqo/ui/kit-api` |
+  | `lib/legal-gate` | `legal-gate` | `checkLegalAcceptance` from `@merqo/ui/auth` |
+  | `ui/` or `components/ui/` `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `select`, `switch`, `tabs`, `textarea`, `tooltip` | `ui-primitive` | the same names from `@merqo/ui/primitives` |
+  | `lib/utils`, only an import naming `cn` | `cn` | `cn` from `@merqo/ui/primitives`; the other helpers stay local |
 
-  Not flagged on purpose, because they carry kit content: the wordmark,
-  FAQ content, tour steps, help centres and guides, per-domain status badge
-  maps (for example `order-status-badge`) and legal schedules. A wrapper that
-  keeps `lib/utils` or a `lib/supabase/*` file for more than the shared
-  piece belongs in `allow`.
+  Not flagged on purpose, because they carry kit content or wrap a shared
+  piece: the wordmark, FAQ content, tour steps, help centres and guides,
+  per-domain status badge maps (for example `order-status-badge`), legal
+  schedules, and the kit footer, providers, `section` and `lib/money`
+  wrappers. Every message ends with a reminder to add a kit's own wrapper to
+  `allow`.
 - `@merqo/ui/security`: `buildCsp`, `withNonceCsp` (call from `proxy.ts`
   on dynamic routes), `createNonce` and `robotsHeaderFor(VERCEL_ENV)` for
   the staging `noindex` header. `style-src` keeps `'unsafe-inline'`; with no

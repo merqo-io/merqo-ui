@@ -8,6 +8,15 @@ contracts personally until then. terms.md Fees and billing gains a founding
 merchant price lock (12 months from first paid billing cycle, carried over
 on assignment). All three documents bumped to version 2026-11-08.
 
+privacy.md "How long we keep it" now lists the retention the kits enforce:
+paykit failed API sign-in records (IP removed after 30 days), printer
+pairing codes (10 minute validity, deleted a day after expiry), Telegram
+connect tokens (30 minutes, deleted on use or a day after expiry), payment
+link tokens (stored as a hash, kept with the payment record) and payment
+screenshots (kept with the order or booking record they prove, no fixed period, not deleted automatically). The
+printkit label-job line now also covers jobs never printed. Folded into
+2026-11-08 because no kit had pinned it yet.
+
 ## 2026-09-16
 Two fixes, founder-requested:
 

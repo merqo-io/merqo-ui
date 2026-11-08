@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed (legal)
+
+- Privacy policy retention list now states the periods the kits enforce: paykit failed API sign-in IPs (30 days), printer pairing codes, Telegram connect tokens, payment link tokens and payment screenshots, and the printkit label-job line covers jobs that were never printed. Part of the unreleased `2026-11-08` legal version, so `LEGAL_VERSIONS` is unchanged.
+
 ## [0.43.0] - 2026-11-08
 
 ### Changed (legal)
@@ -68,9 +74,7 @@
 ### Fixed
 
 - v0.42.0 could not be installed from git: the `buttonVariants` declaration emit failed with TS2742 when pnpm prepared the package. It now has an explicit type.
-- Radix and 
-ext-themes are now peer dependencies (adix-ui ^1.4.3, 
-ext-themes ^0.4.6) instead of bundled dependencies, so a kit no longer installs a second Radix copy with its own DismissableLayer stack (a shared dialog opened from a kit menu left ody with pointer-events: none). Kits must provide adix-ui themselves. All @radix-ui/react-* imports now come from the adix-ui umbrella.
+- Radix and `next-themes` are now peer dependencies (`radix-ui` ^1.4.3, `next-themes` ^0.4.6) instead of bundled dependencies, so a kit no longer installs a second Radix copy with its own DismissableLayer stack (a shared dialog opened from a kit menu left `body` with pointer-events: none). Kits must provide `radix-ui` themselves. All @radix-ui/react-* imports now come from the `radix-ui` umbrella.
 
 ## [0.42.0] - 2026-11-06
 

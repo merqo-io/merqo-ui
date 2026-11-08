@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased]
+## [0.43.0] - 2026-11-08
+
+### Changed (legal)
+
+- Terms, privacy policy, pilot agreement and `AboutMerqo` no longer say "sole proprietorship, ACRA registration pending". They now say Merqo is not yet registered with ACRA as a business name or incorporated as a company, and that Clarence Lee contracts with you personally until then. The assignment to a future Merqo private limited company is unchanged.
+- Terms "Fees and billing": merchants accepted under a founding merchant offer keep their quoted launch price for 12 months from their first paid billing cycle, carried over on assignment to a Merqo company.
+- `LEGAL_VERSIONS` for terms, privacy and pilot move to `2026-11-08`, so vendors are asked to re-accept. Kits need a merqo-ui bump to pick this up.
 
 ### Added
 

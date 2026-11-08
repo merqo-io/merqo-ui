@@ -35,9 +35,14 @@ describe("terms.md", () => {
   });
 
   it("names Merqo's contracting party, pre-ACRA", () => {
-    expect(source).toContain(
-      "Clarence Lee, trading as Merqo (sole proprietorship, ACRA registration pending)",
-    );
+    expect(source).toContain("Clarence Lee, trading as Merqo");
+    expect(source).toContain("not yet registered with");
+    expect(source).not.toMatch(/registration pending|intend to apply/);
+  });
+
+  it("states the founding merchant price lock", () => {
+    expect(source).toContain("founding merchant offer");
+    expect(source).toContain("12 months from your first paid billing cycle");
   });
 
   it("contains no em dash", () => {

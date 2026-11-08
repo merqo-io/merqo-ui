@@ -2,9 +2,9 @@
  *  changes. A version bump to merqo-ui must roll out to merqo + every kit
  *  the same day — see the plan's Global Constraints (version-skew finding). */
 export const LEGAL_VERSIONS = {
-  terms: "2026-09-16",
-  privacy: "2026-09-16",
-  pilot: "2026-09-16",
+  terms: "2026-11-08",
+  privacy: "2026-11-08",
+  pilot: "2026-11-08",
 } as const;
 
 export type LegalDocType = keyof typeof LEGAL_VERSIONS;

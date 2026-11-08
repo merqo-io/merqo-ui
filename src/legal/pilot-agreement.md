@@ -1,10 +1,11 @@
 # Merqo Pilot / User Acceptance Testing Agreement
 
 This Pilot / User Acceptance Testing Agreement ("Agreement") is between
-Merqo, operated by Clarence Lee, trading as Merqo (sole
-proprietorship, ACRA registration pending) ("Merqo", "we", "us", "our"),
-and [Pilot vendor's legal/business name] ("Pilot Vendor", "you", "your").
-This Agreement is signed by both parties and applies only to the Pilot
+Merqo, operated by Clarence Lee, trading as Merqo
+("Merqo", "we", "us", "our"), and [Pilot vendor's legal/business name]
+("Pilot Vendor", "you", "your"). Merqo is not yet registered with ACRA as a
+business name or incorporated as a company; until then, Clarence Lee
+contracts with you personally. This Agreement is signed by both parties and applies only to the Pilot
 Vendor named above; it is not a public or self-serve document, and it
 does not apply to any other vendor's use of a Merqo kit.
 

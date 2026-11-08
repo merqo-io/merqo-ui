@@ -1,5 +1,13 @@
 # merqo-ui/src/legal/CHANGELOG.md
 
+## 2026-11-08
+Entity status made accurate whether or not an ACRA application is filed:
+terms.md, privacy.md, pilot-agreement.md and about-merqo.tsx now say Merqo
+is not yet registered with ACRA or incorporated, and that Clarence Lee
+contracts personally until then. terms.md Fees and billing gains a founding
+merchant price lock (12 months from first paid billing cycle, carried over
+on assignment). All three documents bumped to version 2026-11-08.
+
 ## 2026-09-16
 Two fixes, founder-requested:
 

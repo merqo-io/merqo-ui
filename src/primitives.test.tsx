@@ -121,7 +121,7 @@ describe("Button", () => {
 });
 
 describe("Badge", () => {
-  it("covers the shadcn variants plus muted, success and gold", () => {
+  it("covers the shadcn variants plus muted and success", () => {
     for (const variant of [
       "default",
       "secondary",
@@ -131,7 +131,6 @@ describe("Badge", () => {
       "link",
       "muted",
       "success",
-      "gold",
     ] as const) {
       render(<Badge variant={variant}>{variant}</Badge>);
       expect(screen.getByText(variant)).toHaveAttribute("data-variant", variant);

@@ -12,8 +12,7 @@ type BadgeVariant =
   | "ghost"
   | "link"
   | "muted"
-  | "success"
-  | "gold";
+  | "success";
 
 const variants = cva(
   "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
@@ -31,7 +30,6 @@ const variants = cva(
         link: "text-primary underline-offset-4 [a&]:hover:underline",
         muted: "bg-muted text-muted-foreground",
         success: "bg-primary/10 text-primary dark:bg-primary/15",
-        gold: "bg-gold text-gold-foreground [a&]:hover:bg-gold/90",
       },
     },
     defaultVariants: {

@@ -913,11 +913,16 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   `icon-lg`. On coarse pointers (touch) every size is at least 44px (`lg` is
   48px), so a vendor on a tablet gets a full tap target; mouse and trackpad keep
   the compact sizes.
+- `Input` and `Label` carry shadcn's dark-mode (`dark:bg-input/30`, dark
+  invalid ring) and disabled-state classes, so `LoginForm`, `MfaForm`,
+  `SocialLinksFields` and `MoneyInput` pick them up. Internal `Button`,
+  `Input` and `SelectTrigger` uses such as `BackButton` grow to 44px on coarse
+  pointers.
 - `Input` and `SelectTrigger` are 36px (32px for `sm`) and 44px on coarse
   pointers. `Textarea` and `Label` have no size.
 - `Badge`, `badgeVariants`, `BadgeProps`. Variants: `default`, `secondary`,
-  `destructive`, `outline`, `ghost`, `link`, `muted`, `success`, `gold`. `gold`
-  needs the kit to define `--color-gold` and `--color-gold-foreground`.
+  `destructive`, `outline`, `ghost`, `link`, `muted`, `success`. A kit that needs a gold badge wraps
+  `Badge` locally.
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.

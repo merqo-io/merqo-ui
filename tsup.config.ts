@@ -83,6 +83,21 @@ const ENTRIES = {
   wordmark: "src/wordmark.tsx",
   "legal-page": "src/legal-page.tsx",
   "accept-terms": "src/accept-terms.tsx",
+  // Public @merqo/ui/primitives surface. dist/primitives.js is written by
+  // scripts/build-index.mjs and re-exports these per-module files.
+  "lib/utils": "src/lib/utils.ts",
+  "ui/badge": "src/ui/badge.tsx",
+  "ui/button": "src/ui/button.tsx",
+  "ui/card": "src/ui/card.tsx",
+  "ui/checkbox": "src/ui/checkbox.tsx",
+  "ui/dialog": "src/ui/dialog.tsx",
+  "ui/input": "src/ui/input.tsx",
+  "ui/label": "src/ui/label.tsx",
+  "ui/select": "src/ui/select.tsx",
+  "ui/switch": "src/ui/switch.tsx",
+  "ui/tabs": "src/ui/tabs.tsx",
+  "ui/textarea": "src/ui/textarea.tsx",
+  "ui/tooltip": "src/ui/tooltip.tsx",
 };
 
 export default defineConfig([

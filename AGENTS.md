@@ -38,7 +38,9 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck, build and
 - Do not add a barrel that mixes server and client code.
 - A new export needs three things together: the module under `src/`, a line in
   `src/index.ts`, and an entry in `ENTRIES` in `tsup.config.ts`.
-- `src/ui/` holds the private shadcn primitives. They are not exported.
+- `src/ui/` holds the shadcn primitives. Those listed in `src/primitives.ts`
+  are exported as `@merqo/ui/primitives`; every other `src/ui/` module stays
+  private.
 
 ## Working rules
 

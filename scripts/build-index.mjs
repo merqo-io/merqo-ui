@@ -6,22 +6,28 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import ts from "typescript";
 
-const source = readFileSync(new URL("../src/index.ts", import.meta.url), "utf8");
+// dist/primitives.js (@merqo/ui/primitives) is shimmed the same way from
+// src/primitives.ts, over the per-module files in dist/ui/.
+function writeShim(sourceFile, outFile) {
+  const source = readFileSync(new URL(sourceFile, import.meta.url), "utf8");
+  // `ts.transpileModule` already drops `export type { ... }` clauses (they're
+  // erased at the type level) and keeps only value re-exports.
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2022,
+    },
+  });
 
-// `ts.transpileModule` already drops `export type { ... }` clauses (they're
-// erased at the type level) and keeps only value re-exports.
-const { outputText } = ts.transpileModule(source, {
-  compilerOptions: {
-    module: ts.ModuleKind.ESNext,
-    target: ts.ScriptTarget.ES2022,
-  },
-});
+  // Relative specifiers need an explicit ".js" for Node/bundler ESM
+  // resolution -- the source omits it (TS resolves bare "./module" itself).
+  const withExtensions = outputText.replace(
+    /from "(\.\/[^"]+)"/g,
+    (_match, specifier) => `from "${specifier}.js"`,
+  );
 
-// Relative specifiers need an explicit ".js" for Node/bundler ESM
-// resolution -- the source omits it (TS resolves bare "./module" itself).
-const withExtensions = outputText.replace(
-  /from "(\.\/[^"]+)"/g,
-  (_match, specifier) => `from "${specifier}.js"`,
-);
+  writeFileSync(new URL(outFile, import.meta.url), withExtensions);
+}
 
-writeFileSync(new URL("../dist/index.js", import.meta.url), withExtensions);
+writeShim("../src/index.ts", "../dist/index.js");
+writeShim("../src/primitives.ts", "../dist/primitives.js");

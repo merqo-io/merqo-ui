@@ -626,6 +626,28 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   consent to marketing; any SMS, voice or fax marketing needs express
   consent and a Do Not Call Registry check first. Added v0.33.0.
 
+  **Wiring.** Put it on every customer-facing form that collects a phone
+  number or name from someone who is not signed in as a vendor: an order or
+  checkout form, a booking or inquiry form, a waitlist or notify-me form. Vendor
+  and admin forms do not need it, because the vendor accepted the terms at
+  sign-up. Place it inside the form, directly above the submit button and
+  below the last personal-data field, so the customer reads it at the moment
+  they type. Keep `purpose` to one short phrase that says what the data is
+  for, such as `process your order`, and set `phoneOptional` whenever the
+  phone field can be left empty. Where the form also needs consent to the
+  terms, show `TermsAcceptanceCheckbox` as well; the notice never replaces it.
+
+  ```tsx
+  import { DataCollectionNotice } from "@merqo/ui";
+
+  <form action={placeOrder}>
+    <Input name="name" autoComplete="name" required />
+    <Input name="phone" type="tel" autoComplete="tel" />
+    <DataCollectionNotice purpose="process your order" phoneOptional />
+    <Button type="submit">Place order</Button>
+  </form>
+  ```
+
 These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server
@@ -965,6 +987,77 @@ install only what the entries you import need.
   The preset adds no `@typescript-eslint/no-use-before-define`; kits keep
   their own. Test files, `scripts/**` and `e2e/**` are exempt from inline
   comment, size and colour rules.
+
+  `merqoNoLocalCopies({ allow? })` is a separate flat-config helper, not part
+  of the preset. It reports an import, re-export or dynamic `import()` of a
+  kit-local module (`@/...`, `~/...`, `src/...` or a relative path), and any
+  file that lives at such a path, when @merqo/ui ships the same piece. The
+  message names the replacement import. Imports from `@merqo/ui` itself are
+  never flagged. Patterns are anchored to the folders the copies live in
+  (a trailing `/index` and the extension are ignored), so a same-named module
+  elsewhere is left alone. A file that itself imports from `@merqo/ui` or one
+  of its subpaths is a wrapper, not a copy, and is not reported as a
+  definition (importing the wrapper is still reported). Turn the rule on in
+  the pull request that deletes the copies:
+
+  ```js
+  import { merqoEslintPreset, merqoNoLocalCopies } from "@merqo/ui/eslint";
+
+  export default [
+    ...merqoEslintPreset({ sonarjsPlugin, tsPlugin }),
+    ...merqoNoLocalCopies({ allow: ["components/landing/page-header"] }),
+  ];
+  ```
+
+  `allow` lists pieces the kit keeps on purpose. Each entry is a piece id
+  (`"page-header"`) or a path suffix (`"components/landing/page-header"`).
+  Local prefixes (`@/`, `~/`, `src/`, `./`, `../`) and the extension are
+  ignored and the match is case-insensitive. An entry skips both the imports
+  of that path and the file that lives there. Flagged pieces:
+
+  | Local module | Id | Use instead |
+  | --- | --- | --- |
+  | `hooks/use-async-action` | `use-async-action` | `useAsyncAction` from `@merqo/ui` |
+  | `lib/tier-label` | `tier-label` | `tierLabel` from `@merqo/ui` |
+  | `components/**/segmented-control` | `segmented-control` | `SegmentedControl` from `@merqo/ui` |
+  | `components/page-header`, `components/widgets/page-header` | `page-header` | `PageHeader` from `@merqo/ui` |
+  | `components/empty-state` | `empty-state` | `EmptyState` from `@merqo/ui` |
+  | `app/**/mfa-form`, `components/**/mfa-form` | `mfa-form` | `MfaForm` from `@merqo/ui` |
+  | `lib/brand-icon` | `brand-icon` | `brandIcon` from `@merqo/ui` |
+  | `components/**/status-badge` | `status-badge` | `StatusBadge` from `@merqo/ui` |
+  | `components/**/confirm-dialog` | `confirm-dialog` | `ConfirmDialog` from `@merqo/ui` |
+  | `app/**/audit-log`, `components/**/audit-log-table` | `audit-log` | `AuditLogTable` from `@merqo/ui` |
+  | `components/**/stat-tile` | `stat-tile` | `StatTile` from `@merqo/ui` |
+  | `components/stat-card`, `components/dashboard/stat-card` | `stat-card` | `StatCard` from `@merqo/ui` |
+  | `app/**/dashboard-nav`, `components/**/dashboard-nav` | `dashboard-nav` | `DashboardNav` from `@merqo/ui` |
+  | `components/**/dashboard-tour`, `dashboard-tour.server` | `dashboard-tour` | `DashboardTour` from `@merqo/ui` |
+  | `components/**/elevated-card` | `elevated-card` | `ElevatedCard` from `@merqo/ui` |
+  | `components/**/pro-lock` | `pro-lock` | `ProLock` from `@merqo/ui` |
+  | `lib/feedback-schema` | `feedback-schema` | `feedbackSchema` from `@merqo/ui` |
+  | `lib/telegram-link` | `telegram-link` | `telegramLink`, `normalizeTelegramHandle` from `@merqo/ui` |
+  | `app/**/telegram-connect`, `components/**/telegram-connect` | `customer-telegram-connect` | `CustomerTelegramConnect` from `@merqo/ui` |
+  | `app/**/vendor-telegram-connect`, `components/**/vendor-telegram-section` | `vendor-telegram-section` | `VendorTelegramSection` from `@merqo/ui`, passing `onConnect` |
+  | `lib/safe-redirect` | `safe-redirect` | `safeRedirectPath` from `@merqo/ui` |
+  | `lib/theme-props` | `theme-props` | `themeProps` from `@merqo/ui/next` |
+  | `lib/security-headers` | `security-headers` | `buildSecurityHeaders` from `@merqo/ui/security` |
+  | `lib/supabase/client` | `supabase-client` | `createSupabaseBrowserClient` from `@merqo/ui/supabase` |
+  | `lib/supabase/server` | `supabase-server` | `createSupabaseServerClient`, `createSupabaseServiceClient` from `@merqo/ui/supabase/server` |
+  | `lib/supabase/middleware` | `supabase-middleware` | `updateSupabaseSession` from `@merqo/ui/supabase/middleware` |
+  | `lib/rate-limit` | `rate-limit` | `rateLimit`, `rateLimitStrict`, `clientIp` from `@merqo/ui/kit-api` |
+  | `lib/action-result` | `action-result` | `ActionResult`, `isActionError` from `@merqo/ui/kit-api` |
+  | `lib/kit-callback` | `kit-callback` | `postKitCallback` from `@merqo/ui/kit-api` |
+  | `lib/kit-auth` | `kit-auth` | `verifyKitAuth`, `hashApiKey` from `@merqo/ui/kit-api` |
+  | `lib/merqo-url` | `merqo-url` | `merqoBaseUrl`, `merqoUrl` from `@merqo/ui/kit-api` |
+  | `lib/legal-gate` | `legal-gate` | `checkLegalAcceptance` from `@merqo/ui/auth` |
+  | `ui/` or `components/ui/` `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `select`, `switch`, `tabs`, `textarea`, `tooltip` | `ui-primitive` | the same names from `@merqo/ui/primitives` |
+  | `lib/utils`, only an import naming `cn` | `cn` | `cn` from `@merqo/ui/primitives`; the other helpers stay local |
+
+  Not flagged on purpose, because they carry kit content or wrap a shared
+  piece: the wordmark, FAQ content, tour steps, help centres and guides,
+  per-domain status badge maps (for example `order-status-badge`), legal
+  schedules, and the kit footer, providers, `section` and `lib/money`
+  wrappers. Every message ends with a reminder to add a kit's own wrapper to
+  `allow`.
 - `@merqo/ui/security`: `buildCsp`, `withNonceCsp` (call from `proxy.ts`
   on dynamic routes), `createNonce` and `robotsHeaderFor(VERCEL_ENV)` for
   the staging `noindex` header. `style-src` keeps `'unsafe-inline'`; with no

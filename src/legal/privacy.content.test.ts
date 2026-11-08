@@ -90,7 +90,7 @@ describe("privacy.md", () => {
       /\*\*payment link tokens\*\*[\s\S]*?one-way hash/i,
     );
     expect(retention).toMatch(
-      /\*\*payment screenshots\*\*[\s\S]*?same terms as end customer\s+records[\s\S]*?no separate fixed period/i,
+      /\*\*payment screenshots\*\*[\s\S]*?order or booking record they prove[\s\S]*?no fixed period[\s\S]*?not deleted automatically/i,
     );
   });
 

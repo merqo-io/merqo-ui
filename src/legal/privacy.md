@@ -194,8 +194,8 @@ collected for, or as required by law:
 - **payment link tokens** (paykit): stored only as a one-way hash, never in
   readable form, and kept with the payment record they belong to; and
 - **payment screenshots** (proof of payment a customer uploads): kept with
-  the order or booking record they prove, on the same terms as end customer
-  records above, with no separate fixed period.
+  the order or booking record they prove; there is no fixed period and they
+  are not deleted automatically.
 
 ## Audit and security logs
 

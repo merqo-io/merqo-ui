@@ -13,7 +13,7 @@ paykit failed API sign-in records (IP removed after 30 days), printer
 pairing codes (10 minute validity, deleted a day after expiry), Telegram
 connect tokens (30 minutes, deleted on use or a day after expiry), payment
 link tokens (stored as a hash, kept with the payment record) and payment
-screenshots (kept with the order or booking record, no fixed period). The
+screenshots (kept with the order or booking record they prove, no fixed period, not deleted automatically). The
 printkit label-job line now also covers jobs never printed. Folded into
 2026-11-08 because no kit had pinned it yet.
 

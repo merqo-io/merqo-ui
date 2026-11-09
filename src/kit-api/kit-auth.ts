@@ -37,7 +37,10 @@ export interface KitAuthRateLimit {
   store: RateLimitStore;
   /** Attempts per client IP per window, failed or not. Default 300. */
   limit?: number;
-  /** Attempts per kit slug per window, across all IPs. Defaults to `limit`. */
+  /**
+   * Failed attempts per kit slug per window, across all IPs. Defaults to
+   * `limit`. A valid key is never blocked by it.
+   */
   slugLimit?: number;
   /** Window length in seconds. Default 60. */
   windowSeconds?: number;
@@ -154,8 +157,22 @@ export async function verifyKitAuth(
   }
 
   const { kitSlug, secret } = parsed;
-  // A second bucket per slug keeps rotating IPs from bypassing the limit.
-  // The cost: a flood naming a real slug can lock that kit out for a window.
+  const stored = await lookupHash(store, kitSlug);
+  const matches = hashesMatch(hashApiKey(secret), stored ?? DECOY_HASH);
+
+  if (stored !== null && matches) {
+    try {
+      await store.touch?.(kitSlug);
+    } catch {
+      console.warn("verifyKitAuth: last_used_at update failed");
+    }
+    return { kitSlug };
+  }
+
+  // Slugs are public, so this bucket counts failures only and is checked after
+  // the secret: a valid key is never blocked by someone else's junk tokens.
+  // It stops rotating IPs from flooding failures (and the audit log) for one
+  // slug.
   if (
     rateLimit &&
     !(await underAttemptLimit(
@@ -167,19 +184,9 @@ export async function verifyKitAuth(
     console.warn("verifyKitAuth rate limited");
     return null;
   }
-  const stored = await lookupHash(store, kitSlug);
-  const matches = hashesMatch(hashApiKey(secret), stored ?? DECOY_HASH);
-  if (stored === null) {
-    return reject(store, { kitSlug, reason: "unknown kit_slug", ip });
-  }
-  if (!matches) {
-    return reject(store, { kitSlug, reason: "secret mismatch", ip });
-  }
-
-  try {
-    await store.touch?.(kitSlug);
-  } catch {
-    console.warn("verifyKitAuth: last_used_at update failed");
-  }
-  return { kitSlug };
+  return reject(store, {
+    kitSlug,
+    reason: stored === null ? "unknown kit_slug" : "secret mismatch",
+    ip,
+  });
 }

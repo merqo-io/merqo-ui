@@ -125,20 +125,83 @@ describe("verifyKitAuth", () => {
     expect(await verifyKitAuth(r(), { store, rateLimit })).toBeNull();
   });
 
-  it("limits per slug even when the IP rotates", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { store } = makeStore();
-    const rateLimit = {
+  describe("per-slug failure bucket", () => {
+    const slugRateLimit = () => ({
       store: createMemoryRateLimitStore(() => 0),
       limit: 100,
       slugLimit: 2,
       windowSeconds: 60,
-    };
-    const r = (ip: string) =>
+    });
+    const bad = (ip: string, slug = "qkit") =>
+      req(`Bearer ${slug}:bad`, { "x-vercel-forwarded-for": ip });
+    const good = (ip: string) =>
       req("Bearer qkit:good-secret", { "x-vercel-forwarded-for": ip });
-    expect(await verifyKitAuth(r("1.1.1.1"), { store, rateLimit })).not.toBeNull();
-    expect(await verifyKitAuth(r("1.1.1.2"), { store, rateLimit })).not.toBeNull();
-    expect(await verifyKitAuth(r("1.1.1.3"), { store, rateLimit })).toBeNull();
+
+    it("never blocks a valid key, even after a flood of bad secrets", async () => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { store } = makeStore();
+      const rateLimit = slugRateLimit();
+      for (const ip of ["1.1.1.1", "1.1.1.2", "1.1.1.3"]) {
+        expect(await verifyKitAuth(bad(ip), { store, rateLimit })).toBeNull();
+      }
+      expect(await verifyKitAuth(good("1.1.1.4"), { store, rateLimit })).toEqual({
+        kitSlug: "qkit",
+      });
+    });
+
+    it("skips logFailure once failures exceed slugLimit", async () => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { store, failures } = makeStore();
+      const rateLimit = slugRateLimit();
+      await verifyKitAuth(bad("1.1.1.1"), { store, rateLimit });
+      await verifyKitAuth(bad("1.1.1.2"), { store, rateLimit });
+      expect(failures).toHaveLength(2);
+      expect(await verifyKitAuth(bad("1.1.1.3"), { store, rateLimit })).toBeNull();
+      expect(failures).toHaveLength(2);
+    });
+
+    it("counts unknown slugs against their own bucket", async () => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { store, failures } = makeStore();
+      const rateLimit = slugRateLimit();
+      for (const ip of ["1.1.1.1", "1.1.1.2", "1.1.1.3"]) {
+        await verifyKitAuth(bad(ip, "nope"), { store, rateLimit });
+      }
+      expect(failures).toHaveLength(2);
+    });
+
+    it("does not touch the slug bucket on success", async () => {
+      const { store } = makeStore();
+      const hit = vi.fn().mockResolvedValue(true);
+      const rateLimit = { store: { hit }, limit: 100, windowSeconds: 60 };
+      expect(await verifyKitAuth(good("1.1.1.1"), { store, rateLimit })).toEqual({
+        kitSlug: "qkit",
+      });
+      expect(hit.mock.calls.map((c) => c[0])).toEqual(["kit-auth:1.1.1.1"]);
+    });
+
+    it("does not let a slug-bucket outage fail a valid key", async () => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { store, failures } = makeStore();
+      const hit = vi.fn(async (key: string) => {
+        if (key.startsWith("kit-auth-slug:")) throw new Error("down");
+        return true;
+      });
+      const rateLimit = { store: { hit }, limit: 100, windowSeconds: 60 };
+      expect(await verifyKitAuth(good("1.1.1.1"), { store, rateLimit })).toEqual({
+        kitSlug: "qkit",
+      });
+      expect(await verifyKitAuth(bad("1.1.1.1"), { store, rateLimit })).toBeNull();
+      expect(failures).toHaveLength(0);
+      expect(
+        await verifyKitAuth(bad("1.1.1.1"), {
+          store,
+          rateLimit: { ...rateLimit, failOpen: true },
+        }),
+      ).toBeNull();
+      expect(failures).toHaveLength(1);
+    });
   });
 
   it("does not let a spoofed x-real-ip rotate the IP bucket by default", async () => {

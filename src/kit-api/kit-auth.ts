@@ -38,8 +38,9 @@ export interface KitAuthRateLimit {
   /** Attempts per client IP per window, failed or not. Default 300. */
   limit?: number;
   /**
-   * Failed attempts per kit slug per window, across all IPs. Defaults to
-   * `limit`. A valid key is never blocked by it.
+   * Failures per kit slug per window, across all IPs, that are written to
+   * `logFailure`. Defaults to `limit`. It does not throttle guessing (only
+   * `limit`, per IP, does) and a valid key always succeeds regardless.
    */
   slugLimit?: number;
   /** Window length in seconds. Default 60. */
@@ -169,10 +170,13 @@ export async function verifyKitAuth(
     return { kitSlug };
   }
 
-  // Slugs are public, so this bucket counts failures only and is checked after
-  // the secret: a valid key is never blocked by someone else's junk tokens.
-  // It stops rotating IPs from flooding failures (and the audit log) for one
-  // slug.
+  // Slugs are public, so a valid key must never be blocked by someone else's
+  // junk tokens: this bucket is checked only after the secret failed. It does
+  // not throttle guessing (that is the per-IP limit alone; rotating IPs are
+  // bounded by the key's entropy). It only caps how many failures per slug
+  // reach logFailure per window, so a flood cannot fill the audit log. The
+  // lookup above now runs before this bucket, so junk tokens naming a slug
+  // reach the store; the per-IP limit bounds that.
   if (
     rateLimit &&
     !(await underAttemptLimit(
@@ -181,7 +185,7 @@ export async function verifyKitAuth(
       rateLimit.slugLimit ?? rateLimit.limit,
     ))
   ) {
-    console.warn("verifyKitAuth rate limited");
+    console.warn("verifyKitAuth slug failure limit reached, not logging");
     return null;
   }
   return reject(store, {

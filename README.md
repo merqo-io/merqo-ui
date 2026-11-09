@@ -1296,10 +1296,13 @@ injected dependency, and none throws to the caller except `callMerqoRpc`.
   (`getSecretHash`, optional `touch` and `logFailure`) using a constant-time
   compare, and resolves to `{kitSlug}` or `null`. The optional `rateLimit`
   counts attempts per client IP (`limit`) and fails closed unless
-  `failOpen: true`. A second bucket counts failed attempts per kit slug
-  (`slugLimit`, defaults to `limit`) so rotating IPs cannot flood failures
-  for one slug. It is checked after the secret, so a valid key is never
-  blocked by it, and over-limit failures skip `logFailure`. Pass
+  `failOpen: true`. Secret guessing is throttled per client IP only; with
+  rotating IPs it is bounded by the key's entropy. A second bucket
+  (`slugLimit`, defaults to `limit`) does not cap guesses: it caps how many
+  failures per slug are written to `logFailure` per window, so a flood cannot
+  fill the audit log. It is checked after the secret, so a valid key always
+  succeeds. Junk tokens naming a slug still reach the store lookup, bounded by
+  the per-IP limit. Pass
   `trustedHeaders` to choose the IP headers (see `clientIp`). `KitKeyStore.
   logFailure` receives the request's `kitSlug`, which is untrusted: sanitise
   it before writing it anywhere.

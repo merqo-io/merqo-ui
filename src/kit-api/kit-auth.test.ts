@@ -180,27 +180,51 @@ describe("verifyKitAuth", () => {
       expect(hit.mock.calls.map((c) => c[0])).toEqual(["kit-auth:1.1.1.1"]);
     });
 
-    it("does not let a slug-bucket outage fail a valid key", async () => {
-      vi.spyOn(console, "warn").mockImplementation(() => {});
-      vi.spyOn(console, "error").mockImplementation(() => {});
-      const { store, failures } = makeStore();
+    const slugOutage = () => {
       const hit = vi.fn(async (key: string) => {
         if (key.startsWith("kit-auth-slug:")) throw new Error("down");
         return true;
       });
-      const rateLimit = { store: { hit }, limit: 100, windowSeconds: 60 };
-      expect(await verifyKitAuth(good("1.1.1.1"), { store, rateLimit })).toEqual({
-        kitSlug: "qkit",
-      });
-      expect(await verifyKitAuth(bad("1.1.1.1"), { store, rateLimit })).toBeNull();
-      expect(failures).toHaveLength(0);
+      return { store: { hit }, limit: 100, windowSeconds: 60 };
+    };
+
+    it("does not let a slug-bucket outage fail a valid key", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { store } = makeStore();
       expect(
-        await verifyKitAuth(bad("1.1.1.1"), {
-          store,
-          rateLimit: { ...rateLimit, failOpen: true },
-        }),
+        await verifyKitAuth(good("1.1.1.1"), { store, rateLimit: slugOutage() }),
+      ).toEqual({ kitSlug: "qkit" });
+    });
+
+    it("on a slug-bucket outage, a failing request fails closed and is not logged", async () => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { store, failures } = makeStore();
+      expect(
+        await verifyKitAuth(bad("1.1.1.1"), { store, rateLimit: slugOutage() }),
       ).toBeNull();
+      expect(failures).toHaveLength(0);
+    });
+
+    it("on a slug-bucket outage with failOpen, a failing request is still null but logged", async () => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { store, failures } = makeStore();
+      const rateLimit = { ...slugOutage(), failOpen: true };
+      expect(await verifyKitAuth(bad("1.1.1.1"), { store, rateLimit })).toBeNull();
       expect(failures).toHaveLength(1);
+    });
+
+    it("warns with a distinct message when over-limit failures are not logged", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { store } = makeStore();
+      const rateLimit = slugRateLimit();
+      for (const ip of ["1.1.1.1", "1.1.1.2", "1.1.1.3"]) {
+        await verifyKitAuth(bad(ip), { store, rateLimit });
+      }
+      expect(warn).toHaveBeenLastCalledWith(
+        "verifyKitAuth slug failure limit reached, not logging",
+      );
     });
   });
 

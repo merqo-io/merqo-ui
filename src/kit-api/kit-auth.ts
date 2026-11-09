@@ -37,7 +37,11 @@ export interface KitAuthRateLimit {
   store: RateLimitStore;
   /** Attempts per client IP per window, failed or not. Default 300. */
   limit?: number;
-  /** Attempts per kit slug per window, across all IPs. Defaults to `limit`. */
+  /**
+   * Failures per kit slug per window, across all IPs, that are written to
+   * `logFailure`. Defaults to `limit`. It does not throttle guessing (only
+   * `limit`, per IP, does) and a valid key always succeeds regardless.
+   */
   slugLimit?: number;
   /** Window length in seconds. Default 60. */
   windowSeconds?: number;
@@ -154,8 +158,25 @@ export async function verifyKitAuth(
   }
 
   const { kitSlug, secret } = parsed;
-  // A second bucket per slug keeps rotating IPs from bypassing the limit.
-  // The cost: a flood naming a real slug can lock that kit out for a window.
+  const stored = await lookupHash(store, kitSlug);
+  const matches = hashesMatch(hashApiKey(secret), stored ?? DECOY_HASH);
+
+  if (stored !== null && matches) {
+    try {
+      await store.touch?.(kitSlug);
+    } catch {
+      console.warn("verifyKitAuth: last_used_at update failed");
+    }
+    return { kitSlug };
+  }
+
+  // Slugs are public, so a valid key must never be blocked by someone else's
+  // junk tokens: this bucket is checked only after the secret failed. It does
+  // not throttle guessing (that is the per-IP limit alone; rotating IPs are
+  // bounded by the key's entropy). It only caps how many failures per slug
+  // reach logFailure per window, so a flood cannot fill the audit log. The
+  // lookup above now runs before this bucket, so junk tokens naming a slug
+  // reach the store; the per-IP limit bounds that.
   if (
     rateLimit &&
     !(await underAttemptLimit(
@@ -164,22 +185,12 @@ export async function verifyKitAuth(
       rateLimit.slugLimit ?? rateLimit.limit,
     ))
   ) {
-    console.warn("verifyKitAuth rate limited");
+    console.warn("verifyKitAuth slug failure limit reached, not logging");
     return null;
   }
-  const stored = await lookupHash(store, kitSlug);
-  const matches = hashesMatch(hashApiKey(secret), stored ?? DECOY_HASH);
-  if (stored === null) {
-    return reject(store, { kitSlug, reason: "unknown kit_slug", ip });
-  }
-  if (!matches) {
-    return reject(store, { kitSlug, reason: "secret mismatch", ip });
-  }
-
-  try {
-    await store.touch?.(kitSlug);
-  } catch {
-    console.warn("verifyKitAuth: last_used_at update failed");
-  }
-  return { kitSlug };
+  return reject(store, {
+    kitSlug,
+    reason: stored === null ? "unknown kit_slug" : "secret mismatch",
+    ip,
+  });
 }

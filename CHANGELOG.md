@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `verifyKitAuth`: a flood of junk tokens naming a real kit slug can no longer lock that kit out of its own API. The per-slug bucket now counts failed attempts only and is checked after the secret, so a valid key always succeeds. It is no longer a guess throttle (that is the per-IP `limit`; rotating IPs are bounded by key entropy): it only caps how many failures per slug reach `logFailure` per window, and over-limit failures log a distinct warning.
+
 ## [0.44.0] - 2026-11-08
 
 ### Changed (legal)

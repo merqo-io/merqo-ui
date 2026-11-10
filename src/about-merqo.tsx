@@ -45,7 +45,7 @@ export function AboutMerqo({ kitName, className, children }: AboutMerqoProps) {
           sign-in and one dashboard across all of them.
         </p>
         <p>
-          Merqo is run by Clarence Lee, trading as Merqo. Merqo is not yet registered with ACRA or incorporated as a company.
+          Merqo is a personal software project built and run by Clarence Lee. Merqo is not registered with ACRA or incorporated as a company.
           Every kit is built
           for the same kind of vendor as that coffee cart: small, busy,
           and better off spending time on the product, not the queue.

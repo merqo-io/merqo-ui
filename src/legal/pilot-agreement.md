@@ -1,10 +1,10 @@
 # Merqo Pilot / User Acceptance Testing Agreement
 
 This Pilot / User Acceptance Testing Agreement ("Agreement") is between
-Merqo, operated by Clarence Lee, trading as Merqo
+Merqo, a personal software project built and run by Clarence Lee
 ("Merqo", "we", "us", "our"), and [Pilot vendor's legal/business name]
-("Pilot Vendor", "you", "your"). Merqo is not yet registered with ACRA as a
-business name or incorporated as a company; until then, Clarence Lee
+("Pilot Vendor", "you", "your"). Merqo is not registered with ACRA as a
+business name or incorporated as a company, so Clarence Lee
 contracts with you personally. This Agreement is signed by both parties and applies only to the Pilot
 Vendor named above; it is not a public or self-serve document, and it
 does not apply to any other vendor's use of a Merqo kit.
@@ -118,7 +118,7 @@ set out in Governing law and disputes in the Merqo Vendor Terms of
 Service. The advance-consent novation clause in the Merqo Vendor Terms
 of Service's General terms section (under which the Pilot Vendor
 consents in advance to Merqo assigning or novating its agreement with
-Merqo to a Merqo private limited company once one is incorporated)
+Merqo to a Merqo private limited company if one is incorporated)
 applies to this Agreement as well and is not restated separately here;
 a Pilot Vendor who later converts to the standard Terms of Service is
 not asked to consent to that novation a second time. Notices under this

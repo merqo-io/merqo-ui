@@ -8,14 +8,14 @@ you agree to these Terms on behalf of the business you represent.
 
 ## Who we are
 
-Merqo is operated by Clarence Lee, trading as Merqo ("Merqo", "we", "us", "our").
+Merqo is a personal software project built and run by Clarence Lee ("Merqo", "we", "us", "our").
 Merqo is a family of small-business software tools (queueing, loyalty,
 payments, inventory, and print-routing kits) built for small and
-medium-sized businesses in Singapore. Merqo is not yet registered with
-ACRA as a business name or incorporated as a company; until then, Clarence
-Lee contracts with you personally, as set out in General terms below. This
-document will be updated with our UEN and registered address once Merqo is
-registered or incorporated.
+medium-sized businesses in Singapore. Merqo is not registered with ACRA as
+a business name or incorporated as a company, so Clarence Lee contracts
+with you personally, as set out in General terms below. If Merqo is later
+registered or incorporated, this document will be updated with its UEN and
+registered address.
 
 ## Acceptable use
 
@@ -61,27 +61,35 @@ if you suspect unauthorised access.
 
 ## Fees and billing
 
-Each Kit is billed at a flat monthly rate per Kit, as quoted to you at
-sign-up or shown in your dashboard. Quoted fees are shown as "GST not
-applicable (Merqo is not GST-registered)"; if Merqo registers for GST,
-GST will be added to fees billed from the date registration takes effect
-and this document will be updated accordingly.
+Merqo is free during the pilot and no fees are charged. If paid plans are
+introduced, vendors will get at least 30 days' notice first, and the rest
+of this section applies only from then.
 
-Your billing cycle runs monthly from the date you first activate a paid
-Kit. We do not increase your fees mid-term: a price change only takes
+If paid plans are introduced, each paid Kit is billed at a flat monthly
+rate per Kit, as quoted to you beforehand or shown in your dashboard.
+Quoted fees would be shown as "GST not applicable (Merqo is not
+GST-registered)"; if Merqo registers for GST, GST will be added to fees
+billed from the date registration takes effect and this document will be
+updated accordingly.
+
+Your billing cycle would run monthly from the date you first activate a
+paid Kit. We do not increase your fees mid-term: a price change only takes
 effect from your next billing cycle after the notice period described in
 Changes to these terms, and never during a period you have already paid
 for. You may cancel a Kit at any time from your account settings, or by
 emailing legal@merqo.io; cancellation takes effect at the end of your
 current billing cycle, and you retain access until then.
 
-If you were accepted under a founding merchant offer, you keep the launch
-price quoted to you for 12 months from your first paid billing cycle. This
-carries over if this agreement is assigned or novated to a Merqo private
-limited company. After those 12 months, the price change notice described
+If paid plans are introduced and you were accepted under a
+founding merchant offer, you keep the launch price quoted to you for
+12 months from your first paid billing cycle. This carries over if this
+agreement is assigned or novated to a Merqo company, if one is ever
+incorporated. After those 12 months, the price change notice described
 above applies as normal.
 
 ## Refunds and cancellation
+
+This section applies only if you are on a paid plan.
 
 Fees already paid are not refunded on a pro-rata basis if you cancel
 partway through a billing cycle. You keep access for the remainder of
@@ -273,7 +281,7 @@ account.
 You may not assign or transfer your rights or obligations under these
 Terms without our prior written consent. By agreeing to these Terms, you
 consent in advance to Merqo assigning or novating this agreement to a
-Merqo private limited company once one is incorporated, with the founder
+Merqo private limited company if one is incorporated, with the founder
 named in Who we are released from further obligation under these Terms
 from the date we give you written notice that the assignment or
 novation has taken effect.

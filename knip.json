@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/*.{ts,tsx}",
+    "src/{admin,auth,eslint,kit-api,next,security,supabase,testing}/index.ts",
+    "src/supabase/{server,middleware}.ts",
+    "src/ui/{badge,button,card,checkbox,dialog,input,label,select,switch,tabs,textarea,tooltip}.tsx",
+    "scripts/*.mjs"
+  ],
+  "ignoreIssues": {
+    "src/next/theme-props.ts": ["duplicates"]
+  },
+  "project":["src/**/*.{ts,tsx}", "scripts/*.mjs"]
+}

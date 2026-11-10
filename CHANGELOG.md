@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Close-out sweep: added `knip.json` so `pnpm dlx knip@6.44.2` runs clean, removed four unused parts from the private `src/ui` dropdown-menu and sheet primitives (not part of the public API), and added a README to every `src` folder. No public export changed.
+
 ## [0.44.2] - 2026-11-10
 
 ### Changed

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.44.2] - 2026-11-10
+
+### Changed
+
+- Legal copy (terms, privacy, pilot agreement) and the About text now describe Merqo as a personal software project and make charging fees and any future incorporation conditional, since Merqo is a free pilot with no decided business structure. Legal documents bumped to version 2026-11-10, so users are asked to re-accept.
+
 ## [0.44.1] - 2026-11-10
 
 ### Fixed

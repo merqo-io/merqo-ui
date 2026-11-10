@@ -35,9 +35,15 @@ describe("terms.md", () => {
   });
 
   it("names Merqo's contracting party, pre-ACRA", () => {
-    expect(source).toContain("Clarence Lee, trading as Merqo");
-    expect(source).toContain("not yet registered with");
+    expect(source).toContain("a personal software project built and run by Clarence Lee");
+    expect(source).toContain("not registered with ACRA");
+    expect(source).not.toContain("trading as");
+    expect(source).not.toContain("once one is incorporated");
     expect(source).not.toMatch(/registration pending|intend to apply/);
+  });
+
+  it("states Merqo is free during the pilot", () => {
+    expect(source).toContain("Merqo is free during the pilot and no fees are charged.");
   });
 
   it("states the founding merchant price lock", () => {

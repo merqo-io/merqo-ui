@@ -1,5 +1,17 @@
 # merqo-ui/src/legal/CHANGELOG.md
 
+## 2026-11-10
+Wording made accurate for a free pilot with no decided business structure.
+terms.md, privacy.md, pilot-agreement.md and about-merqo.tsx now describe
+Merqo as a personal software project built and run by Clarence Lee instead
+of a trading business, and still say it is not registered with ACRA or
+incorporated. terms.md Fees and billing now opens by saying Merqo is free
+during the pilot, with at least 30 days' notice before any paid plan; the
+billing, founding merchant price lock and refund wording applies only if
+paid plans are introduced. The novation to a Merqo private limited company
+is conditional on one being incorporated. All three documents bumped to
+version 2026-11-10.
+
 ## 2026-11-08
 Entity status made accurate whether or not an ACRA application is filed:
 terms.md, privacy.md, pilot-agreement.md and about-merqo.tsx now say Merqo

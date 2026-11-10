@@ -250,9 +250,9 @@ under Part 6A of the PDPA.
 
 ## Contact and DPO
 
-Merqo is operated by Clarence Lee, trading as Merqo
-("Merqo", "we", "us", "our"). Merqo is not yet registered with ACRA as a
-business name or incorporated as a company; until then, Clarence Lee is
+Merqo is a personal software project built and run by Clarence Lee
+("Merqo", "we", "us", "our"). Merqo is not registered with ACRA as a
+business name or incorporated as a company, so Clarence Lee is
 the person responsible for your personal data.
 
 For a question about this Privacy Policy, or to make a request described

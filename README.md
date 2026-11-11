@@ -964,7 +964,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Sheet`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`,
   `SheetFooter`, `SheetTitle`, `SheetDescription`. `SheetContent` takes
   `side` and `showCloseButton` (default `true`; `false` drops the built-in X
-  so the sheet supplies its own `SheetClose`).
+  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon.
 - `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
   `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
   `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,
@@ -1075,6 +1075,17 @@ install only what the entries you import need.
   | `lib/legal-gate` | `legal-gate` | `checkLegalAcceptance` from `@merqo/ui/auth` |
   | `ui/` or `components/ui/` `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `select`, `switch`, `tabs`, `textarea`, `tooltip` | `ui-primitive` | the same names from `@merqo/ui/primitives` |
   | `lib/utils`, only an import naming `cn` | `cn` | `cn` from `@merqo/ui/primitives`; the other helpers stay local |
+  | `ui/` or `components/ui/` `alert-dialog` | `alert-dialog` | the same names from `@merqo/ui/primitives` |
+  | `ui/` or `components/ui/` `popover` | `popover` | the same names from `@merqo/ui/primitives` |
+  | `ui/` or `components/ui/` `sheet` | `sheet` | the same names from `@merqo/ui/primitives` |
+  | `ui/` or `components/ui/` `dropdown-menu` | `dropdown-menu` | the same names from `@merqo/ui/primitives` |
+  | `ui/` or `components/ui/` `toggle` | `toggle` | the same names from `@merqo/ui/primitives` |
+  | `ui/` or `components/ui/` `toggle-group` | `toggle-group` | the same names from `@merqo/ui/primitives` |
+  | `ui/` or `components/ui/` `skeleton` | `skeleton` | the same names from `@merqo/ui/primitives` |
+  | `lib/utils`, only an import naming `FORM_LABEL_CLASS` or `FORM_ERROR_CLASS` | `form-classes` | both from `@merqo/ui` |
+  | `app/**/error` (not `app/dev/`), unless it imports `ErrorPage` from `@merqo/ui` | `error-page` | render `ErrorPage` from `@merqo/ui` |
+  | `app/**/global-error`, unless it imports `GlobalError` from `@merqo/ui` | `global-error-page` | render `GlobalError` from `@merqo/ui` |
+  | `app/**/not-found`, unless it imports `NotFound` from `@merqo/ui` | `not-found-page` | render `NotFound` from `@merqo/ui` |
 
   Not flagged on purpose, because they carry kit content or wrap a shared
   piece: the wordmark, FAQ content, tour steps, help centres and guides,
@@ -1082,6 +1093,12 @@ install only what the entries you import need.
   schedules, and the kit footer, providers, `section` and `lib/money`
   wrappers. Every message ends with a reminder to add a kit's own wrapper to
   `allow`.
+
+  The error-page rows work on the file, because Next.js requires it to
+  exist: the file is reported unless it imports the named export from
+  `@merqo/ui` (importing only `ElevatedCard` is not enough). A file under
+  `app/dev/`, a file that only re-exports another module, and imports of these
+  files are not reported.
 - `@merqo/ui/security`: `buildCsp`, `withNonceCsp` (call from `proxy.ts`
   on dynamic routes), `createNonce` and `robotsHeaderFor(VERCEL_ENV)` for
   the staging `noindex` header. `style-src` keeps `'unsafe-inline'`; with no

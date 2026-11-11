@@ -30,8 +30,8 @@ function normalisePath(path: string): string {
     .replace(/\/index$/, "");
 }
 
-function findPiece(tail: string): SharedPiece | undefined {
-  return compiled.find(({ regex }) => regex.test(tail))?.piece;
+function findPieces(tail: string): SharedPiece[] {
+  return compiled.filter(({ regex }) => regex.test(tail)).map(({ piece }) => piece);
 }
 
 function isAllowed(piece: SharedPiece, tail: string, allow: string[]): boolean {
@@ -54,6 +54,30 @@ function importsSharedPackage(body: readonly { type: string; source?: unknown }[
     const source = statement.source as { value?: unknown } | null | undefined;
     return typeof source?.value === "string" && SHARED_SOURCE.test(source.value);
   });
+}
+
+function importsRequired(
+  body: readonly { type: string; source?: unknown; specifiers?: unknown }[],
+  names: readonly string[],
+): boolean {
+  return body.some((statement) => {
+    if (statement.type !== "ImportDeclaration") return false;
+    const source = statement.source as { value?: unknown } | undefined;
+    if (typeof source?.value !== "string" || !SHARED_SOURCE.test(source.value)) return false;
+    return importedNames(statement as unknown as Rule.Node).some((name) => names.includes(name));
+  });
+}
+
+// A file that only re-exports another module carries no markup to replace.
+function onlyReExports(body: readonly { type: string; source?: unknown }[]): boolean {
+  return (
+    body.length > 0 &&
+    body.every(
+      (statement) =>
+        (statement.type === "ExportNamedDeclaration" || statement.type === "ExportAllDeclaration") &&
+        Boolean(statement.source),
+    )
+  );
 }
 
 type SpecifierName = { name?: string; value?: string };
@@ -92,13 +116,14 @@ const rule: Rule.RuleModule = {
       if (typeof source !== "string") return;
       const tail = specifierTail(source);
       if (tail === undefined) return;
-      const piece = findPiece(tail);
-      if (!piece || isAllowed(piece, tail, allow)) return;
-      if (piece.importNames) {
-        if (dynamic || !importedNames(node).some((name) => piece.importNames?.includes(name))) {
-          return;
-        }
-      }
+      const piece = findPieces(tail).find((candidate) => {
+        if (candidate.requiredImport || isAllowed(candidate, tail, allow)) return false;
+        if (!candidate.importNames) return true;
+        return (
+          !dynamic && importedNames(node).some((name) => candidate.importNames?.includes(name))
+        );
+      });
+      if (!piece) return;
       if (piece.message) {
         context.report({ node, messageId: "custom", data: { message: piece.message } });
         return;
@@ -113,10 +138,21 @@ const rule: Rule.RuleModule = {
     return {
       Program(node) {
         const file = normalisePath(context.filename);
-        const piece = findPiece(file);
-        if (!piece || piece.importNames || isAllowed(piece, file, allow)) return;
-        if (importsSharedPackage(node.body as { type: string; source?: unknown }[])) return;
-        context.report({ node, messageId: "defined", data: { replacement: piece.replacement } });
+        const body = node.body as { type: string; source?: unknown }[];
+        for (const piece of findPieces(file)) {
+          if (piece.importNames || isAllowed(piece, file, allow)) continue;
+          if (piece.requiredImport) {
+            if (onlyReExports(body) || importsRequired(body, piece.requiredImport)) continue;
+          } else if (importsSharedPackage(body)) {
+            continue;
+          }
+          context.report({
+            node,
+            messageId: piece.message ? "custom" : "defined",
+            data: { message: piece.message, replacement: piece.replacement },
+          });
+          return;
+        }
       },
       ImportDeclaration(node) {
         checkSource(node, node.source.value);

@@ -403,6 +403,9 @@ describe("Toggle and ToggleGroup", () => {
       document.querySelectorAll('[data-slot="toggle-group-item"]');
     expect(items()[0]).toHaveAttribute("data-spacing", "0");
     expect(items()[0].className).toContain("data-[spacing=0]:rounded-none");
+    expect(document.querySelector('[data-slot="toggle-group"]')?.className).toContain(
+      "data-[spacing=0]:data-[variant=outline]:shadow-xs",
+    );
     await user.pointer({ keys: "[TouchA]", target: items()[1] });
     expect(items()[1]).toHaveAttribute("data-state", "on");
     rerender(
@@ -414,6 +417,9 @@ describe("Toggle and ToggleGroup", () => {
     expect(document.querySelector('[data-slot="toggle-group"]')).toHaveStyle({
       "--gap": "2",
     });
+    expect(document.querySelector('[data-slot="toggle-group"]')?.className).toContain(
+      "gap-[--spacing(var(--gap))]",
+    );
   });
 });
 
@@ -464,7 +470,18 @@ describe("AlertDialog, Popover, Sheet and DropdownMenu", () => {
         </SheetContent>
       </Sheet>,
     );
-    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+    const close = screen.getByRole("button", { name: "Close" });
+    expect(close).toBeInTheDocument();
+    for (const cls of [
+      "pointer-coarse:after:absolute",
+      "pointer-coarse:after:top-1/2",
+      "pointer-coarse:after:left-1/2",
+      "pointer-coarse:after:size-11",
+      "pointer-coarse:after:-translate-x-1/2",
+      "pointer-coarse:after:-translate-y-1/2",
+    ]) {
+      expect(close.className).toContain(cls);
+    }
     unmount();
     render(
       <Sheet open>

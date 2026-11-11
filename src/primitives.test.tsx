@@ -4,6 +4,11 @@ import userEvent from "@testing-library/user-event";
 
 import * as primitives from "./primitives";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
   Badge,
   Button,
   Card,
@@ -21,8 +26,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Input,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectGroup,
@@ -31,18 +43,27 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  Skeleton,
   Switch,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
   Textarea,
+  Toggle,
+  ToggleGroup,
+  ToggleGroupItem,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   badgeVariants,
   buttonVariants,
   cn,
+  toggleVariants,
 } from "./primitives";
 
 describe("@merqo/ui/primitives", () => {
@@ -64,15 +85,23 @@ describe("@merqo/ui/primitives", () => {
       "Textarea",
       "Tooltip",
       "TooltipProvider",
+      "AlertDialog",
+      "Popover",
+      "Sheet",
+      "DropdownMenu",
+      "Toggle",
+      "toggleVariants",
+      "ToggleGroup",
+      "ToggleGroupItem",
+      "Skeleton",
     ]) {
       expect(primitives).toHaveProperty(name);
     }
   });
 
-  it("keeps the other private ui modules out of the public surface", () => {
-    expect(primitives).not.toHaveProperty("Sheet");
-    expect(primitives).not.toHaveProperty("AlertDialog");
-    expect(primitives).not.toHaveProperty("Popover");
+  it("keeps unlisted ui modules out of the public surface", () => {
+    expect(primitives).not.toHaveProperty("Accordion");
+    expect(primitives).not.toHaveProperty("SheetPortal");
   });
 
   it("cn merges conflicting Tailwind classes", () => {
@@ -328,5 +357,111 @@ describe("Tooltip", () => {
     fireEvent.focus(trigger);
     const shown = await screen.findAllByText("Helpful words");
     expect(shown.length).toBeGreaterThan(0);
+  });
+});
+
+describe("Skeleton", () => {
+  it("is a pulsing placeholder that stops under reduced motion", () => {
+    render(<Skeleton className="h-4 w-10" />);
+    expect(document.querySelector('[data-slot="skeleton"]')).toHaveClass(
+      "bg-accent",
+      "animate-pulse",
+      "motion-reduce:animate-none",
+      "h-4",
+    );
+  });
+});
+
+describe("Toggle and ToggleGroup", () => {
+  it("toggleVariants reaches 44px on coarse pointers", () => {
+    for (const size of ["default", "sm", "lg"] as const) {
+      expect(toggleVariants({ size })).toContain("pointer-coarse:h-11");
+    }
+  });
+
+  it("toggles on a touch tap", async () => {
+    const user = userEvent.setup();
+    render(<Toggle aria-label="Bold">B</Toggle>);
+    const btn = screen.getByRole("button", { name: "Bold" });
+    expect(btn).toHaveAttribute("aria-pressed", "false");
+    await user.pointer({ keys: "[TouchA]", target: btn });
+    expect(btn).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("fuses items at spacing 0 and separates them above 0", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <ToggleGroup type="single" defaultValue="a">
+        <ToggleGroupItem value="a">A</ToggleGroupItem>
+        <ToggleGroupItem value="b">B</ToggleGroupItem>
+      </ToggleGroup>,
+    );
+    const items = () =>
+      document.querySelectorAll('[data-slot="toggle-group-item"]');
+    expect(items()[0]).toHaveAttribute("data-spacing", "0");
+    expect(items()[0].className).toContain("data-[spacing=0]:rounded-none");
+    await user.pointer({ keys: "[TouchA]", target: items()[1] });
+    expect(items()[1]).toHaveAttribute("data-state", "on");
+    rerender(
+      <ToggleGroup type="single" spacing={2}>
+        <ToggleGroupItem value="a">A</ToggleGroupItem>
+      </ToggleGroup>,
+    );
+    expect(items()[0]).toHaveAttribute("data-spacing", "2");
+    expect(document.querySelector('[data-slot="toggle-group"]')).toHaveStyle({
+      "--gap": "2",
+    });
+  });
+});
+
+describe("AlertDialog, Popover, Sheet and DropdownMenu", () => {
+  it("open from a touch tap", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <AlertDialog>
+          <AlertDialogTrigger>Delete</AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>Sure?</AlertDialogTitle>
+            <AlertDialogDescription>Gone for good.</AlertDialogDescription>
+          </AlertDialogContent>
+        </AlertDialog>
+        <Popover>
+          <PopoverTrigger>Info</PopoverTrigger>
+          <PopoverContent>Popover body</PopoverContent>
+        </Popover>
+        <DropdownMenu>
+          <DropdownMenuTrigger>More</DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Rename</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </>,
+    );
+    for (const [trigger, shown] of [
+      ["Delete", "Sure?"],
+      ["Info", "Popover body"],
+    ] as const) {
+      await user.pointer({
+        keys: "[TouchA]",
+        target: screen.getByRole("button", { name: trigger }),
+      });
+      expect(await screen.findByText(shown)).toBeInTheDocument();
+      await user.keyboard("{Escape}");
+    }
+    expect(screen.getByRole("button", { name: "More" })).toBeInTheDocument();
+  });
+
+  it("renders an open Sheet with its parts", () => {
+    render(
+      <Sheet open>
+        <SheetContent>
+          <SheetTitle>Sheet title</SheetTitle>
+          <SheetDescription>Sheet body</SheetDescription>
+        </SheetContent>
+      </Sheet>,
+    );
+    expect(screen.getByText("Sheet title")).toBeInTheDocument();
+    expect(screen.getByText("Sheet body")).toBeInTheDocument();
   });
 });

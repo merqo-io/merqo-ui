@@ -1,6 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { FORM_LABEL_CLASS, FormError } from "./form-field";
+import { FORM_ERROR_CLASS, FORM_LABEL_CLASS, FormError } from "./form-field";
+
+describe("FORM_ERROR_CLASS", () => {
+  it("is the shared destructive error style FormError renders", () => {
+    expect(FORM_ERROR_CLASS).toBe("text-sm font-medium text-destructive");
+    render(<FormError message="Bad" />);
+    expect(screen.getByRole("alert")).toHaveClass(
+      ...FORM_ERROR_CLASS.split(" "),
+    );
+  });
+});
 
 describe("FORM_LABEL_CLASS", () => {
   it("is the shared small-caps field label style", () => {

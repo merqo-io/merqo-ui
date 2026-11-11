@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- `@merqo/ui/primitives` now exports `AlertDialog`, `Popover`, `Sheet` and `DropdownMenu` (with their parts), plus new `Toggle`, `toggleVariants`, `ToggleGroup` (with a `spacing` prop), `ToggleGroupItem` and `Skeleton`. Toggles reach 44px on coarse pointers.
+- `FORM_ERROR_CLASS`, the classes `FormError` renders, exported from the package root.
+- `EmptyState` takes `size="compact"` for one-line messages inside a list or card, and `role` forwarded to the root. The default rendering is unchanged.
+
 ### Changed
 
 - Close-out sweep: added `knip.json` so `pnpm dlx knip@6.44.2` runs clean, removed four unused parts from the private `src/ui` dropdown-menu and sheet primitives (not part of the public API), and added a README to every `src` folder. No public export changed.

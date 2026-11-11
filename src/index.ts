@@ -149,7 +149,7 @@ export { AsyncSubmitButton } from "./async-submit-button";
 export type { AsyncSubmitButtonProps } from "./async-submit-button";
 export { Avatar, AvatarIdentity, initials } from "./avatar";
 export type { AvatarProps, AvatarIdentityProps } from "./avatar";
-export { FORM_LABEL_CLASS, FormError } from "./form-field";
+export { FORM_ERROR_CLASS, FORM_LABEL_CLASS, FormError } from "./form-field";
 export type { FormErrorProps } from "./form-field";
 export { DataCollectionNotice } from "./data-collection-notice";
 export type { DataCollectionNoticeProps } from "./data-collection-notice";

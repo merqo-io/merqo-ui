@@ -435,8 +435,11 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   open with the message inline (retry allowed). A Next.js redirect error is
   treated as navigation. Callers fire their own success toast inside
   `onConfirm`.
-- `EmptyState({icon?, title, description?, children?, actions?, className})`
-  — dashed "nothing here yet" card with up to two actions.
+- `EmptyState({icon?, title, description?, children?, actions?, className, size?, role?})`
+  — dashed "nothing here yet" card with up to two actions. `size="compact"`
+  is for a one-line message inside a list or card ("No vendors yet."): the
+  title is a muted `<p>` instead of the `<h2>`, with a smaller radius and
+  padding. `role` is passed to the root, for example `role="status"`.
 - `DataTable` also takes `pagination?: {page, pageSize, onPageChange, labels?}`
   (1-based, clamped): it shows one page of `rows` with previous / next
   buttons (44px) and a "Page x of y" line, and omits the pager when
@@ -489,7 +492,9 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   on its right, hidden below `sm` and truncated. The side is fixed across kits; there is no prop to flip it.
 - `AsyncSubmitButton({pending, pendingChildren?, className?, children})` — submit button with a spinner,
   `aria-busy` and disabled state while pending. Also used inside `FeedbackSheet` and `HelpSheet`.
-- `FORM_LABEL_CLASS` — small-caps field label classes. `FormError({message, id?, className?})` — inline
+- `FORM_LABEL_CLASS` — small-caps field label classes. `FORM_ERROR_CLASS` —
+  the `text-sm font-medium text-destructive` classes `FormError` renders, for
+  error text a kit lays out itself. `FormError({message, id?, className?})` — inline
   `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
 - `ElevatedCard({as?, className, children})` — the polished lifted-shadow
   card shell used across profile/dashboard/setup pages, deliberately not
@@ -952,6 +957,23 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.
+- `AlertDialog`, `AlertDialogTrigger`, `AlertDialogContent`,
+  `AlertDialogHeader`, `AlertDialogFooter`, `AlertDialogTitle`,
+  `AlertDialogDescription`, `AlertDialogAction`, `AlertDialogCancel`.
+- `Popover`, `PopoverTrigger`, `PopoverContent`.
+- `Sheet`, `SheetContent`, `SheetHeader`, `SheetFooter`, `SheetTitle`,
+  `SheetDescription`. `Sheet` is controlled with `open` and `onOpenChange`.
+- `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
+  `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
+  `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,
+  `DropdownMenuSubTrigger`, `DropdownMenuSubContent`.
+- `Toggle`, `toggleVariants`, `ToggleGroup`, `ToggleGroupItem`. Variants:
+  `default`, `outline`; sizes `default` (36px), `sm` (32px), `lg` (40px), all
+  44px on coarse pointers. `ToggleGroup` takes `spacing` (default `0`): at `0`
+  the items fuse into one segmented control, above `0` they are separate with
+  that gap.
+- `Skeleton`: pulsing placeholder block; it stops pulsing under
+  `prefers-reduced-motion`.
 - `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`.
 - `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`,
   `CardContent`, `CardFooter`.

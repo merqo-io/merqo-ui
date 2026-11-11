@@ -16,6 +16,13 @@ export interface EmptyStateProps {
   primaryAction?: React.ReactNode;
   secondaryAction?: React.ReactNode;
   className?: string;
+  /**
+   * `compact` is a one-line message inside a list or card: the title becomes a
+   * muted paragraph instead of a heading, with a smaller radius and padding.
+   */
+  size?: "default" | "compact";
+  /** Forwarded to the root, e.g. `status` for a list that fills in later. */
+  role?: React.AriaRole;
 }
 
 /**
@@ -31,7 +38,10 @@ export function EmptyState({
   primaryAction,
   secondaryAction,
   className,
+  size = "default",
+  role,
 }: EmptyStateProps): React.ReactElement {
+  const compact = size === "compact";
   const body = description ?? children;
   const steps =
     actions ??
@@ -43,29 +53,52 @@ export function EmptyState({
     ) : null);
   return (
     <div
+      role={role}
       className={cn(
-        "rounded-2xl border border-dashed bg-card/50 px-6 py-10 text-center",
+        compact
+          ? "rounded-xl border border-dashed bg-card/50 px-4 py-6 text-center"
+          : "rounded-2xl border border-dashed bg-card/50 px-6 py-10 text-center",
         className,
       )}
     >
       {icon && (
         <div
           aria-hidden="true"
-          className="mx-auto mb-3 flex justify-center text-muted-foreground [&_svg]:size-8"
+          className={
+            compact
+              ? "mx-auto mb-2 flex justify-center text-muted-foreground [&_svg]:size-6"
+              : "mx-auto mb-3 flex justify-center text-muted-foreground [&_svg]:size-8"
+          }
         >
           {icon}
         </div>
       )}
-      <h2 className="font-display text-2xl font-semibold tracking-tight">
-        {title}
-      </h2>
+      {compact ? (
+        <p className="text-sm text-muted-foreground">{title}</p>
+      ) : (
+        <h2 className="font-display text-2xl font-semibold tracking-tight">
+          {title}
+        </h2>
+      )}
       {body && (
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+        <p
+          className={
+            compact
+              ? "mx-auto mt-1 max-w-md text-sm text-muted-foreground"
+              : "mx-auto mt-2 max-w-md text-sm text-muted-foreground"
+          }
+        >
           {body}
         </p>
       )}
       {steps && (
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <div
+          className={
+            compact
+              ? "mt-3 flex flex-wrap items-center justify-center gap-3"
+              : "mt-5 flex flex-wrap items-center justify-center gap-3"
+          }
+        >
           {steps}
         </div>
       )}

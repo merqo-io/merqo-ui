@@ -12,6 +12,13 @@ export type SharedPiece = {
   replacement: string;
   /** Flag only an import that names one of these exports; never a file. */
   importNames?: readonly string[];
+  /**
+   * Marks a file that must exist (the framework requires it) but must render a
+   * shared export: a `.tsx` or `.jsx` file matching `pattern` is reported
+   * unless it value-imports (or re-exports) one of these names from the
+   * `@merqo/ui` package root. Applies to files only, never to imports.
+   */
+  requiredImport?: readonly string[];
   /** Replaces the whole message when the generic one does not fit. */
   message?: string;
 };
@@ -197,5 +204,70 @@ export const SHARED_PIECES: readonly SharedPiece[] = [
     importNames: ["cn"],
     message:
       "Import cn from @merqo/ui/primitives and keep the other helpers local, or add it to `allow` if it wraps the shared piece.",
+  },
+  {
+    id: "alert-dialog",
+    pattern: "(?:components/)?ui/alert-dialog",
+    replacement: 'import { AlertDialog } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "popover",
+    pattern: "(?:components/)?ui/popover",
+    replacement: 'import { Popover } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "sheet",
+    pattern: "(?:components/)?ui/sheet",
+    replacement: 'import { Sheet } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "dropdown-menu",
+    pattern: "(?:components/)?ui/dropdown-menu",
+    replacement: 'import { DropdownMenu } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "toggle",
+    pattern: "(?:components/)?ui/toggle",
+    replacement: 'import { Toggle } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "toggle-group",
+    pattern: "(?:components/)?ui/toggle-group",
+    replacement: 'import { ToggleGroup } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "skeleton",
+    pattern: "(?:components/)?ui/skeleton",
+    replacement: 'import { Skeleton } from "@merqo/ui/primitives"',
+  },
+  {
+    id: "form-classes",
+    pattern: "lib/utils",
+    replacement: 'import { FORM_LABEL_CLASS, FORM_ERROR_CLASS } from "@merqo/ui"',
+    importNames: ["FORM_LABEL_CLASS", "FORM_ERROR_CLASS"],
+  },
+  {
+    id: "error-page",
+    pattern: "src/app/(?!dev/)(?:.*/)?error",
+    replacement: 'import { ErrorPage } from "@merqo/ui"',
+    requiredImport: ["ErrorPage"],
+    message:
+      "Next.js needs this file, but it must render ErrorPage from @merqo/ui, or add it to `allow` if it needs custom behaviour.",
+  },
+  {
+    id: "global-error-page",
+    pattern: "src/app/(?!dev/)(?:.*/)?global-error",
+    replacement: 'import { GlobalError } from "@merqo/ui"',
+    requiredImport: ["GlobalError"],
+    message:
+      "Next.js needs this file, but it must render GlobalError from @merqo/ui, or add it to `allow` if it needs custom behaviour.",
+  },
+  {
+    id: "not-found-page",
+    pattern: "src/app/(?!dev/)(?:.*/)?not-found",
+    replacement: 'import { NotFound } from "@merqo/ui"',
+    requiredImport: ["NotFound"],
+    message:
+      "Next.js needs this file, but it must render NotFound from @merqo/ui, or add it to `allow` if it needs custom behaviour.",
   },
 ];

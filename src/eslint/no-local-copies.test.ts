@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { ESLint, type Linter } from "eslint";
 import tseslint from "typescript-eslint";
@@ -87,6 +88,131 @@ describe("merqoNoLocalCopies", () => {
     });
   });
 
+  describe("primitives shipped from @merqo/ui/primitives", () => {
+    it.each([
+      ["alert-dialog", "AlertDialog"],
+      ["popover", "Popover"],
+      ["sheet", "Sheet"],
+      ["dropdown-menu", "DropdownMenu"],
+      ["toggle", "Toggle"],
+      ["toggle-group", "ToggleGroup"],
+      ["skeleton", "Skeleton"],
+    ])("flags a local %s copy and accepts its id in allow", async (id, name) => {
+      const code = `import { ${name} } from "@/components/ui/${id}";\n`;
+      const [message] = await lint(code);
+      expect(message.message).toContain(`import { ${name}`);
+      expect(message.message).toContain("@merqo/ui/primitives");
+      expect(await lint("export {};\n", `src/components/ui/${id}.tsx`)).toHaveLength(1);
+      const allowed = makeLint({ allow: [id] });
+      expect(await allowed(code)).toHaveLength(0);
+      expect(await allowed("export {};\n", `src/components/ui/${id}.tsx`)).toHaveLength(0);
+    });
+
+    it("does not confuse toggle with toggle-group", async () => {
+      const [message] = await lint('import { ToggleGroup } from "@/components/ui/toggle-group";\n');
+      expect(message.message).toContain("ToggleGroup");
+    });
+  });
+
+  describe("form class constants", () => {
+    it("flags FORM_LABEL_CLASS and FORM_ERROR_CLASS imported from lib/utils", async () => {
+      for (const name of ["FORM_LABEL_CLASS", "FORM_ERROR_CLASS"]) {
+        const [message] = await lint(`import { ${name} } from "@/lib/utils";\n`);
+        expect(message.message).toContain(
+          'import { FORM_LABEL_CLASS, FORM_ERROR_CLASS } from "@merqo/ui"',
+        );
+      }
+      expect(await lint('import { FORM_ERROR_CLASS } from "../lib/utils/index";\n')).toHaveLength(1);
+      expect(await lint('export { FORM_LABEL_CLASS } from "./lib/utils";\n')).toHaveLength(1);
+    });
+
+    it("leaves other names and the defining file alone, and honours allow", async () => {
+      expect(await lint('import { formatThing } from "@/lib/utils";\n')).toHaveLength(0);
+      expect(await lint('export const FORM_ERROR_CLASS = "x";\n', "src/lib/utils.ts")).toHaveLength(0);
+      const allowed = makeLint({ allow: ["form-classes"] });
+      expect(await allowed('import { FORM_LABEL_CLASS } from "@/lib/utils";\n')).toHaveLength(0);
+    });
+
+    it("reports a form constant imported beside cn", async () => {
+      expect(await lint('import { cn, FORM_LABEL_CLASS } from "@/lib/utils";\n')).toHaveLength(1);
+    });
+  });
+
+  describe("error pages", () => {
+    const only =
+      'import { ElevatedCard } from "@merqo/ui";\nexport default function P() { return ElevatedCard; }\n';
+    it.each([
+      ["error-page", "ErrorPage", "src/app/error.tsx"],
+      ["global-error-page", "GlobalError", "src/app/global-error.tsx"],
+      ["not-found-page", "NotFound", "src/app/not-found.tsx"],
+      ["error-page", "ErrorPage", "src/app/(auth)/dashboard/error.tsx"],
+    ])("requires %s to render %s in %s", async (id, name, file) => {
+      const [message] = await lint(only, file);
+      expect(message.message).toContain(name);
+      const good = `import { ${name} } from "@merqo/ui";\nexport default ${name};\n`;
+      expect(await lint(good, file)).toHaveLength(0);
+      expect(await makeLint({ allow: [id] })(only, file)).toHaveLength(0);
+    });
+
+    it("flags a page that imports nothing from @merqo/ui", async () => {
+      expect(await lint("export default function E() { return null; }\n", "src/app/error.tsx")).toHaveLength(1);
+    });
+
+    it("does not accept the required export from a subpath", async () => {
+      const code = 'import { ErrorPage } from "@merqo/ui/next";\nexport default ErrorPage;\n';
+      expect(await lint(code, "src/app/error.tsx")).toHaveLength(1);
+    });
+
+    it("does not accept a type-only import of the required export", async () => {
+      const decl = 'import type { ErrorPage } from "@merqo/ui";\nexport default function E() { return null; }\n';
+      const inline = 'import { type ErrorPage } from "@merqo/ui";\nexport default function E() { return null; }\n';
+      expect(await lint(decl, "src/app/error.tsx")).toHaveLength(1);
+      expect(await lint(inline, "src/app/error.tsx")).toHaveLength(1);
+    });
+
+    it("accepts a re-export of the required name from the package root", async () => {
+      const code = 'export { ErrorPage as default } from "@merqo/ui";\n';
+      expect(await lint(code, "src/app/error.tsx")).toHaveLength(0);
+      expect(await lint('export { ErrorPage as default } from "@merqo/ui/next";\n', "src/app/error.tsx")).toHaveLength(1);
+    });
+
+    it("is not confused by a leading use client directive", async () => {
+      const reExport = '"use client";\nexport { ErrorPage as default } from "@merqo/ui";\n';
+      const value = '"use client";\nimport { ErrorPage } from "@merqo/ui";\nexport default ErrorPage;\n';
+      expect(await lint(reExport, "src/app/error.tsx")).toHaveLength(0);
+      expect(await lint(value, "src/app/error.tsx")).toHaveLength(0);
+    });
+
+    it("reports a file that re-exports a local page", async () => {
+      const code = 'export { default } from "./local-page";\n';
+      expect(await lint(code, "src/app/dashboard/error.tsx")).toHaveLength(1);
+      expect(await makeLint({ allow: ["error-page"] })(code, "src/app/dashboard/error.tsx")).toHaveLength(0);
+    });
+
+    it("anchors on src/app, not any ancestor folder named app", async () => {
+      // Paths stay under cwd, because ESLint ignores files outside its base directory.
+      const at = (...parts: string[]) => join(process.cwd(), ...parts);
+      expect(await lint(only, at("app", "src", "lib", "error.ts"))).toHaveLength(0);
+      expect(await lint(only, at("u", "app", "src", "components", "not-found.tsx"))).toHaveLength(0);
+      expect(await lint(only, at("app", "src", "app", "error.tsx"))).toHaveLength(1);
+      expect(await lint(only, at("kit", "src", "app", "(auth)", "not-found.tsx"))).toHaveLength(1);
+    });
+
+    it("checks component files only", async () => {
+      expect(await lint(only, "src/app/error.ts")).toHaveLength(0);
+      expect(await lint(only, "src/app/error/index.ts")).toHaveLength(0);
+      expect(await lint(only, "src/app/error/index.tsx")).toHaveLength(1);
+      expect(await lint(only, "src/app/error.jsx")).toHaveLength(1);
+    });
+
+    it("skips app/dev, other folders and imports of the files", async () => {
+      expect(await lint(only, "src/app/dev/error.tsx")).toHaveLength(0);
+      expect(await lint(only, "src/components/error.tsx")).toHaveLength(0);
+      expect(await lint(only, "src/app/error.test.tsx")).toHaveLength(0);
+      expect(await lint('import E from "@/app/error";\n')).toHaveLength(0);
+    });
+  });
+
   it("does not flag shared imports", async () => {
     const code = [
       'import { useAsyncAction, PageHeader } from "@merqo/ui";',
@@ -105,7 +231,7 @@ describe("merqoNoLocalCopies", () => {
       'import { FAQ_ITEMS } from "@/components/landing/faq";',
       'import { STEPS } from "@/components/tour/steps";',
       'import { SCHEDULES } from "@/lib/legal-schedules";',
-      'import { AlertDialog } from "@/components/ui/alert-dialog";',
+      'import { Calendar } from "@/components/ui/calendar";',
       'import { SiteFooter } from "@/components/site-footer";',
       'import { Providers } from "@/components/providers";',
       'import { Section } from "@/components/section";',

@@ -7,9 +7,12 @@
 - `@merqo/ui/primitives` now exports `AlertDialog`, `Popover`, `Sheet` and `DropdownMenu` (with their parts, including `SheetTrigger`, `SheetClose`, `PopoverAnchor` and a `showCloseButton` prop on `SheetContent` that defaults to true), plus new `Toggle`, `toggleVariants`, `ToggleGroup` (with a `spacing` prop), `ToggleGroupItem` and `Skeleton`. Toggles reach 44px on coarse pointers.
 - `FORM_ERROR_CLASS`, the classes `FormError` renders, exported from the package root.
 - `EmptyState` takes `size="compact"` for one-line messages inside a list or card, and `role` forwarded to the root. The default rendering is unchanged.
+- `merqoNoLocalCopies` also reports kit-local copies of `alert-dialog`, `popover`, `sheet`, `dropdown-menu`, `toggle`, `toggle-group` and `skeleton` (ids of the same names), imports of `FORM_LABEL_CLASS` or `FORM_ERROR_CLASS` from `lib/utils` (`form-classes`), and `error`, `global-error` and `not-found` `.tsx`/`.jsx` files under `src/app/` that do not value-import or re-export `ErrorPage`, `GlobalError` or `NotFound` from the `@merqo/ui` root (`error-page`, `global-error-page`, `not-found-page`; `src/app/dev/` is skipped). `SharedPiece` gains `requiredImport` for the file-must-use-this-export case. Enabling this version reports these copies in every kit until each kit adopts the shared export or adds the id to `allow`.
 
 ### Changed
 
+- `SheetContent` close button reaches a 44px hit area on coarse pointers; the icon stays where it was and fine-pointer rendering is unchanged.
+- `ToggleGroup` root: the outline shadow now applies to a fused group (`data-[spacing=0]`); the previous selector never matched.
 - Close-out sweep: added `knip.json` so `pnpm dlx knip@6.44.2` runs clean, removed four unused parts from the private `src/ui` dropdown-menu and sheet primitives (not part of the public API), and added a README to every `src` folder. No public export changed.
 
 ## [0.44.2] - 2026-11-10

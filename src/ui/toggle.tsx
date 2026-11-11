@@ -6,7 +6,7 @@ import { Toggle as TogglePrimitive } from "radix-ui";
 
 import { cn } from "../lib/utils";
 
-const toggleVariants = cva(
+const variants = cva(
   "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[color,box-shadow] outline-none hover:bg-muted hover:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -27,6 +27,23 @@ const toggleVariants = cva(
     },
   },
 );
+
+type ToggleVariant = "default" | "outline";
+type ToggleSize = "default" | "sm" | "lg";
+
+// Wrapper with an explicit signature: the inferred cva type cannot be named in
+// the emitted .d.ts when pnpm builds the package from a temp store (TS2742).
+function toggleVariants({
+  variant,
+  size,
+  className,
+}: {
+  variant?: ToggleVariant | null;
+  size?: ToggleSize | null;
+  className?: string;
+} = {}): string {
+  return variants({ variant, size, className });
+}
 
 function Toggle({
   className,

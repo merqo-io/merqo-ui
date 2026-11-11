@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- v0.45.0 failed to build when installed as a git dependency: `toggleVariants` was an inferred `cva()` value, so `tsc` could not name its type in the emitted declarations from pnpm's temp store (TS2742) and `prepare` aborted. It is now a function with an explicit signature, called exactly as before. A test fails if any module exports a value inferred from `cva()`.
+
 ## [0.45.0] - 2026-11-11
 
 ### Added

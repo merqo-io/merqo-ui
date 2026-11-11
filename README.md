@@ -960,9 +960,11 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `AlertDialog`, `AlertDialogTrigger`, `AlertDialogContent`,
   `AlertDialogHeader`, `AlertDialogFooter`, `AlertDialogTitle`,
   `AlertDialogDescription`, `AlertDialogAction`, `AlertDialogCancel`.
-- `Popover`, `PopoverTrigger`, `PopoverContent`.
-- `Sheet`, `SheetContent`, `SheetHeader`, `SheetFooter`, `SheetTitle`,
-  `SheetDescription`. `Sheet` is controlled with `open` and `onOpenChange`.
+- `Popover`, `PopoverTrigger`, `PopoverAnchor`, `PopoverContent`.
+- `Sheet`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`,
+  `SheetFooter`, `SheetTitle`, `SheetDescription`. `SheetContent` takes
+  `side` and `showCloseButton` (default `true`; `false` drops the built-in X
+  so the sheet supplies its own `SheetClose`).
 - `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
   `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
   `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,

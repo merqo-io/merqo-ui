@@ -4,7 +4,7 @@
 
 ### Added
 
-- `@merqo/ui/primitives` now exports `AlertDialog`, `Popover`, `Sheet` and `DropdownMenu` (with their parts), plus new `Toggle`, `toggleVariants`, `ToggleGroup` (with a `spacing` prop), `ToggleGroupItem` and `Skeleton`. Toggles reach 44px on coarse pointers.
+- `@merqo/ui/primitives` now exports `AlertDialog`, `Popover`, `Sheet` and `DropdownMenu` (with their parts, including `SheetTrigger`, `SheetClose`, `PopoverAnchor` and a `showCloseButton` prop on `SheetContent` that defaults to true), plus new `Toggle`, `toggleVariants`, `ToggleGroup` (with a `spacing` prop), `ToggleGroupItem` and `Skeleton`. Toggles reach 44px on coarse pointers.
 - `FORM_ERROR_CLASS`, the classes `FormError` renders, exported from the package root.
 - `EmptyState` takes `size="compact"` for one-line messages inside a list or card, and `role` forwarded to the root. The default rendering is unchanged.
 

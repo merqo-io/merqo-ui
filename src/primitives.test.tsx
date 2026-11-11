@@ -33,6 +33,7 @@ import {
   Input,
   Label,
   Popover,
+  PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
   Select,
@@ -44,9 +45,11 @@ import {
   SelectTrigger,
   SelectValue,
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetTitle,
+  SheetTrigger,
   Skeleton,
   Switch,
   Tabs,
@@ -450,6 +453,61 @@ describe("AlertDialog, Popover, Sheet and DropdownMenu", () => {
       await user.keyboard("{Escape}");
     }
     expect(screen.getByRole("button", { name: "More" })).toBeInTheDocument();
+  });
+
+  it("renders the built-in Sheet close button by default and omits it on request", () => {
+    const { unmount } = render(
+      <Sheet open>
+        <SheetContent>
+          <SheetTitle>T</SheetTitle>
+          <SheetDescription>D</SheetDescription>
+        </SheetContent>
+      </Sheet>,
+    );
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+    unmount();
+    render(
+      <Sheet open>
+        <SheetContent showCloseButton={false}>
+          <SheetTitle>T</SheetTitle>
+          <SheetDescription>D</SheetDescription>
+          <SheetClose>Done</SheetClose>
+        </SheetContent>
+      </Sheet>,
+    );
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Done" })).toHaveAttribute(
+      "data-slot",
+      "sheet-close",
+    );
+  });
+
+  it("opens a Sheet from SheetTrigger and anchors a Popover", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <Sheet>
+          <SheetTrigger>Open sheet</SheetTrigger>
+          <SheetContent>
+            <SheetTitle>Sheet opened</SheetTitle>
+            <SheetDescription>Body</SheetDescription>
+          </SheetContent>
+        </Sheet>
+        <Popover open>
+          <PopoverAnchor data-testid="anchor">Anchor</PopoverAnchor>
+          <PopoverContent>Anchored body</PopoverContent>
+        </Popover>
+      </>,
+    );
+    expect(screen.getByTestId("anchor")).toHaveAttribute(
+      "data-slot",
+      "popover-anchor",
+    );
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Open sheet" }),
+    });
+    expect(await screen.findByText("Sheet opened")).toBeInTheDocument();
   });
 
   it("renders an open Sheet with its parts", () => {

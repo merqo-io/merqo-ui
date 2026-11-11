@@ -55,7 +55,12 @@ export {
 } from "./ui/dropdown-menu";
 export { Input } from "./ui/input";
 export { Label } from "./ui/label";
-export { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+export {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTrigger,
+} from "./ui/popover";
 export {
   Select,
   SelectContent,
@@ -70,11 +75,13 @@ export {
 } from "./ui/select";
 export {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "./ui/sheet";
 export { Skeleton } from "./ui/skeleton";
 export { Switch } from "./ui/switch";

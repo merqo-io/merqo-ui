@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-11-11
+
 ### Added
 
 - `@merqo/ui/primitives` now exports `AlertDialog`, `Popover`, `Sheet` and `DropdownMenu` (with their parts, including `SheetTrigger`, `SheetClose`, `PopoverAnchor` and a `showCloseButton` prop on `SheetContent` that defaults to true), plus new `Toggle`, `toggleVariants`, `ToggleGroup` (with a `spacing` prop), `ToggleGroupItem` and `Skeleton`. Toggles reach 44px on coarse pointers.

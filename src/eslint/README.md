@@ -7,3 +7,5 @@ Shared lint configuration for the kits (`@merqo/ui/eslint`).
 - `index.ts`: the public entry.
 
 Rule: the caller passes its own `sonarjs` and `@typescript-eslint` plugin objects so ESLint sees one instance. A new rule changes lint in all six kits on their next pin bump, so add it with a test and a CHANGELOG note.
+
+`requiredImport` accepts a value import or a re-export from the `@merqo/ui` root; type-only imports, subpaths and namespace imports do not count.

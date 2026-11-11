@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { ESLint, type Linter } from "eslint";
 import tseslint from "typescript-eslint";
@@ -143,7 +144,7 @@ describe("merqoNoLocalCopies", () => {
     it.each([
       ["error-page", "ErrorPage", "src/app/error.tsx"],
       ["global-error-page", "GlobalError", "src/app/global-error.tsx"],
-      ["not-found-page", "NotFound", "app/not-found.tsx"],
+      ["not-found-page", "NotFound", "src/app/not-found.tsx"],
       ["error-page", "ErrorPage", "src/app/(auth)/dashboard/error.tsx"],
     ])("requires %s to render %s in %s", async (id, name, file) => {
       const [message] = await lint(only, file);
@@ -157,14 +158,55 @@ describe("merqoNoLocalCopies", () => {
       expect(await lint("export default function E() { return null; }\n", "src/app/error.tsx")).toHaveLength(1);
     });
 
-    it("accepts the required export from a subpath", async () => {
+    it("does not accept the required export from a subpath", async () => {
       const code = 'import { ErrorPage } from "@merqo/ui/next";\nexport default ErrorPage;\n';
-      expect(await lint(code, "src/app/error.tsx")).toHaveLength(0);
+      expect(await lint(code, "src/app/error.tsx")).toHaveLength(1);
     });
 
-    it("skips app/dev, re-export-only files, other folders and imports of the files", async () => {
+    it("does not accept a type-only import of the required export", async () => {
+      const decl = 'import type { ErrorPage } from "@merqo/ui";\nexport default function E() { return null; }\n';
+      const inline = 'import { type ErrorPage } from "@merqo/ui";\nexport default function E() { return null; }\n';
+      expect(await lint(decl, "src/app/error.tsx")).toHaveLength(1);
+      expect(await lint(inline, "src/app/error.tsx")).toHaveLength(1);
+    });
+
+    it("accepts a re-export of the required name from the package root", async () => {
+      const code = 'export { ErrorPage as default } from "@merqo/ui";\n';
+      expect(await lint(code, "src/app/error.tsx")).toHaveLength(0);
+      expect(await lint('export { ErrorPage as default } from "@merqo/ui/next";\n', "src/app/error.tsx")).toHaveLength(1);
+    });
+
+    it("is not confused by a leading use client directive", async () => {
+      const reExport = '"use client";\nexport { ErrorPage as default } from "@merqo/ui";\n';
+      const value = '"use client";\nimport { ErrorPage } from "@merqo/ui";\nexport default ErrorPage;\n';
+      expect(await lint(reExport, "src/app/error.tsx")).toHaveLength(0);
+      expect(await lint(value, "src/app/error.tsx")).toHaveLength(0);
+    });
+
+    it("reports a file that re-exports a local page", async () => {
+      const code = 'export { default } from "./local-page";\n';
+      expect(await lint(code, "src/app/dashboard/error.tsx")).toHaveLength(1);
+      expect(await makeLint({ allow: ["error-page"] })(code, "src/app/dashboard/error.tsx")).toHaveLength(0);
+    });
+
+    it("anchors on src/app, not any ancestor folder named app", async () => {
+      // Paths stay under cwd, because ESLint ignores files outside its base directory.
+      const at = (...parts: string[]) => join(process.cwd(), ...parts);
+      expect(await lint(only, at("app", "src", "lib", "error.ts"))).toHaveLength(0);
+      expect(await lint(only, at("u", "app", "src", "components", "not-found.tsx"))).toHaveLength(0);
+      expect(await lint(only, at("app", "src", "app", "error.tsx"))).toHaveLength(1);
+      expect(await lint(only, at("kit", "src", "app", "(auth)", "not-found.tsx"))).toHaveLength(1);
+    });
+
+    it("checks component files only", async () => {
+      expect(await lint(only, "src/app/error.ts")).toHaveLength(0);
+      expect(await lint(only, "src/app/error/index.ts")).toHaveLength(0);
+      expect(await lint(only, "src/app/error/index.tsx")).toHaveLength(1);
+      expect(await lint(only, "src/app/error.jsx")).toHaveLength(1);
+    });
+
+    it("skips app/dev, other folders and imports of the files", async () => {
       expect(await lint(only, "src/app/dev/error.tsx")).toHaveLength(0);
-      expect(await lint('export { default } from "../error";\n', "src/app/dashboard/error.tsx")).toHaveLength(0);
       expect(await lint(only, "src/components/error.tsx")).toHaveLength(0);
       expect(await lint(only, "src/app/error.test.tsx")).toHaveLength(0);
       expect(await lint('import E from "@/app/error";\n')).toHaveLength(0);

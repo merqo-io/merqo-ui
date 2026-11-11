@@ -1083,9 +1083,9 @@ install only what the entries you import need.
   | `ui/` or `components/ui/` `toggle-group` | `toggle-group` | the same names from `@merqo/ui/primitives` |
   | `ui/` or `components/ui/` `skeleton` | `skeleton` | the same names from `@merqo/ui/primitives` |
   | `lib/utils`, only an import naming `FORM_LABEL_CLASS` or `FORM_ERROR_CLASS` | `form-classes` | both from `@merqo/ui` |
-  | `app/**/error` (not `app/dev/`), unless it imports `ErrorPage` from `@merqo/ui` | `error-page` | render `ErrorPage` from `@merqo/ui` |
-  | `app/**/global-error`, unless it imports `GlobalError` from `@merqo/ui` | `global-error-page` | render `GlobalError` from `@merqo/ui` |
-  | `app/**/not-found`, unless it imports `NotFound` from `@merqo/ui` | `not-found-page` | render `NotFound` from `@merqo/ui` |
+  | `src/app/**/error.tsx` (not `src/app/dev/`), unless it imports `ErrorPage` from `@merqo/ui` | `error-page` | render `ErrorPage` from `@merqo/ui` |
+  | `src/app/**/global-error.tsx`, unless it imports `GlobalError` from `@merqo/ui` | `global-error-page` | render `GlobalError` from `@merqo/ui` |
+  | `src/app/**/not-found.tsx`, unless it imports `NotFound` from `@merqo/ui` | `not-found-page` | render `NotFound` from `@merqo/ui` |
 
   Not flagged on purpose, because they carry kit content or wrap a shared
   piece: the wordmark, FAQ content, tour steps, help centres and guides,
@@ -1094,11 +1094,14 @@ install only what the entries you import need.
   wrappers. Every message ends with a reminder to add a kit's own wrapper to
   `allow`.
 
-  The error-page rows work on the file, because Next.js requires it to
-  exist: the file is reported unless it imports the named export from
-  `@merqo/ui` (importing only `ElevatedCard` is not enough). A file under
-  `app/dev/`, a file that only re-exports another module, and imports of these
-  files are not reported.
+  The error-page rows work on the `.tsx` or `.jsx` file under `src/app/`,
+  because Next.js requires it to exist: the file is reported unless it
+  value-imports (or re-exports, for example
+  `export { ErrorPage as default } from "@merqo/ui"`) the named export from
+  the package root `@merqo/ui`. Importing only `ElevatedCard`, a type-only
+  import, a subpath import or re-exporting a local page does not count; add
+  the id to `allow` for a page that needs custom behaviour. Files under
+  `src/app/dev/`, `.ts` helpers and imports of these files are not reported.
 - `@merqo/ui/security`: `buildCsp`, `withNonceCsp` (call from `proxy.ts`
   on dynamic routes), `createNonce` and `robotsHeaderFor(VERCEL_ENV)` for
   the staging `noindex` header. `style-src` keeps `'unsafe-inline'`; with no

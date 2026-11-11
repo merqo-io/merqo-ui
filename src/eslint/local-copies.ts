@@ -14,8 +14,9 @@ export type SharedPiece = {
   importNames?: readonly string[];
   /**
    * Marks a file that must exist (the framework requires it) but must render a
-   * shared export: a file matching `pattern` is reported unless it imports one
-   * of these names from `@merqo/ui`. Applies to files only, never to imports.
+   * shared export: a `.tsx` or `.jsx` file matching `pattern` is reported
+   * unless it value-imports (or re-exports) one of these names from the
+   * `@merqo/ui` package root. Applies to files only, never to imports.
    */
   requiredImport?: readonly string[];
   /** Replaces the whole message when the generic one does not fit. */
@@ -247,7 +248,7 @@ export const SHARED_PIECES: readonly SharedPiece[] = [
   },
   {
     id: "error-page",
-    pattern: "app/(?!dev/)(?:.*/)?error",
+    pattern: "src/app/(?!dev/)(?:.*/)?error",
     replacement: 'import { ErrorPage } from "@merqo/ui"',
     requiredImport: ["ErrorPage"],
     message:
@@ -255,7 +256,7 @@ export const SHARED_PIECES: readonly SharedPiece[] = [
   },
   {
     id: "global-error-page",
-    pattern: "app/(?!dev/)(?:.*/)?global-error",
+    pattern: "src/app/(?!dev/)(?:.*/)?global-error",
     replacement: 'import { GlobalError } from "@merqo/ui"',
     requiredImport: ["GlobalError"],
     message:
@@ -263,7 +264,7 @@ export const SHARED_PIECES: readonly SharedPiece[] = [
   },
   {
     id: "not-found-page",
-    pattern: "app/(?!dev/)(?:.*/)?not-found",
+    pattern: "src/app/(?!dev/)(?:.*/)?not-found",
     replacement: 'import { NotFound } from "@merqo/ui"',
     requiredImport: ["NotFound"],
     message:

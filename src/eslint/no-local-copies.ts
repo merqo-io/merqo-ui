@@ -15,6 +15,7 @@ export type MerqoNoLocalCopiesOptions = {
 const LOCAL_SPECIFIER = /^(?:@\/|~\/|src\/|\.{1,2}(?:\/|$))/;
 const LOCAL_PREFIX = /^(?:(?:@\/|~\/|src\/|\.{1,2}\/)+)/;
 const EXTENSION = /\.(?:[cm]?[jt]sx?)$/;
+const COMPONENT_FILE = /\.[jt]sx$/;
 const SHARED_SOURCE = /^@merqo\/ui(?:\/|$)/;
 const ALLOW_HINT = "or add it to `allow` if it wraps the shared piece";
 
@@ -56,28 +57,37 @@ function importsSharedPackage(body: readonly { type: string; source?: unknown }[
   });
 }
 
-function importsRequired(
-  body: readonly { type: string; source?: unknown; specifiers?: unknown }[],
-  names: readonly string[],
-): boolean {
-  return body.some((statement) => {
-    if (statement.type !== "ImportDeclaration") return false;
-    const source = statement.source as { value?: unknown } | undefined;
-    if (typeof source?.value !== "string" || !SHARED_SOURCE.test(source.value)) return false;
-    return importedNames(statement as unknown as Rule.Node).some((name) => names.includes(name));
-  });
-}
+type RequiredSpecifier = {
+  type: string;
+  importKind?: string;
+  exportKind?: string;
+  imported?: SpecifierName;
+  local?: SpecifierName;
+};
+type RequiredStatement = {
+  type: string;
+  source?: { value?: unknown } | null;
+  importKind?: string;
+  exportKind?: string;
+  specifiers?: RequiredSpecifier[];
+};
 
-// A file that only re-exports another module carries no markup to replace.
-function onlyReExports(body: readonly { type: string; source?: unknown }[]): boolean {
-  return (
-    body.length > 0 &&
-    body.every(
-      (statement) =>
-        (statement.type === "ExportNamedDeclaration" || statement.type === "ExportAllDeclaration") &&
-        Boolean(statement.source),
-    )
-  );
+// Only the package root counts: a subpath or a type-only import does not
+// render the shared page, and a re-export of the name does.
+function importsRequired(body: readonly RequiredStatement[], names: readonly string[]): boolean {
+  return body.some((statement) => {
+    const isImport = statement.type === "ImportDeclaration";
+    const isExport = statement.type === "ExportNamedDeclaration";
+    if (!isImport && !isExport) return false;
+    if (statement.source?.value !== "@merqo/ui") return false;
+    if ((isImport ? statement.importKind : statement.exportKind) === "type") return false;
+    return (statement.specifiers ?? []).some((specifier) => {
+      if ((isImport ? specifier.importKind : specifier.exportKind) === "type") return false;
+      const id = isImport ? specifier.imported : specifier.local;
+      const name = id?.name ?? id?.value;
+      return name !== undefined && names.includes(name);
+    });
+  });
 }
 
 type SpecifierName = { name?: string; value?: string };
@@ -142,7 +152,8 @@ const rule: Rule.RuleModule = {
         for (const piece of findPieces(file)) {
           if (piece.importNames || isAllowed(piece, file, allow)) continue;
           if (piece.requiredImport) {
-            if (onlyReExports(body) || importsRequired(body, piece.requiredImport)) continue;
+            if (!COMPONENT_FILE.test(context.filename)) continue;
+            if (importsRequired(body as RequiredStatement[], piece.requiredImport)) continue;
           } else if (importsSharedPackage(body)) {
             continue;
           }

@@ -6,8 +6,22 @@ import path from "node:path";
 const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../dist");
 const built = existsSync(path.join(dist, "primitives.js"));
 
-const CLIENT = ["checkbox", "dialog", "label", "select", "switch", "tabs", "tooltip"];
-const PLAIN = ["badge", "button", "card", "input", "textarea"];
+const CLIENT = [
+  "alert-dialog",
+  "checkbox",
+  "dialog",
+  "dropdown-menu",
+  "label",
+  "popover",
+  "select",
+  "sheet",
+  "switch",
+  "tabs",
+  "toggle",
+  "toggle-group",
+  "tooltip",
+];
+const PLAIN = ["badge", "button", "card", "input", "skeleton", "textarea"];
 
 // A Server Component imports `cn` or Button from the subpath: the shim must
 // carry no directive and point at per-module files, so only the client
@@ -20,7 +34,9 @@ describe.skipIf(!built)("@merqo/ui/primitives build output", () => {
     expect(shim).not.toMatch(/["']use client["']/);
     expect(shim).not.toContain("function ");
     expect(shim).toMatch(/export\s*\{\s*cn\s*\}\s*from\s*"\.\/lib\/utils\.js"/);
-    expect(shim).toContain('from "./ui/switch.js"');
+    for (const name of [...CLIENT, ...PLAIN]) {
+      expect(shim).toContain(`from "./ui/${name}.js"`);
+    }
   });
 
   it.each(CLIENT)("keeps the directive on ui/%s", (name) => {

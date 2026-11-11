@@ -86,17 +86,24 @@ const ENTRIES = {
   // Public @merqo/ui/primitives surface. dist/primitives.js is written by
   // scripts/build-index.mjs and re-exports these per-module files.
   "lib/utils": "src/lib/utils.ts",
+  "ui/alert-dialog": "src/ui/alert-dialog.tsx",
   "ui/badge": "src/ui/badge.tsx",
   "ui/button": "src/ui/button.tsx",
   "ui/card": "src/ui/card.tsx",
   "ui/checkbox": "src/ui/checkbox.tsx",
   "ui/dialog": "src/ui/dialog.tsx",
+  "ui/dropdown-menu": "src/ui/dropdown-menu.tsx",
   "ui/input": "src/ui/input.tsx",
   "ui/label": "src/ui/label.tsx",
+  "ui/popover": "src/ui/popover.tsx",
   "ui/select": "src/ui/select.tsx",
+  "ui/sheet": "src/ui/sheet.tsx",
+  "ui/skeleton": "src/ui/skeleton.tsx",
   "ui/switch": "src/ui/switch.tsx",
   "ui/tabs": "src/ui/tabs.tsx",
   "ui/textarea": "src/ui/textarea.tsx",
+  "ui/toggle": "src/ui/toggle.tsx",
+  "ui/toggle-group": "src/ui/toggle-group.tsx",
   "ui/tooltip": "src/ui/tooltip.tsx",
 };
 

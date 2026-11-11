@@ -4,7 +4,7 @@
     "src/*.{ts,tsx}",
     "src/{admin,auth,eslint,kit-api,next,security,supabase,testing}/index.ts",
     "src/supabase/{server,middleware}.ts",
-    "src/ui/{badge,button,card,checkbox,dialog,input,label,select,switch,tabs,textarea,tooltip}.tsx",
+    "src/ui/{alert-dialog,badge,button,card,checkbox,dialog,dropdown-menu,input,label,popover,select,sheet,skeleton,switch,tabs,textarea,toggle,toggle-group,tooltip}.tsx",
     "scripts/*.mjs"
   ],
   "ignoreIssues": {

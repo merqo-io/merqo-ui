@@ -14,7 +14,12 @@ export interface PricingLadderProps {
   renderAction?: (plan: CatalogPlan) => React.ReactNode;
   /** Render the Event Pass section below the ladder. Default true. */
   showEventPass?: boolean;
+  /** Render the pilot pricing notice above the ladder. Default true. */
+  showPilotNotice?: boolean;
 }
+
+const PILOT_PRICING_NOTICE =
+  "Merqo is free during the pilot. These prices apply only if paid plans are introduced, and you'd get at least 30 days' notice first.";
 
 // Starter is framed by who it suits, never by price, so it is not read as the
 // bargain option.
@@ -40,6 +45,7 @@ export function PricingLadder({
   descriptions,
   renderAction,
   showEventPass = true,
+  showPilotNotice = true,
 }: PricingLadderProps) {
   const headingId = React.useId();
   const plans = slugs
@@ -50,6 +56,15 @@ export function PricingLadder({
 
   return (
     <div className="space-y-8">
+      {showPilotNotice ? (
+        <p
+          role="note"
+          className="rounded-2xl border border-border bg-muted p-4 text-sm text-foreground"
+        >
+          {PILOT_PRICING_NOTICE}
+        </p>
+      ) : null}
+
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
         {plans.map((plan) => {
           const isHighlighted = plan.slug === highlighted;

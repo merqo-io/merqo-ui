@@ -335,7 +335,10 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   `descriptions?: Partial<Record<string, ReactNode>>` (per-slug override;
   `starter` defaults to an identity-framed line); `renderAction?: (plan) =>
   ReactNode` (the CTA in each card); `showEventPass?: boolean` (default
-  `true`). A plan with a zero monthly price shows "Free" and no annual line.
+  `true`); `showPilotNotice?: boolean` (default `true`; a `role="note"`
+  paragraph above the ladder saying Merqo is free during the pilot, the
+  prices apply only if paid plans are introduced, and at least 30 days'
+  notice is given first). A plan with a zero monthly price shows "Free" and no annual line.
   Annual prices are plain amounts, never discounts. Replaces `PricingForm`,
   which was removed in v0.39.0.
 

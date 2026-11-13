@@ -173,6 +173,32 @@ describe("PricingLadder options", () => {
     expect(screen.queryByText("Event Pass")).not.toBeInTheDocument();
   });
 
+  it("renders the pilot notice by default", () => {
+    render(<PricingLadder catalog={CATALOG} />);
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "Merqo is free during the pilot. These prices apply only if paid plans are introduced, and you'd get at least 30 days' notice first.",
+    );
+  });
+
+  it("places the pilot notice before the plan list", () => {
+    render(<PricingLadder catalog={CATALOG} />);
+    const note = screen.getByRole("note");
+    const list = screen.getByRole("list");
+    expect(
+      note.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("omits the pilot notice when showPilotNotice is false", () => {
+    render(<PricingLadder catalog={CATALOG} showPilotNotice={false} />);
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  });
+
+  it("keeps the pilot notice when the Event Pass is hidden", () => {
+    render(<PricingLadder catalog={CATALOG} showEventPass={false} />);
+    expect(screen.getByRole("note")).toBeInTheDocument();
+  });
+
   it("filters by slugs and keeps catalog order", () => {
     render(<PricingLadder catalog={CATALOG} slugs={["qkit", "free"]} />);
     const names = screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);

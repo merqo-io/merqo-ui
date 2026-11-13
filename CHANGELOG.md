@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-11-13
+
 ### Added
 
 - `PricingLadder` renders a pilot notice above the plans ("Merqo is free during the pilot. These prices apply only if paid plans are introduced, and you'd get at least 30 days' notice first."). Consumers get it by default with no code change; pass `showPilotNotice={false}` to hide it.

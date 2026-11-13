@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Security
+
+- Dev tooling only: the lockfile now resolves `minimatch` 11.x instead of 10.2.6 (denial of service before 11.0.1). Nothing the kits receive changes.
+
 ## [0.45.1] - 2026-11-11
 
 ### Fixed

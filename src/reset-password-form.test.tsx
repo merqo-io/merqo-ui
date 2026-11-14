@@ -218,9 +218,107 @@ describe("ResetPasswordForm validation", () => {
 });
 
 describe("ResetPasswordForm submit results", () => {
-  it("shows a returned string as the error", async () => {
-    await fillAndSubmit({ onSubmit: vi.fn().mockResolvedValue("Pick another one.") });
+  it("shows the fallback, not a returned string, when there is no mapError", async () => {
+    await fillAndSubmit({ onSubmit: vi.fn().mockResolvedValue("provider text") });
+    expect(await screen.findByRole("alert")).toHaveTextContent(FALLBACK);
+    expect(screen.queryByText(/provider text/)).toBeNull();
+  });
+
+  it("shows a returned string unchanged with an identity mapError", async () => {
+    await fillAndSubmit({
+      onSubmit: vi.fn().mockResolvedValue("Pick another one."),
+      mapError: (m) => m,
+    });
     expect(await screen.findByRole("alert")).toHaveTextContent("Pick another one.");
+  });
+
+  it("stays mounted and shows the fallback when mapError throws after a throw", async () => {
+    await fillAndSubmit({
+      onSubmit: vi.fn().mockRejectedValue(new Error("raw boom")),
+      mapError: () => {
+        throw new Error("mapper boom");
+      },
+    });
+    expect(await screen.findByRole("alert")).toHaveTextContent(FALLBACK);
+    expect(screen.getByLabelText("New password")).toBeInTheDocument();
+    expect(screen.queryByText(/boom/)).toBeNull();
+  });
+
+  it("stays mounted and shows the fallback when mapError throws on a returned string", async () => {
+    await fillAndSubmit({
+      onSubmit: vi.fn().mockResolvedValue("raw text"),
+      mapError: () => {
+        throw new Error("mapper boom");
+      },
+    });
+    expect(await screen.findByRole("alert")).toHaveTextContent(FALLBACK);
+    expect(screen.getByLabelText("New password")).toBeInTheDocument();
+    expect(screen.queryByText(/raw text|boom/)).toBeNull();
+  });
+
+  it("stays mounted and shows the fallback when mapErrorObject throws", async () => {
+    await fillAndSubmit({
+      onSubmit: vi.fn().mockResolvedValue({ error: { message: "raw obj" } }),
+      mapErrorObject: () => {
+        throw new Error("mapper boom");
+      },
+    });
+    expect(await screen.findByRole("alert")).toHaveTextContent(FALLBACK);
+    expect(screen.getByLabelText("New password")).toBeInTheDocument();
+    expect(screen.queryByText(/raw obj|boom/)).toBeNull();
+  });
+
+  it("survives a state change to expired while a submit is pending", async () => {
+    let finish!: (value: string) => void;
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<string>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const user = userEvent.setup();
+    const { rerender } = render(<ResetPasswordForm onSubmit={onSubmit} />);
+    await user.type(screen.getByLabelText("New password"), "hunter22x");
+    await user.type(screen.getByLabelText("Confirm password"), "hunter22x");
+    await user.click(screen.getByRole("button", { name: "Update password" }));
+    rerender(<ResetPasswordForm onSubmit={onSubmit} state="expired" />);
+    finish("late error");
+    expect(screen.getByRole("heading", { name: "This link has expired" })).toBeInTheDocument();
+    rerender(<ResetPasswordForm onSubmit={onSubmit} state="ready" />);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("does not crash when unmounted during a pending submit", async () => {
+    let finish!: () => void;
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const user = userEvent.setup();
+    const { unmount } = render(<ResetPasswordForm onSubmit={onSubmit} />);
+    await user.type(screen.getByLabelText("New password"), "hunter22x");
+    await user.type(screen.getByLabelText("Confirm password"), "hunter22x");
+    await user.click(screen.getByRole("button", { name: "Update password" }));
+    unmount();
+    expect(() => finish()).not.toThrow();
+  });
+
+  it("keeps field ids unique across two forms on one page", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <ResetPasswordForm onSubmit={vi.fn()} passwordLabel="First password" />
+        <ResetPasswordForm onSubmit={vi.fn()} passwordLabel="Second password" />
+      </>,
+    );
+    const first = screen.getByLabelText("First password");
+    const second = screen.getByLabelText("Second password");
+    expect(first.id).not.toBe(second.id);
+    await user.type(second, "abc");
+    expect(first).toHaveValue("");
+    expect(second).toHaveValue("abc");
   });
 
   it("runs a returned string through mapError", async () => {

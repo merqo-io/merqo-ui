@@ -748,12 +748,13 @@ Security duties that stay with the kit:
   - `onSubmit(password)` runs after validation and may return nothing, a
     string (error copy), or `{error: unknown}`, sync or async, or throw. The
     form never navigates or toasts: the kit does that inside `onSubmit`. A
-    returned string goes through `mapError(raw)` when given, and is shown as
-    is otherwise. `{error}` goes through `mapErrorObject(error)`. A thrown
-    error goes through `mapError` with its `code` (else `message`). An empty
-    mapping, or no mapper for a thrown or `{error}` result, shows
-    `errorFallback` (default "Could not update your password. Try again."), so
-    raw provider text is never rendered. The button is disabled and shows
+    returned string goes through `mapError(raw)`; without `mapError` it is
+    never shown (a kit returning final copy passes `mapError={(m) => m}`).
+    `{error}` goes through `mapErrorObject(error)`. A thrown error goes
+    through `mapError` with its `code` (else `message`). An empty mapping, a
+    missing mapper, or a mapper that throws shows `errorFallback` (default
+    "Could not update your password. Try again."), so raw provider text is
+    never rendered and a bad mapper cannot unmount the form. The button is disabled and shows
     `pendingLabel` ("Updating…") while pending, overlapping taps run
     `onSubmit` once, and it re-enables after a normal resolve.
   - `state` is `"checking" | "ready" | "expired" | "failed"` (default

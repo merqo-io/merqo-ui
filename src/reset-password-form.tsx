@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { AUTH_ERROR_FALLBACKS } from "./auth-error-message";
 import { rawErrorText, runOnce } from "./auth-form-utils";
+import { isRedirectError } from "./redirect-error";
 import { FORM_ERROR_CLASS, FORM_LABEL_CLASS } from "./form-field";
 import type { LoginFormLinkProps } from "./login-form";
 import { Button } from "./ui/button";
@@ -55,7 +57,6 @@ export type ResetPasswordFormProps = {
 
 type FieldError = { field: "password" | "confirm"; message: string };
 
-const DEFAULT_FALLBACK = "Could not update your password. Try again.";
 const LINK_CLASS =
   "inline-flex min-h-11 items-center justify-center text-sm font-semibold text-primary underline-offset-4 hover:underline";
 const INPUT_CLASS = "h-11 rounded-xl text-base";
@@ -84,21 +85,31 @@ function PanelHeading({ children }: { children: React.ReactNode }) {
 
 type Mappers = Pick<ResetPasswordFormProps, "mapError" | "mapErrorObject" | "errorFallback">;
 
+// A throwing mapper must not unmount the form, and its text must not reach
+// the page, so every mapper call falls back to the generic line.
+function mapped(map: () => string | undefined, fallback: string): string {
+  try {
+    return map() || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function resolveMessage(result: SubmitResult, m: Mappers): string | null {
-  const fallback = m.errorFallback ?? DEFAULT_FALLBACK;
+  const fallback = m.errorFallback ?? AUTH_ERROR_FALLBACKS.update;
   if (typeof result === "string") {
-    if (!result) return null;
-    return (m.mapError ? m.mapError(result) : result) || fallback;
+    return result ? mapped(() => m.mapError?.(result), fallback) : null;
   }
   if (typeof result === "object" && result !== null && "error" in result) {
-    return m.mapErrorObject?.(result.error) || fallback;
+    return mapped(() => m.mapErrorObject?.(result.error), fallback);
   }
   return null;
 }
 
 function thrownMessage(error: unknown, m: Mappers): string {
   const text = rawErrorText(error);
-  return (m.mapError && text !== null ? m.mapError(text) : "") || m.errorFallback || DEFAULT_FALLBACK;
+  const fallback = m.errorFallback ?? AUTH_ERROR_FALLBACKS.update;
+  return mapped(() => (text === null ? undefined : m.mapError?.(text)), fallback);
 }
 
 function validate(
@@ -260,17 +271,22 @@ function ReadyForm({ props }: { props: ResetPasswordFormProps }) {
   const execute = React.useCallback(
     async (password: string) => {
       setMessage(null);
-      const result = await onSubmit(password);
-      setMessage(resolveMessage(result, { mapError, mapErrorObject, errorFallback }));
+      const mappers = { mapError, mapErrorObject, errorFallback };
+      try {
+        setMessage(resolveMessage(await onSubmit(password), mappers));
+      } catch (err) {
+        // A redirect means the page is leaving; useAsyncAction keeps pending.
+        if (isRedirectError(err)) throw err;
+        setMessage(thrownMessage(err, mappers));
+      }
     },
     [onSubmit, mapError, mapErrorObject, errorFallback],
   );
-  const { pending, error, run, reset } = useAsyncAction(execute);
+  const { pending, run } = useAsyncAction(execute);
 
   function clearErrors() {
     setFieldError(null);
     setMessage(null);
-    reset();
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -287,8 +303,7 @@ function ReadyForm({ props }: { props: ResetPasswordFormProps }) {
     runOnce(inflight, run, password);
   }
 
-  const thrown = error === null ? null : thrownMessage(error, { mapError, errorFallback });
-  const shown = message ?? thrown;
+  const shown = message;
   const passwordText = fieldError?.field === "password" ? fieldError.message : undefined;
   const confirmText = fieldError?.field === "confirm" ? fieldError.message : undefined;
   const submitDescribedBy = shown ? submitErrorId : undefined;

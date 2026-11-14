@@ -41,6 +41,9 @@ const BY_MESSAGE: Array<[string, AuthErrorKind]> = [
   ["Expired MFA code", "mfa_code"],
   ["TypeError: Failed to fetch", "network"],
   ["Network request failed", "network"],
+  ["NetworkError when attempting to fetch resource.", "network"],
+  ["Load failed", "network"],
+  ["TOTP code is invalid", "mfa_code"],
 ];
 
 describe("authErrorKind", () => {
@@ -58,9 +61,18 @@ describe("authErrorKind", () => {
     expect(authErrorKind({ status: 429, message: "x" })).toBe("rate_limited");
   });
 
-  it("matches network by name and by status 0", () => {
+  it("matches network by name", () => {
     expect(authErrorKind({ name: "AuthRetryableFetchError", message: "x" })).toBe("network");
-    expect(authErrorKind({ status: 0 })).toBe("network");
+  });
+
+  it("does not treat a bare status 0 as network", () => {
+    expect(authErrorKind({ status: 0 })).toBeNull();
+    expect(authErrorKind({ status: 0, code: "invalid_credentials" })).toBe("invalid_credentials");
+  });
+
+  it("does not treat a loose network or code mention as network or mfa", () => {
+    expect(authErrorKind("Network policy blocked")).toBeNull();
+    expect(authErrorKind("Email link is invalid or has expired, request a new code")).toBeNull();
   });
 
   it("prefers the code over the message", () => {
@@ -94,7 +106,9 @@ describe("authErrorMessage", () => {
     for (const [code, kind] of BY_CODE) {
       expect(authErrorMessage({ code }, "signin")).toBe(AUTH_ERROR_MESSAGES[kind]);
     }
-    expect(authErrorMessage({ status: 0 }, "signin")).toBe(AUTH_ERROR_MESSAGES.network);
+    expect(authErrorMessage({ name: "AuthRetryableFetchError" }, "signin")).toBe(
+      AUTH_ERROR_MESSAGES.network,
+    );
   });
 
   it("uses the exact default copy", () => {

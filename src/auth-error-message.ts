@@ -73,13 +73,12 @@ const RULES: Rule[] = [
   {
     kind: "mfa_code",
     codes: ["mfa_verification_failed", "mfa_challenge_expired"],
-    message: /(invalid|expired).*(totp|mfa|code)/i,
+    message: /(invalid|expired).*\b(totp|mfa)\b|\b(totp|mfa)\b.*(invalid|expired)/i,
   },
   {
     kind: "network",
     name: "AuthRetryableFetchError",
-    status: 0,
-    message: /failed to fetch|network/i,
+    message: /failed to fetch|networkerror|network request failed|load failed/i,
   },
 ];
 

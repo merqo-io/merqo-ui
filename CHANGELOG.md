@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- `Faq`: the summary's missing space (`hiddenitems-start`) is fixed, so the default disclosure marker is hidden in Safari and the row is top-aligned.
 - `LoginForm`: a `mapError` that returns an empty string no longer leaves a failed sign-in with no message; the per-context fallback is shown.
 - `LoginForm`: tapping "Forgot password?" with an empty email now moves focus to the email field as well as showing the message.
 

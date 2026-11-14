@@ -9,8 +9,9 @@ export interface ElevatedCardProps
 }
 
 // The polished-card look shared across profile/dashboard/setup pages across
-// every kit: rounded corners and a soft lifted shadow, both from standard utilities. Deliberately
-// not qkit's scalloped Ticket theme, which stays local to qkit.
+// every kit: rounded corners and a soft lifted shadow, both from standard
+// utilities. Deliberately not qkit's scalloped Ticket theme, which stays local
+// to qkit.
 export function ElevatedCard({
   as: As = "div",
   className,

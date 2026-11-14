@@ -49,3 +49,12 @@ describe("Faq shape", () => {
     expect(item.className).not.toMatch(/rounded-(\[|xl|2xl)/);
   });
 });
+
+describe("Faq summary", () => {
+  it("hides the default marker and top-aligns as separate classes", () => {
+    render(<Faq items={ITEMS} />);
+    const summary = document.querySelector("summary") as HTMLElement;
+    expect(summary).toHaveClass("[&::-webkit-details-marker]:hidden");
+    expect(summary).toHaveClass("items-start");
+  });
+});

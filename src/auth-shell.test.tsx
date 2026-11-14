@@ -26,4 +26,28 @@ describe("AuthShell", () => {
     expect(container.querySelector("footer")).toBeNull();
     expect(screen.getByRole("main")).toBeInTheDocument();
   });
+
+  it("renders a tagline under the wordmark", () => {
+    render(
+      <AuthShell wordmark={<span>Kit</span>} tagline={<span>Sell more</span>} title="T">
+        x
+      </AuthShell>,
+    );
+    expect(screen.getByText("Sell more")).toBeInTheDocument();
+  });
+
+  it("left-aligns the title block by default and centres it on request", () => {
+    const { rerender } = render(
+      <AuthShell title="T" subtitle="S">
+        x
+      </AuthShell>,
+    );
+    expect(screen.getByRole("heading", { level: 1 }).parentElement).not.toHaveClass("text-center");
+    rerender(
+      <AuthShell title="T" subtitle="S" align="center">
+        x
+      </AuthShell>,
+    );
+    expect(screen.getByRole("heading", { level: 1 }).parentElement).toHaveClass("text-center");
+  });
 });

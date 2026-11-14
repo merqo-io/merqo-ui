@@ -332,4 +332,224 @@ describe("LoginForm", () => {
     render(<LoginForm onPasswordSignIn={vi.fn()} initialError="Link expired." />);
     expect(screen.getByRole("alert")).toHaveTextContent("Link expired.");
   });
+
+  describe("sign-up confirmation panel", () => {
+    async function signUp(
+      props: Partial<React.ComponentProps<typeof LoginForm>> = {},
+      onModeChange = vi.fn(),
+    ) {
+      const user = userEvent.setup();
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn()}
+          onPasswordSignUp={vi.fn().mockResolvedValue({ confirmEmail: "a@b.sg" })}
+          onModeChange={onModeChange}
+          {...props}
+        />,
+      );
+      await user.click(screen.getByRole("button", { name: "Create an account" }));
+      await fill(user);
+      await user.click(screen.getByRole("button", { name: "Create account" }));
+      return user;
+    }
+
+    it("replaces the form with a default panel naming the address", async () => {
+      await signUp();
+      expect(await screen.findByRole("heading", { name: "Check your email" })).toBeInTheDocument();
+      expect(screen.getByText(/a@b\.sg/)).toBeInTheDocument();
+      expect(screen.queryByLabelText("Password")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Create an account" })).toBeNull();
+    });
+
+    it("uses custom title and body", async () => {
+      await signUp({
+        confirmEmailTitle: "Almost there",
+        confirmEmailBody: (email) => <span>Link sent to {email}</span>,
+      });
+      expect(await screen.findByRole("heading", { name: "Almost there" })).toBeInTheDocument();
+      expect(screen.getByText("Link sent to a@b.sg")).toBeInTheDocument();
+    });
+
+    it("goes back to sign in by touch, keeps the email and fires onModeChange", async () => {
+      const onModeChange = vi.fn();
+      const user = await signUp({}, onModeChange);
+      const back = await screen.findByRole("button", { name: "Back to sign in" });
+      expect(back.className).toContain("min-h-11");
+      await user.pointer({ keys: "[TouchA]", target: back });
+      expect(onModeChange).toHaveBeenLastCalledWith("signin");
+      expect(screen.getByLabelText("Email")).toHaveValue("a@b.sg");
+      expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "Check your email" })).toBeNull();
+    });
+  });
+
+  describe("rich errors", () => {
+    async function submitSignIn(props: Partial<React.ComponentProps<typeof LoginForm>>) {
+      const user = userEvent.setup();
+      render(<LoginForm onPasswordSignIn={vi.fn()} {...props} />);
+      await fill(user);
+      await user.click(screen.getByRole("button", { name: "Sign in" }));
+    }
+
+    it("hands the error object to mapErrorObject", async () => {
+      const mapErrorObject = vi.fn().mockReturnValue("Wrong password.");
+      const boom = { status: 400, text: "invalid_credentials leak@x.sg" };
+      await submitSignIn({
+        onPasswordSignIn: vi.fn().mockResolvedValue({ error: boom }),
+        mapErrorObject,
+      });
+      expect(await screen.findByRole("alert")).toHaveTextContent("Wrong password.");
+      expect(mapErrorObject).toHaveBeenCalledWith(boom, "signin");
+    });
+
+    it("falls back to the context line and renders no raw text without a mapper", async () => {
+      await submitSignIn({
+        onPasswordSignIn: vi
+          .fn()
+          .mockResolvedValue({ error: new Error("User jo@x.sg not found in auth.users") }),
+      });
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent("Could not sign in. Try again.");
+      expect(document.body).not.toHaveTextContent(/auth\.users|jo@x\.sg/);
+    });
+
+    it("does not feed an error object to string-only mapError", async () => {
+      const mapError = vi.fn().mockReturnValue("mapped");
+      await submitSignIn({
+        onPasswordSignIn: vi.fn().mockResolvedValue({ error: "secret raw" }),
+        mapError,
+      });
+      expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign in. Try again.");
+      expect(mapError).not.toHaveBeenCalled();
+      expect(document.body).not.toHaveTextContent("secret raw");
+    });
+  });
+
+  describe("connectErrorMessage", () => {
+    async function throwing(thrown: unknown, connectErrorMessage?: string) {
+      const user = userEvent.setup();
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn().mockRejectedValue(thrown)}
+          connectErrorMessage={connectErrorMessage}
+        />,
+      );
+      await fill(user);
+      await user.click(screen.getByRole("button", { name: "Sign in" }));
+      return screen.findByRole("alert");
+    }
+
+    it("shows the message when a throw has neither code nor message", async () => {
+      expect(await throwing({ status: 0 }, "Check your connection.")).toHaveTextContent(
+        "Check your connection.",
+      );
+    });
+
+    it("leaves throws that carry a message on the per-context fallback", async () => {
+      expect(await throwing(new Error("boom"), "Check your connection.")).toHaveTextContent(
+        "Could not sign in. Try again.",
+      );
+    });
+
+    it("keeps the fallback when the prop is absent", async () => {
+      expect(await throwing({ status: 0 })).toHaveTextContent("Could not sign in. Try again.");
+    });
+  });
+
+  describe("empty-email forgot password", () => {
+    it("uses emailRequiredMessage and focuses the email input", async () => {
+      const user = userEvent.setup();
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn()}
+          onForgotPassword={vi.fn()}
+          emailRequiredMessage="Type your email above."
+        />,
+      );
+      await user.click(screen.getByRole("button", { name: "Forgot password?" }));
+      expect(screen.getByRole("alert")).toHaveTextContent("Type your email above.");
+      expect(screen.getByLabelText("Email")).toHaveFocus();
+    });
+
+    it("focuses the email input with the default message too", async () => {
+      const user = userEvent.setup();
+      render(<LoginForm onPasswordSignIn={vi.fn()} onForgotPassword={vi.fn()} />);
+      await user.click(screen.getByRole("button", { name: "Forgot password?" }));
+      expect(screen.getByLabelText("Email")).toHaveFocus();
+    });
+  });
+
+  describe("onNotice", () => {
+    async function reset(props: Partial<React.ComponentProps<typeof LoginForm>>) {
+      const user = userEvent.setup();
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn()}
+          onForgotPassword={vi.fn().mockResolvedValue({ notice: "Reset link sent." })}
+          {...props}
+        />,
+      );
+      await user.type(screen.getByLabelText("Email"), "a@b.sg");
+      await user.click(screen.getByRole("button", { name: "Forgot password?" }));
+    }
+
+    it("calls onNotice and still renders inline by default", async () => {
+      const onNotice = vi.fn();
+      await reset({ onNotice });
+      expect(await screen.findByRole("status")).toHaveTextContent("Reset link sent.");
+      expect(onNotice).toHaveBeenCalledWith("Reset link sent.");
+    });
+
+    it("hides the inline notice with noticeDisplay none", async () => {
+      const onNotice = vi.fn();
+      await reset({ onNotice, noticeDisplay: "none" });
+      await waitFor(() => expect(onNotice).toHaveBeenCalledWith("Reset link sent."));
+      expect(screen.queryByRole("status")).toBeNull();
+    });
+  });
+
+  describe("copy and initial value props", () => {
+    it("has no placeholders by default", () => {
+      render(<LoginForm onPasswordSignIn={vi.fn()} />);
+      expect(screen.getByLabelText("Email")).not.toHaveAttribute("placeholder");
+      expect(screen.getByLabelText("Password")).not.toHaveAttribute("placeholder");
+    });
+
+    it("sets placeholders", () => {
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn()}
+          emailPlaceholder="you@shop.sg"
+          passwordPlaceholder="At least 8"
+        />,
+      );
+      expect(screen.getByLabelText("Email")).toHaveAttribute("placeholder", "you@shop.sg");
+      expect(screen.getByLabelText("Password")).toHaveAttribute("placeholder", "At least 8");
+    });
+
+    it("swaps the mode toggle prompt per mode", async () => {
+      const user = userEvent.setup();
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn()}
+          onPasswordSignUp={vi.fn()}
+          modeTogglePrompt={{ signin: "No account?", signup: "Have one?" }}
+        />,
+      );
+      expect(screen.getByText("No account?")).toBeInTheDocument();
+      expect(screen.queryByText("New here?")).toBeNull();
+      await user.click(screen.getByRole("button", { name: "Create an account" }));
+      expect(screen.getByText("Have one?")).toBeInTheDocument();
+    });
+
+    it("keeps the default prompts", () => {
+      render(<LoginForm onPasswordSignIn={vi.fn()} onPasswordSignUp={vi.fn()} />);
+      expect(screen.getByText("New here?")).toBeInTheDocument();
+    });
+
+    it("prefills the email with defaultEmail", () => {
+      render(<LoginForm onPasswordSignIn={vi.fn()} defaultEmail="pre@fill.sg" />);
+      expect(screen.getByLabelText("Email")).toHaveValue("pre@fill.sg");
+    });
+  });
 });

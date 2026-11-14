@@ -14,9 +14,16 @@ export type LoginCredentials = { email: string; password: string };
 
 /**
  * An error message to show, `{ notice }` for a success message such as
- * "Check your email", or nothing on success. A callback may also throw.
+ * "Check your email", `{ error }` for a provider error object, or nothing on
+ * success. A callback may also throw. `{ confirmEmail }` is honoured from
+ * `onPasswordSignUp` only.
  */
-type CallbackResult = string | { notice: string } | void;
+type CallbackResult =
+  | string
+  | { notice: string }
+  | { error: unknown }
+  | { confirmEmail: string }
+  | void;
 
 export type LoginFormProps = {
   onPasswordSignIn: (credentials: LoginCredentials) => Promise<CallbackResult>;
@@ -38,6 +45,36 @@ export type LoginFormProps = {
    * account state, so kits should map the codes they know.
    */
   mapError?: (raw: string, context: LoginErrorContext) => string;
+  /**
+   * Turns the value of a returned `{ error }` into copy. Separate from
+   * `mapError` so existing `(raw: string, ctx) => string` mappers keep their
+   * type. Without it an `{ error }` result shows the per-context fallback;
+   * its content is never rendered.
+   */
+  mapErrorObject?: (error: unknown, context: LoginErrorContext) => string;
+  /**
+   * Shown instead of the per-context fallback when a callback throws a value
+   * with no string `code` and no non-empty string `message` (a bare object, a
+   * number). Throws with a `code` or `message` still go through `mapError` or
+   * the fallback, and a thrown `null` or `undefined` shows nothing, as before.
+   */
+  connectErrorMessage?: string;
+  /** Replaces "Enter your email first.", shown when forgot password is tapped with no email. */
+  emailRequiredMessage?: string;
+  /** Called with a returned `{ notice }` so the kit can show its own toast. */
+  onNotice?: (notice: string) => void;
+  /** `"none"` hides the inline notice, for kits that show it through `onNotice`. */
+  noticeDisplay?: "inline" | "none";
+  emailPlaceholder?: string;
+  passwordPlaceholder?: string;
+  /** Replaces the "New here?" and "Already have an account?" prompts. */
+  modeTogglePrompt?: { signin: string; signup: string };
+  /** Initial value of the email field. */
+  defaultEmail?: string;
+  /** Heading of the panel shown after sign-up returns `{ confirmEmail }`. */
+  confirmEmailTitle?: string;
+  /** Body of that panel; defaults to a sentence naming the address. */
+  confirmEmailBody?: (email: string) => React.ReactNode;
   /** Message to show on first render, e.g. one carried back from an auth callback. */
   initialError?: string;
   className?: string;
@@ -91,15 +128,19 @@ function GoogleBlock({ pending, onClick }: { pending: boolean; onClick: () => vo
 function ModeToggle({
   isSignin,
   pending,
+  prompt,
   onClick,
 }: {
   isSignin: boolean;
   pending: boolean;
+  prompt: { signin: string; signup: string } | undefined;
   onClick: () => void;
 }) {
+  const signinPrompt = prompt?.signin ?? "New here?";
+  const signupPrompt = prompt?.signup ?? "Already have an account?";
   return (
     <p className="mt-6 text-center text-sm text-muted-foreground">
-      {isSignin ? "New here? " : "Already have an account? "}
+      {isSignin ? signinPrompt : signupPrompt}{" "}
       <button
         type="button"
         disabled={pending}
@@ -112,10 +153,96 @@ function ModeToggle({
   );
 }
 
-function splitResult(result: CallbackResult): { error: string | null; notice: string | null } {
-  if (typeof result === "string") return { error: result || null, notice: null };
-  if (typeof result === "object") return { error: null, notice: result.notice };
-  return { error: null, notice: null };
+type Split = {
+  error: string | null;
+  errorObject: { value: unknown } | null;
+  notice: string | null;
+  confirmEmail: string | null;
+};
+
+function splitResult(result: CallbackResult): Split {
+  const none: Split = { error: null, errorObject: null, notice: null, confirmEmail: null };
+  if (typeof result === "string") return { ...none, error: result || null };
+  if (typeof result !== "object" || result === null) return none;
+  if ("error" in result) return { ...none, errorObject: { value: result.error } };
+  if ("confirmEmail" in result) return { ...none, confirmEmail: result.confirmEmail };
+  return { ...none, notice: result.notice };
+}
+
+function Feedback({ error, notice }: { error: string | null | undefined; notice: string | null }) {
+  return (
+    <>
+      {error ? (
+        <p id={ERROR_ID} role="alert" className="text-sm font-medium text-destructive">
+          {error}
+        </p>
+      ) : null}
+      {notice ? (
+        <p role="status" className="text-sm font-medium text-foreground">
+          {notice}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+function announce(notice: string | null, onNotice: ((notice: string) => void) | undefined) {
+  if (notice !== null) onNotice?.(notice);
+}
+
+function resultMessage(
+  result: Split,
+  context: LoginErrorContext,
+  translate: (raw: string | null, context: LoginErrorContext) => string,
+  mapErrorObject: LoginFormProps["mapErrorObject"],
+): string | null {
+  if (result.error) return translate(result.error, context);
+  if (!result.errorObject) return null;
+  return mapErrorObject ? mapErrorObject(result.errorObject.value, context) : FALLBACK[context];
+}
+
+function thrownMessage(
+  error: unknown,
+  context: LoginErrorContext,
+  translate: (raw: string | null, context: LoginErrorContext) => string,
+  connectErrorMessage: string | undefined,
+): string {
+  const text = rawErrorText(error);
+  if (text === null && connectErrorMessage) return connectErrorMessage;
+  return translate(text, context);
+}
+
+function ConfirmPanel({
+  email,
+  title = "Check your email",
+  renderBody,
+  onBack,
+}: {
+  email: string;
+  title: string | undefined;
+  renderBody: ((email: string) => React.ReactNode) | undefined;
+  onBack: () => void;
+}) {
+  return (
+    <div className="space-y-4 text-center">
+      <h2 className="font-display text-2xl font-bold tracking-tight">{title}</h2>
+      <div role="status" className="text-sm text-muted-foreground">
+        {renderBody ? (
+          renderBody(email)
+        ) : (
+          <>We sent a confirmation link to {email}. Open it to finish setting up.</>
+        )}
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onBack}
+        className="min-h-11 w-full rounded-xl font-semibold"
+      >
+        Back to sign in
+      </Button>
+    </div>
+  );
 }
 
 const FORGOT_CLASS =
@@ -130,7 +257,15 @@ function CredentialFields({
   onForgot,
   Link,
   onChange,
+  emailRef,
+  defaultEmail,
+  emailPlaceholder,
+  passwordPlaceholder,
 }: {
+  emailRef: React.RefObject<HTMLInputElement | null>;
+  defaultEmail: string | undefined;
+  emailPlaceholder: string | undefined;
+  passwordPlaceholder: string | undefined;
   pending: boolean;
   invalid: boolean;
   isSignin: boolean;
@@ -150,10 +285,13 @@ function CredentialFields({
           Email
         </Label>
         <Input
+          ref={emailRef}
           id="login-email"
           name="email"
           type="email"
           autoComplete="email"
+          defaultValue={defaultEmail}
+          placeholder={emailPlaceholder}
           required
           disabled={pending}
           {...aria}
@@ -182,6 +320,7 @@ function CredentialFields({
           name="password"
           type="password"
           autoComplete={isSignin ? "current-password" : "new-password"}
+          placeholder={passwordPlaceholder}
           required
           disabled={pending}
           {...aria}
@@ -204,6 +343,17 @@ export function LoginForm({
   onForgotPassword,
   LinkComponent,
   mapError,
+  mapErrorObject,
+  connectErrorMessage,
+  emailRequiredMessage,
+  onNotice,
+  noticeDisplay,
+  emailPlaceholder,
+  passwordPlaceholder,
+  modeTogglePrompt,
+  defaultEmail,
+  confirmEmailTitle,
+  confirmEmailBody,
   initialError,
   className,
 }: LoginFormProps): React.ReactElement {
@@ -213,10 +363,15 @@ export function LoginForm({
   const [message, setMessage] = React.useState<string | null | undefined>(initialError);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [lastContext, setLastContext] = React.useState<LoginErrorContext>("signin");
+  const [confirmEmail, setConfirmEmail] = React.useState<string | null>(null);
+  // The form unmounts behind the confirmation panel, so the typed address is
+  // carried here to refill the field on return.
+  const [emailValue, setEmailValue] = React.useState(defaultEmail);
 
   const Link = LinkComponent ?? DefaultLink;
   const inflight = React.useRef(false);
   const formRef = React.useRef<HTMLFormElement>(null);
+  const emailRef = React.useRef<HTMLInputElement>(null);
 
   // Provider strings and thrown errors can leak account state, so without a
   // kit-supplied mapError only the generic line is ever shown.
@@ -233,11 +388,16 @@ export function LoginForm({
       setLastContext(job.context);
       setMessage(null);
       setNotice(null);
-      const { error: text, notice: success } = splitResult(await job.run());
-      if (text) setMessage(translate(text, job.context));
-      setNotice(success);
+      const result = splitResult(await job.run());
+      const failure = resultMessage(result, job.context, translate, mapErrorObject);
+      if (failure) setMessage(failure);
+      if (result.confirmEmail !== null && job.context === "signup") {
+        setConfirmEmail(result.confirmEmail);
+      }
+      setNotice(result.notice);
+      announce(result.notice, onNotice);
     },
-    [translate],
+    [translate, mapErrorObject, onNotice],
   );
   const { pending, error, run, reset } = useAsyncAction(execute);
 
@@ -249,7 +409,8 @@ export function LoginForm({
     reset();
   }
 
-  const thrown = error === null ? null : translate(rawErrorText(error), lastContext);
+  const thrown =
+    error === null ? null : thrownMessage(error, lastContext, translate, connectErrorMessage);
   const shown = message ?? thrown;
 
   const isSignin = mode === "signin";
@@ -267,14 +428,17 @@ export function LoginForm({
     if (isSignin || !onPasswordSignUp) {
       submit({ context: "signin", run: () => onPasswordSignIn(credentials) });
     } else {
+      setEmailValue(credentials.email);
       submit({ context: "signup", run: () => onPasswordSignUp(credentials) });
     }
   }
 
   function forgot() {
     const email = String(new FormData(formRef.current ?? undefined).get("email") ?? "").trim();
-    if (!email) setMessage(ENTER_EMAIL);
-    else submit({ context: "reset", run: () => onForgotPassword!(email) });
+    if (!email) {
+      setMessage(emailRequiredMessage ?? ENTER_EMAIL);
+      emailRef.current?.focus();
+    } else submit({ context: "reset", run: () => onForgotPassword!(email) });
   }
 
   function switchMode() {
@@ -282,7 +446,30 @@ export function LoginForm({
     setMode(next);
     setMessage(null);
     setNotice(null);
+    changed(next);
+  }
+
+  function changed(next: LoginMode) {
     onModeChange?.(next);
+  }
+
+  function backToSignin() {
+    setConfirmEmail(null);
+    setMode("signin");
+    changed("signin");
+  }
+
+  if (confirmEmail !== null) {
+    return (
+      <div className={className}>
+        <ConfirmPanel
+          email={confirmEmail}
+          title={confirmEmailTitle}
+          renderBody={confirmEmailBody}
+          onBack={backToSignin}
+        />
+      </div>
+    );
   }
 
   return (
@@ -303,17 +490,12 @@ export function LoginForm({
           onForgot={onForgotPassword ? forgot : undefined}
           Link={Link}
           onChange={clearError}
+          emailRef={emailRef}
+          defaultEmail={emailValue}
+          emailPlaceholder={emailPlaceholder}
+          passwordPlaceholder={passwordPlaceholder}
         />
-        {shown ? (
-          <p id={ERROR_ID} role="alert" className="text-sm font-medium text-destructive">
-            {shown}
-          </p>
-        ) : null}
-        {notice ? (
-          <p role="status" className="text-sm font-medium text-foreground">
-            {notice}
-          </p>
-        ) : null}
+        <Feedback error={shown} notice={noticeDisplay === "none" ? null : notice} />
         <Button
           type="submit"
           size="lg"
@@ -325,7 +507,12 @@ export function LoginForm({
       </form>
 
       {onPasswordSignUp ? (
-        <ModeToggle isSignin={isSignin} pending={pending} onClick={switchMode} />
+        <ModeToggle
+          isSignin={isSignin}
+          pending={pending}
+          prompt={modeTogglePrompt}
+          onClick={switchMode}
+        />
       ) : null}
     </div>
   );

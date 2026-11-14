@@ -681,12 +681,18 @@ Security duties that stay with the kit:
 - **Render QR codes safely.** `MfaForm` shows the QR image only when
   `qr` starts with `data:image/`; anything else leaves just the manual key.
 
-- `AuthShell({wordmark?, title, subtitle?, children, footer?, className?})` -
+- `AuthShell({wordmark?, tagline?, align?, title, subtitle?, children, footer?,
+  className?})` -
   centred card with a wordmark slot above, an `h1` title, optional subtitle
-  and a footer slot (legal links) under the card. Server-renderable.
+  and a footer slot (legal links) under the card. `tagline` renders under the
+  wordmark; `align` (`"start"` default, or `"center"`) aligns the title and
+  subtitle inside the card. Server-renderable.
 - `LoginForm({onPasswordSignIn, onPasswordSignUp?, onGoogleSignIn?,
   showGoogle?, defaultMode?, onModeChange?, forgotPasswordHref?,
-  onForgotPassword?, LinkComponent?, mapError?, initialError?})` - email and
+  onForgotPassword?, LinkComponent?, mapError?, mapErrorObject?,
+  connectErrorMessage?, emailRequiredMessage?, onNotice?, noticeDisplay?,
+  emailPlaceholder?, passwordPlaceholder?, modeTogglePrompt?, defaultEmail?,
+  confirmEmailTitle?, confirmEmailBody?, initialError?})` - email and
   password with correct `autocomplete` (`current-password` or
   `new-password`), `name` attributes, and `aria-invalid` /
   `aria-describedby` tied to the error. Typing clears the error, and
@@ -701,7 +707,31 @@ Security duties that stay with the kit:
   asks for an email first. `mapError(raw, context)` turns a returned string,
   or a thrown error's `code` (else `message`), into vendor copy; context is
   `"signin" | "signup" | "oauth" | "reset"`. Controls are 44px or taller and
-  the whole form works by touch.
+  the whole form works by touch. Every prop below is optional; without them
+  the form renders and behaves as before, except that forgot password with
+  an empty email now also moves focus to the email field.
+  - `onPasswordSignUp` may return `{confirmEmail: address}`. The form is then
+    replaced by a panel with an `h2` (`confirmEmailTitle`, default "Check your
+    email"), a body (`confirmEmailBody(email)`, default a sentence naming the
+    address) and a 44px "Back to sign in" button. The button returns to the
+    form in sign-in mode, refilled with the typed email, and calls
+    `onModeChange("signin")`.
+  - Any callback may return `{error: unknown}`, such as a provider error
+    object. `mapErrorObject(error, context)` turns it into copy; it is a
+    separate prop so existing `mapError(raw: string, ctx)` mappers keep their
+    type. Without `mapErrorObject` the per-context fallback line is shown and
+    nothing from the object is rendered. `mapError` never sees an object.
+  - `connectErrorMessage` replaces the fallback line when a callback throws a
+    value with no string `code` and no non-empty string `message` (a bare
+    object or a number). Throws that carry either still use `mapError` or the
+    fallback, and a thrown `null` or `undefined` shows nothing, as before.
+  - `emailRequiredMessage` replaces "Enter your email first.".
+  - `onNotice(notice)` is called with a returned `{notice}`. The inline
+    status line stays unless `noticeDisplay="none"`, for kits that show the
+    text as a toast instead.
+  - `emailPlaceholder`, `passwordPlaceholder`, `defaultEmail` (initial email)
+    and `modeTogglePrompt={{signin, signup}}` (replaces "New here?" and
+    "Already have an account?").
 - `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?,
   enrolIntro?, mapError?})` - six-digit code (`inputMode="numeric"`,
   `pattern="[0-9]*"`, `autocomplete="one-time-code"`). Typed or pasted text
@@ -736,8 +766,21 @@ Wiring example in a Next.js kit:
       router.refresh();
       await navigatingAway();
     }}
+    onPasswordSignUp={async (c) => {
+      const { data, error } = await supabase.auth.signUp(c);
+      if (error) return { error }; // mapped by mapErrorObject, never rendered raw
+      if (!data.session) return { confirmEmail: c.email };
+      router.push("/dashboard");
+      await navigatingAway();
+    }}
+    mapErrorObject={(error, context) => friendlyAuthError(error, context)}
+    onForgotPassword={async (email) => {
+      await requestReset(email);
+      return { notice: "Reset link sent." };
+    }}
+    onNotice={(text) => toast(text)}
+    noticeDisplay="none"
     onGoogleSignIn={signInWithGoogle}
-    forgotPasswordHref="/forgot-password"
   />
 </AuthShell>
 

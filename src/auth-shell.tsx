@@ -31,6 +31,7 @@ export function AuthShell({
   footer,
   className,
 }: AuthShellProps): React.ReactElement {
+  const centred = align === "center" ? "text-center" : undefined;
   return (
     <main className={cn("flex min-h-screen items-center justify-center p-5", className)}>
       <div className="w-full max-w-md">
@@ -41,10 +42,10 @@ export function AuthShell({
           </div>
         ) : null}
         <ElevatedCard className="px-7 pt-9 pb-8">
-          <div className={align === "center" ? "text-center" : undefined}>
-            <h1 className="font-display text-3xl font-bold tracking-tight">{title}</h1>
-            {subtitle ? <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p> : null}
-          </div>
+          <h1 className={cn("font-display text-3xl font-bold tracking-tight", centred)}>{title}</h1>
+          {subtitle ? (
+            <p className={cn("mt-1.5 text-sm text-muted-foreground", centred)}>{subtitle}</p>
+          ) : null}
           <div className="mt-7">{children}</div>
         </ElevatedCard>
         {footer ? (

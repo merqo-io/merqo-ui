@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- `LoginForm`: a `mapError` that returns an empty string no longer leaves a failed sign-in with no message; the per-context fallback is shown.
 - `LoginForm`: tapping "Forgot password?" with an empty email now moves focus to the email field as well as showing the message.
 
 ## [0.46.0] - 2026-11-13

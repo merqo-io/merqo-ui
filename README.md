@@ -715,7 +715,12 @@ Security duties that stay with the kit:
     email"), a body (`confirmEmailBody(email)`, default a sentence naming the
     address) and a 44px "Back to sign in" button. The button returns to the
     form in sign-in mode, refilled with the typed email, and calls
-    `onModeChange("signin")`.
+    `onModeChange("signin")`. Focus moves to the panel heading when it
+    appears (the submit button it replaces is gone) and to the password field
+    after "Back to sign in". A non-string or empty `confirmEmail` is ignored,
+    and `confirmEmail` from any callback other than `onPasswordSignUp` is too.
+  - If `mapError` or `mapErrorObject` returns an empty string, the
+    per-context fallback line is shown instead, so a failure is never silent.
   - Any callback may return `{error: unknown}`, such as a provider error
     object. `mapErrorObject(error, context)` turns it into copy; it is a
     separate prop so existing `mapError(raw: string, ctx)` mappers keep their

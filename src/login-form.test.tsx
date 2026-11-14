@@ -14,6 +14,13 @@ async function fill(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Password"), "hunter22");
 }
 
+async function submitSignIn(props: Partial<React.ComponentProps<typeof LoginForm>>) {
+  const user = userEvent.setup();
+  render(<LoginForm onPasswordSignIn={vi.fn()} {...props} />);
+  await fill(user);
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+}
+
 describe("LoginForm", () => {
   it("labels inputs with the right autocomplete", () => {
     render(<LoginForm onPasswordSignIn={vi.fn()} />);
@@ -384,13 +391,6 @@ describe("LoginForm", () => {
   });
 
   describe("rich errors", () => {
-    async function submitSignIn(props: Partial<React.ComponentProps<typeof LoginForm>>) {
-      const user = userEvent.setup();
-      render(<LoginForm onPasswordSignIn={vi.fn()} {...props} />);
-      await fill(user);
-      await user.click(screen.getByRole("button", { name: "Sign in" }));
-    }
-
     it("hands the error object to mapErrorObject", async () => {
       const mapErrorObject = vi.fn().mockReturnValue("Wrong password.");
       const boom = { status: 400, text: "invalid_credentials leak@x.sg" };
@@ -550,6 +550,160 @@ describe("LoginForm", () => {
     it("prefills the email with defaultEmail", () => {
       render(<LoginForm onPasswordSignIn={vi.fn()} defaultEmail="pre@fill.sg" />);
       expect(screen.getByLabelText("Email")).toHaveValue("pre@fill.sg");
+    });
+  });
+
+  describe("review round 1", () => {
+    it("falls back when mapErrorObject returns an empty string", async () => {
+      await submitSignIn({
+        onPasswordSignIn: vi.fn().mockResolvedValue({ error: new Error("x") }),
+        mapErrorObject: () => "",
+      });
+      expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign in. Try again.");
+    });
+
+    it("falls back when mapError returns an empty string for a returned or thrown error", async () => {
+      await submitSignIn({
+        onPasswordSignIn: vi.fn().mockResolvedValue("code"),
+        mapError: () => "",
+      });
+      expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign in. Try again.");
+    });
+
+    it("falls back when mapError returns an empty string for a thrown error", async () => {
+      await submitSignIn({
+        onPasswordSignIn: vi.fn().mockRejectedValue(new Error("code")),
+        mapError: () => "",
+      });
+      expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign in. Try again.");
+    });
+
+    it.each([undefined, "Check your connection."])(
+      "never renders raw text when mapErrorObject throws (connectErrorMessage %s)",
+      async (connectErrorMessage) => {
+        await submitSignIn({
+          onPasswordSignIn: vi.fn().mockResolvedValue({ error: "x" }),
+          mapErrorObject: () => {
+            throw new Error("raw provider secret");
+          },
+          connectErrorMessage,
+        });
+        expect(await screen.findByRole("alert")).toBeInTheDocument();
+        expect(document.body).not.toHaveTextContent("raw provider secret");
+      },
+    );
+
+    describe("confirmation panel", () => {
+      async function toPanel(
+        onPasswordSignUp: React.ComponentProps<typeof LoginForm>["onPasswordSignUp"],
+        onModeChange = vi.fn(),
+        extra: Partial<React.ComponentProps<typeof LoginForm>> = {},
+      ) {
+        const user = userEvent.setup();
+        const onPasswordSignIn = vi.fn().mockResolvedValue(undefined);
+        render(
+          <LoginForm
+            onPasswordSignIn={onPasswordSignIn}
+            onPasswordSignUp={onPasswordSignUp}
+            onModeChange={onModeChange}
+            {...extra}
+          />,
+        );
+        await user.click(screen.getByRole("button", { name: "Create an account" }));
+        await fill(user);
+        await user.click(screen.getByRole("button", { name: "Create account" }));
+        return { user, onPasswordSignIn };
+      }
+
+      it("focuses the heading when the panel appears", async () => {
+        await toPanel(vi.fn().mockResolvedValue({ confirmEmail: "a@b.sg" }));
+        const heading = await screen.findByRole("heading", { name: "Check your email" });
+        expect(heading).toHaveAttribute("tabindex", "-1");
+        expect(heading).toHaveFocus();
+      });
+
+      it("focuses the password field after Back to sign in by touch", async () => {
+        const { user } = await toPanel(vi.fn().mockResolvedValue({ confirmEmail: "a@b.sg" }));
+        await user.pointer({
+          keys: "[TouchA]",
+          target: await screen.findByRole("button", { name: "Back to sign in" }),
+        });
+        expect(screen.getByLabelText("Password")).toHaveFocus();
+        expect(screen.getByLabelText("Email")).toHaveValue("a@b.sg");
+      });
+
+      it("returns to a clean sign-in: mode, one onModeChange, no stale message, submit works", async () => {
+        const onModeChange = vi.fn();
+        const onPasswordSignUp = vi
+          .fn()
+          .mockResolvedValueOnce({ notice: "Earlier notice." })
+          .mockResolvedValueOnce({ confirmEmail: "a@b.sg" });
+        const { user, onPasswordSignIn } = await toPanel(onPasswordSignUp, onModeChange);
+        expect(await screen.findByRole("status")).toHaveTextContent("Earlier notice.");
+        await user.click(screen.getByRole("button", { name: "Create account" }));
+        await user.click(await screen.findByRole("button", { name: "Back to sign in" }));
+        expect(onModeChange.mock.calls.filter(([m]) => m === "signin")).toHaveLength(1);
+        expect(screen.queryByRole("alert")).toBeNull();
+        expect(screen.queryByText("Earlier notice.")).toBeNull();
+        expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
+        await user.type(screen.getByLabelText("Password"), "hunter22");
+        await user.click(screen.getByRole("button", { name: "Sign in" }));
+        expect(onPasswordSignIn).toHaveBeenCalledWith({ email: "a@b.sg", password: "hunter22" });
+      });
+
+      it("clears an earlier error after going back", async () => {
+        const onPasswordSignUp = vi
+          .fn()
+          .mockResolvedValueOnce("nope")
+          .mockResolvedValueOnce({ confirmEmail: "a@b.sg" });
+        const { user } = await toPanel(onPasswordSignUp);
+        await screen.findByRole("alert");
+        await user.click(screen.getByRole("button", { name: "Create account" }));
+        await user.click(await screen.findByRole("button", { name: "Back to sign in" }));
+        expect(screen.queryByRole("alert")).toBeNull();
+      });
+
+      it("keeps the 44px class on the button", async () => {
+        await toPanel(vi.fn().mockResolvedValue({ confirmEmail: "a@b.sg" }));
+        expect(await screen.findByRole("button", { name: "Back to sign in" })).toHaveClass(
+          "min-h-11",
+        );
+      });
+
+      it("renders the address as text, not markup", async () => {
+        await toPanel(vi.fn().mockResolvedValue({ confirmEmail: "a<b>x</b>@y.sg" }));
+        expect(await screen.findByText(/a<b>x<\/b>@y\.sg/)).toBeInTheDocument();
+        expect(document.body.querySelector("b")).toBeNull();
+      });
+
+      it("treats a non-string confirmEmail as no result", async () => {
+        await toPanel(vi.fn().mockResolvedValue({ confirmEmail: 42 }));
+        await waitFor(() => expect(screen.getByRole("button", { name: "Create account" })).toBeEnabled());
+        expect(screen.getByLabelText("Password")).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Check your email" })).toBeNull();
+      });
+
+      it("ignores confirmEmail from sign-in, Google and reset", async () => {
+        const user = userEvent.setup();
+        const result = vi.fn().mockResolvedValue({ confirmEmail: "a@b.sg" });
+        render(
+          <LoginForm
+            onPasswordSignIn={result}
+            onGoogleSignIn={result}
+            onForgotPassword={result}
+          />,
+        );
+        await user.type(screen.getByLabelText("Email"), "a@b.sg");
+        await user.type(screen.getByLabelText("Password"), "hunter22");
+        await user.click(screen.getByRole("button", { name: "Sign in" }));
+        await waitFor(() => expect(result).toHaveBeenCalledTimes(1));
+        await user.click(screen.getByRole("button", { name: "Continue with Google" }));
+        await waitFor(() => expect(result).toHaveBeenCalledTimes(2));
+        await user.click(screen.getByRole("button", { name: "Forgot password?" }));
+        await waitFor(() => expect(result).toHaveBeenCalledTimes(3));
+        expect(screen.queryByRole("heading", { name: "Check your email" })).toBeNull();
+        expect(screen.getByLabelText("Password")).toBeInTheDocument();
+      });
     });
   });
 });

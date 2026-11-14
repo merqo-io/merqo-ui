@@ -165,7 +165,10 @@ function splitResult(result: CallbackResult): Split {
   if (typeof result === "string") return { ...none, error: result || null };
   if (typeof result !== "object" || result === null) return none;
   if ("error" in result) return { ...none, errorObject: { value: result.error } };
-  if ("confirmEmail" in result) return { ...none, confirmEmail: result.confirmEmail };
+  if ("confirmEmail" in result) {
+    const { confirmEmail } = result;
+    return typeof confirmEmail === "string" && confirmEmail ? { ...none, confirmEmail } : none;
+  }
   return { ...none, notice: result.notice };
 }
 
@@ -198,7 +201,8 @@ function resultMessage(
 ): string | null {
   if (result.error) return translate(result.error, context);
   if (!result.errorObject) return null;
-  return mapErrorObject ? mapErrorObject(result.errorObject.value, context) : FALLBACK[context];
+  const mapped = mapErrorObject?.(result.errorObject.value, context);
+  return mapped || FALLBACK[context];
 }
 
 function thrownMessage(
@@ -223,10 +227,22 @@ function ConfirmPanel({
   renderBody: ((email: string) => React.ReactNode) | undefined;
   onBack: () => void;
 }) {
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+  // The focused submit button unmounts with the form, so focus would fall to
+  // the body; the heading also gets the panel announced to screen readers.
+  React.useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
   return (
     <div className="space-y-4 text-center">
-      <h2 className="font-display text-2xl font-bold tracking-tight">{title}</h2>
-      <div role="status" className="text-sm text-muted-foreground">
+      <h2
+        ref={headingRef}
+        tabIndex={-1}
+        className="font-display text-2xl font-bold tracking-tight outline-none"
+      >
+        {title}
+      </h2>
+      <div className="text-sm text-muted-foreground">
         {renderBody ? (
           renderBody(email)
         ) : (
@@ -258,11 +274,13 @@ function CredentialFields({
   Link,
   onChange,
   emailRef,
+  passwordRef,
   defaultEmail,
   emailPlaceholder,
   passwordPlaceholder,
 }: {
   emailRef: React.RefObject<HTMLInputElement | null>;
+  passwordRef: React.RefObject<HTMLInputElement | null>;
   defaultEmail: string | undefined;
   emailPlaceholder: string | undefined;
   passwordPlaceholder: string | undefined;
@@ -316,6 +334,7 @@ function CredentialFields({
           ) : null}
         </div>
         <Input
+          ref={passwordRef}
           id="login-password"
           name="password"
           type="password"
@@ -372,12 +391,14 @@ export function LoginForm({
   const inflight = React.useRef(false);
   const formRef = React.useRef<HTMLFormElement>(null);
   const emailRef = React.useRef<HTMLInputElement>(null);
+  const passwordRef = React.useRef<HTMLInputElement>(null);
+  const refocusPassword = React.useRef(false);
 
   // Provider strings and thrown errors can leak account state, so without a
   // kit-supplied mapError only the generic line is ever shown.
   const translate = React.useCallback(
     (raw: string | null, context: LoginErrorContext) =>
-      mapError && raw !== null ? mapError(raw, context) : FALLBACK[context],
+      (mapError && raw !== null ? mapError(raw, context) : "") || FALLBACK[context],
     [mapError],
   );
 
@@ -454,10 +475,20 @@ export function LoginForm({
   }
 
   function backToSignin() {
+    clearError();
+    refocusPassword.current = true;
     setConfirmEmail(null);
     setMode("signin");
     changed("signin");
   }
+
+  // The email is already filled after going back, so the password is next.
+  React.useEffect(() => {
+    if (confirmEmail === null && refocusPassword.current) {
+      refocusPassword.current = false;
+      passwordRef.current?.focus();
+    }
+  }, [confirmEmail]);
 
   if (confirmEmail !== null) {
     return (
@@ -491,6 +522,7 @@ export function LoginForm({
           Link={Link}
           onChange={clearError}
           emailRef={emailRef}
+          passwordRef={passwordRef}
           defaultEmail={emailValue}
           emailPlaceholder={emailPlaceholder}
           passwordPlaceholder={passwordPlaceholder}

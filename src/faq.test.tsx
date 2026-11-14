@@ -40,3 +40,12 @@ describe("Faq", () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+describe("Faq shape", () => {
+  it("takes its corners from the kit radius token", () => {
+    render(<Faq items={ITEMS} />);
+    const item = document.querySelector("details") as HTMLElement;
+    expect(item).toHaveClass("rounded-lg");
+    expect(item.className).not.toMatch(/rounded-(\[|xl|2xl)/);
+  });
+});

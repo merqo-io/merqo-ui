@@ -41,7 +41,7 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
           {items.map((item, i) => (
             <details
               key={i}
-              className="group overflow-hidden rounded-xl border border-border bg-card open:border-primary/50"
+              className="group overflow-hidden rounded-lg border border-border bg-card open:border-primary/50"
             >
               <summary className="flex min-h-11 cursor-pointer list-none [&::-webkit-details-marker]:hiddenitems-start justify-between gap-4 px-5 py-4 outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset">
                 <span className="text-base font-semibold leading-snug text-foreground">

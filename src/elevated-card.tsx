@@ -9,7 +9,7 @@ export interface ElevatedCardProps
 }
 
 // The polished-card look shared across profile/dashboard/setup pages across
-// every kit: rounded corners, a soft two-layer lifted shadow. Deliberately
+// every kit: rounded corners and a soft lifted shadow, both from standard utilities. Deliberately
 // not qkit's scalloped Ticket theme, which stays local to qkit.
 export function ElevatedCard({
   as: As = "div",
@@ -20,7 +20,7 @@ export function ElevatedCard({
   return (
     <As
       className={cn(
-        "rounded-[20px] border bg-card shadow-[0_1px_0_0_var(--color-border),0_12px_28px_-20px_rgba(0,0,0,0.35)]",
+        "rounded-2xl border bg-card shadow-md",
         className,
       )}
       {...props}

@@ -34,10 +34,10 @@ export function BackToTop(): ReactElement {
       aria-label="Back to top"
       tabIndex={show ? 0 : -1}
       className={cn(
-        "fixed right-6 bottom-6 z-40 grid size-12 place-items-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition-all outline-none hover:bg-secondary focus-visible:ring-[3px] focus-visible:ring-ring/50 motion-reduce:transition-none",
+        "fixed right-6 bottom-6 z-40 grid size-12 place-items-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition-opacity outline-none hover:bg-secondary active:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 motion-reduce:transition-none",
         show
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-2 opacity-0",
+          ? "opacity-100"
+          : "pointer-events-none opacity-0",
       )}
     >
       <ArrowUp className="size-5" />

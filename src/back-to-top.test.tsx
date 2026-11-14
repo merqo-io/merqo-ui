@@ -55,3 +55,13 @@ describe("BackToTop", () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
   });
 });
+
+describe("BackToTop motion", () => {
+  it("fades only, with no lift, scale or all-property transition", () => {
+    render(<BackToTop />);
+    const cls = screen.getByRole("button", { name: "Back to top" }).className;
+    expect(cls).toContain("transition-opacity");
+    expect(cls).not.toMatch(/transition-all|translate|scale/);
+    expect(cls).toContain("active:");
+  });
+});

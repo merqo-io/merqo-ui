@@ -168,7 +168,7 @@ describe("Section", () => {
     );
     expect(container.firstChild).toHaveClass("custom-class");
     // still carries the base neutral card classes
-    expect(container.firstChild).toHaveClass("rounded-xl", "border", "bg-card");
+    expect(container.firstChild).toHaveClass("rounded-lg", "border", "bg-card");
   });
 
   it("never uses a literal color, font, or radius value", () => {
@@ -268,5 +268,18 @@ describe("Section surface", () => {
     const shell = container.querySelector("section");
     expect(shell).not.toHaveClass("bg-card");
     expect(shell).toHaveClass("mine");
+  });
+});
+
+describe("Section shape", () => {
+  it("takes its corners from the kit radius token", () => {
+    const { container } = render(
+      <Section icon={<Info />} title="t">
+        <div />
+      </Section>,
+    );
+    const shell = container.querySelector("section") as HTMLElement;
+    expect(shell).toHaveClass("rounded-lg");
+    expect(shell.className).not.toMatch(/rounded-(\[|xl|2xl)/);
   });
 });

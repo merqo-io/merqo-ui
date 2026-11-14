@@ -212,3 +212,17 @@ describe("PricingLadder options", () => {
     expect(within(card("qkit")).getByRole("button", { name: "Pick qkit" })).toBeInTheDocument();
   });
 });
+
+describe("PricingLadder shape", () => {
+  it("uses one token-derived radius on every surface", () => {
+    const { container } = render(<PricingLadder catalog={CATALOG} />);
+    const surfaces = container.querySelectorAll(
+      "li[class*='rounded'], section, [role='note']",
+    );
+    expect(surfaces.length).toBeGreaterThan(0);
+    surfaces.forEach((el) => {
+      expect(el).toHaveClass("rounded-lg");
+      expect(el.className).not.toMatch(/rounded-(\[|xl|2xl)/);
+    });
+  });
+});

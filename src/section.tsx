@@ -94,7 +94,7 @@ export function Section({
     <section
       className={cn(
         surface === "default" &&
-          "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border p-6 shadow-sm",
+          "bg-card text-card-foreground flex flex-col gap-4 rounded-lg border p-6 shadow-sm",
         surface === "none" && "flex flex-col gap-4",
         className,
       )}

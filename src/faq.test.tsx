@@ -40,3 +40,21 @@ describe("Faq", () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+describe("Faq shape", () => {
+  it("takes its corners from the kit radius token", () => {
+    render(<Faq items={ITEMS} />);
+    const item = document.querySelector("details") as HTMLElement;
+    expect(item).toHaveClass("rounded-lg");
+    expect(item.className).not.toMatch(/rounded-(\[|xl|2xl)/);
+  });
+});
+
+describe("Faq summary", () => {
+  it("hides the default marker and top-aligns as separate classes", () => {
+    render(<Faq items={ITEMS} />);
+    const summary = document.querySelector("summary") as HTMLElement;
+    expect(summary).toHaveClass("[&::-webkit-details-marker]:hidden");
+    expect(summary).toHaveClass("items-start");
+  });
+});

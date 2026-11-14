@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Added
+
+- `LoginForm`: `onPasswordSignUp` may return `{ confirmEmail }` to replace the form with a "Check your email" panel (`confirmEmailTitle`, `confirmEmailBody`) and a 44px "Back to sign in" button that restores the form in sign-in mode with the typed email and fires `onModeChange("signin")`.
+- `LoginForm`: callbacks may return `{ error: unknown }`, translated by the new `mapErrorObject(error, context)`. Without it the per-context fallback is shown and nothing from the object is rendered. `mapError` keeps its `(raw: string, context)` signature.
+- `LoginForm`: `connectErrorMessage` for throws with no string `code` or `message`.
+- `LoginForm`: `emailRequiredMessage`, `onNotice` with `noticeDisplay` (`"inline"` default or `"none"`), `emailPlaceholder`, `passwordPlaceholder`, `modeTogglePrompt` and `defaultEmail`.
+- `AuthShell`: `tagline` under the wordmark and `align` (`"start"` default, or `"center"`) for the title block.
+
+### Fixed
+
+- `LoginForm`: a `mapError` that returns an empty string no longer leaves a failed sign-in with no message; the per-context fallback is shown.
+- `LoginForm`: tapping "Forgot password?" with an empty email now moves focus to the email field as well as showing the message.
+
 ## [0.46.0] - 2026-11-13
 
 ### Added

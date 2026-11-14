@@ -128,6 +128,14 @@ export type {
   LoginCredentials,
   LoginFormLinkProps,
 } from "./login-form";
+export { ResetPasswordForm } from "./reset-password-form";
+export type { ResetPasswordFormProps, ResetPasswordState } from "./reset-password-form";
+export { AUTH_ERROR_FALLBACKS, AUTH_ERROR_MESSAGES, authErrorKind, authErrorMessage } from "./auth-error-message";
+export type {
+  AuthErrorContext,
+  AuthErrorKind,
+  AuthErrorMessageOptions,
+} from "./auth-error-message";
 export { MfaForm } from "./mfa-form";
 export type { MfaFormProps, MfaEnrolment } from "./mfa-form";
 export { AdminShell } from "./admin-shell";

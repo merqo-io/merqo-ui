@@ -17,6 +17,8 @@ const ENTRIES = {
   "admin-shell": "src/admin-shell.tsx",
   "auth-shell": "src/auth-shell.tsx",
   "login-form": "src/login-form.tsx",
+  "reset-password-form": "src/reset-password-form.tsx",
+  "auth-error-message": "src/auth-error-message.ts",
   "mfa-form": "src/mfa-form.tsx",
   avatar: "src/avatar.tsx",
   "form-field": "src/form-field.tsx",

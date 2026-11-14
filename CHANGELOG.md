@@ -4,6 +4,8 @@
 
 ### Added
 
+- `ResetPasswordForm`: the "set a new password" form for the emailed recovery link. Controlled `state` (`checking`, `ready`, `expired`, `failed`), password and confirm fields with submit-time length and match validation, `mapError` and `mapErrorObject`, optional `onRetry`, and no page shell.
+- `authErrorMessage`, `authErrorKind`, `AUTH_ERROR_MESSAGES` and `AUTH_ERROR_FALLBACKS`: map a Supabase-style auth error to friendly copy without returning raw provider text. Server-safe, with per-kind overrides and per-context fallbacks.
 - `LoginForm`: `onPasswordSignUp` may return `{ confirmEmail }` to replace the form with a "Check your email" panel (`confirmEmailTitle`, `confirmEmailBody`) and a 44px "Back to sign in" button that restores the form in sign-in mode with the typed email and fires `onModeChange("signin")`.
 - `LoginForm`: callbacks may return `{ error: unknown }`, translated by the new `mapErrorObject(error, context)`. Without it the per-context fallback is shown and nothing from the object is rendered. `mapError` keeps its `(raw: string, context)` signature.
 - `LoginForm`: `connectErrorMessage` for throws with no string `code` or `message`.

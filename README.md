@@ -737,6 +737,59 @@ Security duties that stay with the kit:
   - `emailPlaceholder`, `passwordPlaceholder`, `defaultEmail` (initial email)
     and `modeTogglePrompt={{signin, signup}}` (replaces "New here?" and
     "Already have an account?").
+- `ResetPasswordForm({onSubmit, state?, onRetry?, mapError?, mapErrorObject?,
+  errorFallback?, minLength?, maxLength?, tooShortMessage?, tooLongMessage?,
+  mismatchMessage?, title?, subtitle?, passwordLabel?, confirmLabel?,
+  submitLabel?, pendingLabel?, checkingLabel?, expiredTitle?, expiredBody?,
+  failedTitle?, failedBody?, signInHref?, signInLabel?, LinkComponent?,
+  className?})` - the "set a new password" form shown after the emailed
+  recovery link. It renders no card or page shell; wrap it in `AuthShell` or
+  the kit's own card. Only `onSubmit` is required.
+  - `onSubmit(password)` runs after validation and may return nothing, a
+    string (error copy), or `{error: unknown}`, sync or async, or throw. The
+    form never navigates or toasts: the kit does that inside `onSubmit`. A
+    returned string goes through `mapError(raw)` when given, and is shown as
+    is otherwise. `{error}` goes through `mapErrorObject(error)`. A thrown
+    error goes through `mapError` with its `code` (else `message`). An empty
+    mapping, or no mapper for a thrown or `{error}` result, shows
+    `errorFallback` (default "Could not update your password. Try again."), so
+    raw provider text is never rendered. The button is disabled and shows
+    `pendingLabel` ("Updating…") while pending, overlapping taps run
+    `onSubmit` once, and it re-enables after a normal resolve.
+  - `state` is `"checking" | "ready" | "expired" | "failed"` (default
+    `"ready"`) and is controlled by the kit. `checking` shows a polite status
+    line (`checkingLabel`). `expired` and `failed` show a heading that takes
+    focus, a body (`expiredTitle`, `expiredBody`, `failedTitle`,
+    `failedBody`) and the back-to-sign-in link. `failed` also shows a "Try
+    again" button, only when `onRetry` is given.
+  - Validation runs on submit, before `onSubmit`: `minLength` (default 8),
+    optional `maxLength`, and a match check. The message appears under the
+    offending field with `aria-invalid` and `aria-describedby`, and focus
+    moves to that field. Typing clears it. Messages are `tooShortMessage`
+    (default "Use at least N characters."), `tooLongMessage` (default "Use at
+    most N characters.") and `mismatchMessage` ("Passwords do not match.").
+  - `title` and `subtitle` render above the fields only when given.
+    `signInHref` renders a "Back to sign in" link (`signInLabel`) in every
+    state; pass `next/link`'s `Link` as `LinkComponent`. Controls are 44px or
+    taller and the form works by touch.
+- `authErrorMessage(error, context, options?)` - maps a Supabase-style auth
+  error to friendly copy and never returns raw provider text or an empty
+  string. It is a plain function with no client boundary, so a server action
+  can call it. `context` is `"signin" | "signup" | "oauth" | "reset" |
+  "update"` (`reset` is sending the link, `update` is setting the new
+  password); the first four match `LoginForm`'s context, so
+  `mapErrorObject={(e, ctx) => authErrorMessage(e, ctx)}` type-checks.
+  `authErrorKind(error)` returns the matched `AuthErrorKind`
+  (`invalid_credentials`, `email_not_confirmed`, `email_exists`,
+  `weak_password`, `same_password`, `rate_limited`, `mfa_code`, `network`) or
+  `null`; it checks `code`, then `status`, then `name`, then the message. An
+  unmatched error gets `options.fallback`, else the per-context line in
+  `AUTH_ERROR_FALLBACKS`. `options.overrides` replaces the copy per kind, and
+  an empty override is ignored. `AUTH_ERROR_MESSAGES` and
+  `AUTH_ERROR_FALLBACKS` are frozen and exported for reading.
+  - The default `email_exists` copy tells the user an account exists. A kit
+    that wants a neutral line should override it, for example
+    `{overrides: {email_exists: "Check your email to continue."}}`.
 - `MfaForm({hasFactor, onEnrol?, onVerify, onCancel?, cancelLabel?,
   enrolIntro?, mapError?})` - six-digit code (`inputMode="numeric"`,
   `pattern="[0-9]*"`, `autocomplete="one-time-code"`). Typed or pasted text
@@ -799,6 +852,36 @@ Wiring example in a Next.js kit:
 >
   {children}
 </AdminShell>
+```
+
+Reset password page with the shared error mapper:
+
+```tsx
+// app/reset-password/page.tsx (client component)
+<AuthShell wordmark={<Wordmark />} title="Set a new password">
+  <ResetPasswordForm
+    state={state} // "checking" | "ready" | "expired" | "failed", from your session check
+    onRetry={recheckSession}
+    signInHref="/login"
+    LinkComponent={Link}
+    onSubmit={async (password) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) return { error };
+      toast("Password updated.");
+      router.push("/dashboard");
+      await navigatingAway();
+    }}
+    mapErrorObject={(error) => authErrorMessage(error, "update")}
+  />
+</AuthShell>
+
+// LoginForm, with a neutral duplicate-account line
+<LoginForm
+  onPasswordSignIn={signIn}
+  mapErrorObject={(e, ctx) =>
+    authErrorMessage(e, ctx, { overrides: { email_exists: "Check your email to continue." } })
+  }
+/>
 ```
 
 ## App chrome (error pages, icons, metadata, providers, legal pages)

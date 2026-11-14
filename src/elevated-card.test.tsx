@@ -18,6 +18,15 @@ describe("ElevatedCard", () => {
     render(<ElevatedCard className="px-7 py-6">content</ElevatedCard>);
     const el = screen.getByText("content");
     expect(el.className).toContain("px-7 py-6");
-    expect(el.className).toContain("rounded-[20px]");
+    expect(el.className).toContain("rounded-2xl");
+  });
+});
+
+describe("ElevatedCard shape", () => {
+  it("uses standard radius and shadow utilities, no arbitrary values", () => {
+    render(<ElevatedCard>content</ElevatedCard>);
+    const el = screen.getByText("content");
+    expect(el).toHaveClass("rounded-2xl", "shadow-md");
+    expect(el.className).not.toMatch(/(rounded|shadow)-\[|rgba?\(|oklch/);
   });
 });

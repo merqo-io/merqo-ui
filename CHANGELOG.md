@@ -12,6 +12,12 @@
 - `LoginForm`: `emailRequiredMessage`, `onNotice` with `noticeDisplay` (`"inline"` default or `"none"`), `emailPlaceholder`, `passwordPlaceholder`, `modeTogglePrompt` and `defaultEmail`.
 - `AuthShell`: `tagline` under the wordmark and `align` (`"start"` default, or `"center"`) for the title block.
 
+### Changed
+
+- Shape now comes from the kit tokens. `Faq` items, `Section` (default surface) and every `PricingLadder` surface use `rounded-lg` instead of `rounded-xl` or `rounded-2xl`, so each kit's `--radius` drives the corners (visibly tighter corners).
+- `ElevatedCard`: the literal `rounded-[20px]` and arbitrary two-layer shadow are replaced by the standard `rounded-2xl` and `shadow-md` utilities. Corners are 16px instead of 20px and the shadow is the standard medium shadow; the card keeps its elevation and props.
+- `BackToTop`: transitions opacity only (was `transition-all`), no longer slides up when it appears, and gains an `active:` pressed state.
+
 ### Fixed
 
 - `LoginForm`: a `mapError` that returns an empty string no longer leaves a failed sign-in with no message; the per-context fallback is shown.

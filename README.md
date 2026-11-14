@@ -185,7 +185,7 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
   default bg-card/border/shadow classes don't apply.
   `surface?: "default" | "elevated" | "none"` picks the default shell: the existing
-  bordered card, the `ElevatedCard` look, or no chrome (ignored with `wrapper`).
+  bordered card (`rounded-lg`, driven by the kit's `--radius`), the `ElevatedCard` look, or no chrome (ignored with `wrapper`).
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -326,7 +326,8 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   `1600` as `S$16`, `1333` as `S$13.33` and `15` as `15c`. No `"use client"`;
   call it from a Server Component.
 - `PricingLadder` (since v0.39.0) — renders a `PlanCatalog` as a ladder of
-  plan cards plus a separate Event Pass section. Server-renderable, no
+  plan cards plus a separate Event Pass section, all with `rounded-lg`
+  corners from the kit's `--radius`. Server-renderable, no
   billing toggle, and every amount comes from the catalog. Props:
   `catalog` (required); `highlight?: "qkit" | "all_access"` (default
   `"qkit"`; the emphasised card carries a "Recommended" label and
@@ -457,7 +458,8 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
 - `Faq({items, id?, eyebrow?, title?, className?})` — accordion FAQ on
   native `<details>`, so it works by touch, keyboard and screen reader.
   `items` is `{question, answer}[]` (nodes allowed); the content stays in
-  the kit. Renders nothing for an empty list. Server-safe.
+  the kit. Renders nothing for an empty list. Items use `rounded-lg`, so
+  the kit's `--radius` token sets the corners. Server-safe.
 - `readTourSeen(key, storage?)` and `writeTourSeen(key, storage?, now?)` —
   the tour-seen core. The kit passes the storage key; storage defaults to
   `window.localStorage`, and missing or blocked storage reads as unseen and
@@ -500,7 +502,8 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   error text a kit lays out itself. `FormError({message, id?, className?})` — inline
   `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
 - `ElevatedCard({as?, className, children})` — the polished lifted-shadow
-  card shell used across profile/dashboard/setup pages, deliberately not
+  card shell (`rounded-2xl` and `shadow-md`, both standard utilities, so no
+  literal radius or shadow value ships) used across profile/dashboard/setup pages, deliberately not
   qkit's own scalloped `Ticket` theme (that stays local to qkit). `as`
   picks `div`/`section`/`li`. Promoted 2026-09-16, same "found
   byte-identical in half the kits" basis as `BackButton`.
@@ -559,7 +562,7 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
 
 - `BackToTop` — fixed bottom-right back-to-top button for a long landing
   page. Appears past ~600px of scroll, scrolls smoothly unless the visitor
-  prefers reduced motion. Promoted 2026-09-19; was byte-identical in qkit,
+  prefers reduced motion. It fades in with no slide and has a pressed state. Promoted 2026-09-19; was byte-identical in qkit,
   paykit, loopkit and merqo, and differed only in comments in stockkit.
 - `GoogleMark` — Google's "G" mark for the Google OAuth button on every
   kit's login page. Promoted 2026-09-19; was identical in all five.

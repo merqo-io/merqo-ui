@@ -18,22 +18,33 @@ const plan = (
   kits: [],
 });
 
+const EVENT_PASS = { per_cup_cents: 15, min_cents: 1400, cap_cents: 2800, days: 2 };
+
 const CATALOG: PlanCatalog = {
   plans: [
     plan("free", "Free", 0, 0),
-    plan("loopkit", "loopkit", 1000, 10000),
-    plan("starter", "Starter", 1200, 12000),
-    plan("stockkit", "stockkit", 1500, 15000),
-    plan("qkit", "qkit", 1600, 16000),
-    plan("all_access", "All-Access", 3600, 36000),
+    plan("starter", "Starter", 1490, 14900),
+    plan("qkit", "Pro", 1990, 19900),
   ],
-  event_pass: { per_cup_cents: 15, min_cents: 1400, cap_cents: 2800, days: 2 },
+  event_pass: EVENT_PASS,
 };
 
-const OTHER: PlanCatalog = {
+const CATALOG_WITH_INACTIVE_PLANS: PlanCatalog = {
+  plans: [
+    plan("free", "Free", 0, 0),
+    plan("loopkit", "loopkit", 1000, 10000),
+    plan("starter", "Starter", 1490, 14900),
+    plan("stockkit", "stockkit", 1500, 15000),
+    plan("qkit", "Pro", 1990, 19900),
+    plan("all_access", "All-Access", 3600, 36000),
+  ],
+  event_pass: EVENT_PASS,
+};
+
+const ALTERNATE_CATALOG_WITH_INACTIVE_PLANS: PlanCatalog = {
   plans: [
     plan("starter", "Starter", 1300, 13000),
-    plan("qkit", "qkit", 1733, 17330),
+    plan("qkit", "Pro", 1733, 17330),
     plan("all_access", "All-Access", 4100, 41000),
   ],
   event_pass: { per_cup_cents: 20, min_cents: 1500, cap_cents: 3100, days: 1 },
@@ -44,19 +55,19 @@ const card = (name: string) =>
 
 describe("PricingLadder prices", () => {
   it("renders every price from the catalog", () => {
-    render(<PricingLadder catalog={CATALOG} />);
-    expect(card("qkit")).toHaveTextContent("S$16 a month");
-    expect(within(card("qkit")).getByText("or S$160 a year")).toBeInTheDocument();
+    render(<PricingLadder catalog={CATALOG_WITH_INACTIVE_PLANS} />);
+    expect(card("Pro")).toHaveTextContent("S$19.90 a month");
+    expect(within(card("Pro")).getByText("or S$199 a year")).toBeInTheDocument();
     expect(within(card("All-Access")).getByText("or S$360 a year")).toBeInTheDocument();
-    expect(within(card("Starter")).getByText("or S$120 a year")).toBeInTheDocument();
+    expect(within(card("Starter")).getByText("or S$149 a year")).toBeInTheDocument();
   });
 
   it("renders different numbers for a different catalog", () => {
-    render(<PricingLadder catalog={OTHER} />);
-    expect(within(card("qkit")).getByText(/S\$17\.33/)).toBeInTheDocument();
+    render(<PricingLadder catalog={ALTERNATE_CATALOG_WITH_INACTIVE_PLANS} />);
+    expect(within(card("Pro")).getByText(/S\$17\.33/)).toBeInTheDocument();
     expect(screen.getByText("or S$173.30 a year")).toBeInTheDocument();
     expect(screen.getByText("or S$410 a year")).toBeInTheDocument();
-    expect(screen.queryByText(/S\$16\b/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/S\$19\.90/)).not.toBeInTheDocument();
     const pass = screen.getByRole("region", { name: "Event Pass" });
     expect(pass).toHaveTextContent("minimum of S$15");
     expect(pass).toHaveTextContent("20c per cup");
@@ -79,31 +90,31 @@ describe("PricingLadder highlight", () => {
   it("highlights qkit by default", () => {
     render(<PricingLadder catalog={CATALOG} />);
     expect(recommended()).toHaveLength(1);
-    expect(card("qkit")).toHaveAttribute("aria-current", "true");
-    expect(within(card("qkit")).getByText("Recommended")).toBeInTheDocument();
+    expect(card("Pro")).toHaveAttribute("aria-current", "true");
+    expect(within(card("Pro")).getByText("Recommended")).toBeInTheDocument();
   });
 
   it("highlights all_access when asked", () => {
-    render(<PricingLadder catalog={CATALOG} highlight="all_access" />);
+    render(<PricingLadder catalog={CATALOG_WITH_INACTIVE_PLANS} highlight="all_access" />);
     expect(card("All-Access")).toHaveAttribute("aria-current", "true");
-    expect(card("qkit")).not.toHaveAttribute("aria-current");
+    expect(card("Pro")).not.toHaveAttribute("aria-current");
   });
 
   it("falls back to all_access when qkit is absent", () => {
-    const catalog = { ...CATALOG, plans: CATALOG.plans.filter((p) => p.slug !== "qkit") };
+    const catalog = { ...CATALOG_WITH_INACTIVE_PLANS, plans: CATALOG_WITH_INACTIVE_PLANS.plans.filter((p) => p.slug !== "qkit") };
     render(<PricingLadder catalog={catalog} />);
     expect(card("All-Access")).toHaveAttribute("aria-current", "true");
   });
 
   it("falls back to qkit when all_access is absent", () => {
-    const catalog = { ...CATALOG, plans: CATALOG.plans.filter((p) => p.slug !== "all_access") };
+    const catalog = { ...CATALOG_WITH_INACTIVE_PLANS, plans: CATALOG_WITH_INACTIVE_PLANS.plans.filter((p) => p.slug !== "all_access") };
     render(<PricingLadder catalog={catalog} highlight="all_access" />);
-    expect(card("qkit")).toHaveAttribute("aria-current", "true");
+    expect(card("Pro")).toHaveAttribute("aria-current", "true");
   });
 
   it("resolves the highlight against the filtered plans", () => {
     render(
-      <PricingLadder catalog={CATALOG} slugs={["free", "loopkit", "all_access"]} />,
+      <PricingLadder catalog={CATALOG_WITH_INACTIVE_PLANS} slugs={["free", "loopkit", "all_access"]} />,
     );
     expect(card("All-Access")).toHaveAttribute("aria-current", "true");
   });
@@ -121,7 +132,7 @@ describe("PricingLadder highlight", () => {
   });
 
   it("never highlights Starter and highlights nothing without either plan", () => {
-    const catalog = { ...CATALOG, plans: [plan("starter", "Starter", 1200, 12000)] };
+    const catalog = { ...CATALOG, plans: [plan("starter", "Starter", 1490, 14900)] };
     render(<PricingLadder catalog={catalog} />);
     expect(screen.queryByText("Recommended")).not.toBeInTheDocument();
     expect(card("Starter")).not.toHaveAttribute("aria-current");
@@ -136,7 +147,7 @@ describe("PricingLadder copy", () => {
         descriptions={{ qkit: "Queue and order.", starter: "Custom starter." }}
       />,
     );
-    expect(within(card("qkit")).getByText("Queue and order.")).toBeInTheDocument();
+    expect(within(card("Pro")).getByText("Queue and order.")).toBeInTheDocument();
     expect(within(card("Starter")).getByText("Custom starter.")).toBeInTheDocument();
   });
 
@@ -202,14 +213,14 @@ describe("PricingLadder options", () => {
   it("filters by slugs and keeps catalog order", () => {
     render(<PricingLadder catalog={CATALOG} slugs={["qkit", "free"]} />);
     const names = screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
-    expect(names).toEqual(["Free", "qkit", "Event Pass"]);
+    expect(names).toEqual(["Free", "Pro", "Event Pass"]);
   });
 
   it("calls renderAction once per rendered plan", () => {
     const renderAction = vi.fn((p: CatalogPlan) => <button>{`Pick ${p.slug}`}</button>);
     render(<PricingLadder catalog={CATALOG} slugs={["qkit", "starter"]} renderAction={renderAction} />);
     expect(renderAction).toHaveBeenCalledTimes(2);
-    expect(within(card("qkit")).getByRole("button", { name: "Pick qkit" })).toBeInTheDocument();
+    expect(within(card("Pro")).getByRole("button", { name: "Pick qkit" })).toBeInTheDocument();
   });
 });
 

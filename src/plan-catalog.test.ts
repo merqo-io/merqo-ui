@@ -4,9 +4,8 @@ import { fetchPlanCatalog, formatCatalogPrice } from "./plan-catalog";
 const FIXTURE = {
   plans: [
     { slug: "free", kind: "free", name: "Free", monthly_cents: 0, annual_cents: 0, kits: [] },
-    { slug: "starter", kind: "bundle", name: "Starter", monthly_cents: 1200, annual_cents: 12000, kits: ["qkit"] },
-    { slug: "qkit", kind: "kit", name: "qkit", monthly_cents: 1600, annual_cents: 16000, kits: ["qkit"] },
-    { slug: "all_access", kind: "bundle", name: "All-Access", monthly_cents: 3600, annual_cents: 36000, kits: ["qkit", "loopkit"] },
+    { slug: "starter", kind: "bundle", name: "Starter", monthly_cents: 1490, annual_cents: 14900, kits: ["qkit", "paykit"] },
+    { slug: "qkit", kind: "kit", name: "Pro", monthly_cents: 1990, annual_cents: 19900, kits: ["qkit", "printkit", "paykit"] },
   ],
   event_pass: { per_cup_cents: 15, min_cents: 1400, cap_cents: 2800, days: 2 },
 };
@@ -75,11 +74,11 @@ describe("fetchPlanCatalog", () => {
 
 describe("formatCatalogPrice", () => {
   it.each([
-    [1600, "S$16"],
+    [1990, "S$19.90"],
     [1333, "S$13.33"],
     [15, "15c"],
     [0, "S$0"],
-    [36000, "S$360"],
+    [19900, "S$199"],
   ])("formats %i as %s", (value, expected) => {
     expect(formatCatalogPrice(value)).toBe(expected);
   });

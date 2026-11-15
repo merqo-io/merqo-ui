@@ -7,6 +7,8 @@
 - `@merqo/ui/auth`: `handleAuthConfirm`, `authConfirmForwardUrl`, `readAuthConfirmParams`, `isAuthConfirmType` and `AUTH_CONFIRM_TYPES` for emailed links that carry a `token_hash`. The POST handler verifies with `verifyOtp`, redirects with 303, rejects cross-origin posts (Origin, else Sec-Fetch-Site) and fails to `loginPath?error=link`; the forwarder sends a link to an allowlisted kit origin. `readAuthConfirmParams` and `authConfirmForwardUrl` accept a `URLSearchParams` or a Next `searchParams` object, and a repeated `token_hash` or `type` is invalid.
 - `AuthConfirmForm` and `AuthConfirmInvalid`: the no-JavaScript "Continue" page for those links, so a GET never consumes the token.
 
+## [0.48.0] - 2026-11-16
+
 ### Fixed
 
 - `Footer`: compact on phones. Under `sm` it is three centred rows (wordmark and tagline, one wrapping row of About, Terms, Privacy and sign-in links with 24px tap targets, copyright) instead of six stacked lines. From `sm` up the layout is unchanged.

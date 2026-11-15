@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-16
+
 ### Fixed
 
 - `Footer`: compact on phones. Under `sm` it is three centred rows (wordmark and tagline, one wrapping row of About, Terms, Privacy and sign-in links with 24px tap targets, copyright) instead of six stacked lines. From `sm` up the layout is unchanged.

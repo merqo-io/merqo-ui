@@ -460,6 +460,44 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   `items` is `{question, answer}[]` (nodes allowed); the content stays in
   the kit. Renders nothing for an empty list. Items use `rounded-lg`, so
   the kit's `--radius` token sets the corners. Server-safe.
+- `FaqRows({rows})` and `type FaqRow = {q, a}` — ruled native `<details>`
+  rows (44px summary, `+` and `-` marker) for the three landing objections
+  under a `Journey`. Use `Faq` for a carded accordion with an eyebrow and
+  title; use `FaqRows` for plain ruled rows. Server-safe.
+- `Journey({title, id?, className?, children})` and
+  `JourneyStep({label, heading, say, stage, extra?, stageRef?})` — the
+  three-step landing layout: a section with a heading, then steps that pair
+  copy with a product object (`stage`). Structure only; the kit's tokens
+  drive the look and the kit supplies the objects. Server-safe.
+  `PhoneFrame({label, size?, className?, children})` is a labelled
+  (`role="group"`) phone-shaped frame for those objects, `size` `"large"`
+  (default) or `"small"`, `rounded-3xl` unless `className` overrides it.
+  `ClosingCall({heading, line, action, aside})` is the closing row under the
+  steps. `PressButton` is a full-width 44px button with a hover darken, a
+  colour-only pressed state that fires by touch, and `type="button"` by
+  default. All server-safe.
+- `useScrollPlay(ref, steps)` -> step `0..steps`, plus
+  `usePrefersReducedMotion()`, `scrollProgress(rect, viewportHeight)` and
+  `progressToStep(progress, steps)`. The step rises as the element scrolls
+  into view and falls back on scroll up. Server render, no-JS and reduced
+  motion return `steps` (the finished state). Pass the stage element to
+  `useScrollPlay`, not the section: the band is measured on the element that
+  shows the result. Client module.
+
+  ```tsx
+  "use client";
+  const stageRef = useRef<HTMLDivElement>(null);
+  const step = useScrollPlay(stageRef, 3);
+  <Journey id="how" title="Three steps">
+    <JourneyStep
+      label="Step 1"
+      heading="Scan"
+      say="Point a phone."
+      stageRef={stageRef}
+      stage={<PhoneFrame label="Order">{/* step-driven product object */}</PhoneFrame>}
+    />
+  </Journey>;
+  ```
 - `readTourSeen(key, storage?)` and `writeTourSeen(key, storage?, now?)` —
   the tour-seen core. The kit passes the storage key; storage defaults to
   `window.localStorage`, and missing or blocked storage reads as unseen and

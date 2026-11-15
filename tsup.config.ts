@@ -16,6 +16,7 @@ const ENTRIES = {
   "audit-log-table": "src/audit-log-table.tsx",
   "admin-shell": "src/admin-shell.tsx",
   "auth-shell": "src/auth-shell.tsx",
+  "auth-confirm-form": "src/auth-confirm-form.tsx",
   "login-form": "src/login-form.tsx",
   "reset-password-form": "src/reset-password-form.tsx",
   "auth-error-message": "src/auth-error-message.ts",

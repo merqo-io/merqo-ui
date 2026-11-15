@@ -142,6 +142,8 @@ export type {
 } from "./login-form";
 export { ResetPasswordForm } from "./reset-password-form";
 export type { ResetPasswordFormProps, ResetPasswordState } from "./reset-password-form";
+export { AuthConfirmForm, AuthConfirmInvalid } from "./auth-confirm-form";
+export type { AuthConfirmFormProps, AuthConfirmInvalidProps } from "./auth-confirm-form";
 export { AUTH_ERROR_FALLBACKS, AUTH_ERROR_MESSAGES, authErrorKind, authErrorMessage } from "./auth-error-message";
 export type {
   AuthErrorContext,

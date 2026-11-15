@@ -948,6 +948,12 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
   ticked. `action` is the kit's server action and receives `FormData` with a
   `next` field; pass an already sanitised `next` (`safeRedirectPath`). The
   page must not run the kit's own legal gate.
+- `AboutMerqo({kitName?, className?, children?})` - the "Why Merqo" story page
+  body, shared by every kit's about page. Server-safe, with no button or link
+  of its own. `kitName` (for example `"qkit"`) adds the closing "You're
+  reading this on {kitName}" sentence; omit it on merqo itself and the
+  sentence is left out. `children` render below the story, so each app passes
+  its own CTA with its own routing.
 
 ```tsx
 // app/error.tsx
@@ -1019,6 +1025,15 @@ export default () => <LegalPage doc="terms" kit="qkit" wordmark={<Wordmark />} L
 
 // app/legal/accept/page.tsx
 <AcceptTermsPage action={acceptLegalTerms} next={safeRedirectPath(next, "/dashboard")} wordmark={<Wordmark />} />
+
+// app/about/page.tsx
+import Link from "next/link";
+import { AboutMerqo } from "@merqo/ui";
+export default () => (
+  <AboutMerqo kitName="qkit">
+    <Link href="/signup">Start with qkit</Link>
+  </AboutMerqo>
+);
 ```
 
 ## Money, time and entitlement helpers

@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import type { AdminUsersClient } from "../supabase";
 import type { AuthCallbackClient } from "./callback";
+import type { AuthConfirmClient } from "./confirm";
 import type { LegalGateClient } from "./legal-gate";
 
 // Compile-time guard: the structural client types must keep accepting a real
@@ -12,6 +13,7 @@ describe("structural client types", () => {
     const callback: AuthCallbackClient = real;
     const admin: AdminUsersClient = real;
     const legal: LegalGateClient = real;
-    expect([callback, admin, legal]).toHaveLength(3);
+    const confirm: AuthConfirmClient = real;
+    expect([callback, admin, legal, confirm]).toHaveLength(4);
   });
 });

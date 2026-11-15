@@ -783,6 +783,16 @@ Security duties that stay with the kit:
   - `emailPlaceholder`, `passwordPlaceholder`, `defaultEmail` (initial email)
     and `modeTogglePrompt={{signin, signup}}` (replaces "New here?" and
     "Already have an account?").
+- `AuthConfirmForm({tokenHash, type, next?, action?, title?, body?,
+  buttonLabel?, className?})` and `AuthConfirmInvalid({loginHref?, title?, body?,
+  loginLabel?, className?})` - the landing step for an emailed auth link. A
+  plain `<form method="post">` (works without JavaScript) with hidden
+  `token_hash`, `type` and `next` inputs and one button; `action` defaults to
+  `/auth/confirm/verify`. The token is never rendered as text. Copy follows
+  `type`: "Reset your password" / Continue, "Confirm your email", "Accept your
+  invite", "Sign in", "Confirm your new email". `AuthConfirmInvalid` is the
+  "This link is invalid or has expired." state with a link back to sign in.
+  Wrap either in the kit's `AuthShell`. See `@merqo/ui/auth` below.
 - `ResetPasswordForm({onSubmit, state?, onRetry?, mapError?, mapErrorObject?,
   errorFallback?, minLength?, maxLength?, tooShortMessage?, tooLongMessage?,
   mismatchMessage?, title?, subtitle?, passwordLabel?, confirmLabel?,
@@ -1496,6 +1506,117 @@ A missing code, a failed or thrown exchange, or a throwing `afterSignIn`
 redirects to the login error.
 Redirects are built from the request origin, so a kit behind a proxy must make
 sure that origin is the public one.
+
+Emailed links (reset, signup confirm, invite, magic link, email change) use
+`token_hash` instead of `/auth/callback?code=`. Set each Supabase email
+template href to:
+
+```
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=<type>&redirect_to={{ .RedirectTo }}
+```
+
+`redirect_to` is inserted as-is, so it must not contain `&` or `#` (a single
+`?next=/path` is fine). The kits' `<origin>/auth/callback?next=/reset-password`
+is safe.
+
+A GET must never consume the token (email scanners pre-fetch links), so each
+app needs two files: a page that renders `AuthConfirmForm`, and a route whose
+POST verifies. `@merqo/ui/auth` exports `handleAuthConfirm`,
+`authConfirmForwardUrl`, `readAuthConfirmParams`, `isAuthConfirmType`,
+`AUTH_CONFIRM_TYPES` and the `AuthConfirmType`, `AuthConfirmClient`,
+`AuthConfirmOptions`, `AuthConfirmParams` and `AuthConfirmSearchParamsInput`
+types. `readAuthConfirmParams` takes a `URLSearchParams` or a Next
+`searchParams` object and returns null for a repeated `token_hash` or `type`.
+
+```tsx
+// src/app/auth/confirm/page.tsx
+import { AuthConfirmForm, AuthConfirmInvalid, AuthShell } from "@merqo/ui";
+import { readAuthConfirmParams } from "@merqo/ui/auth";
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = readAuthConfirmParams(await searchParams);
+  return (
+    <AuthShell>
+      {params ? (
+        <AuthConfirmForm tokenHash={params.tokenHash} type={params.type} next={params.next} />
+      ) : (
+        <AuthConfirmInvalid />
+      )}
+    </AuthShell>
+  );
+}
+
+// src/app/auth/confirm/verify/route.ts
+import { handleAuthConfirm } from "@merqo/ui/auth";
+
+export const POST = (request: Request) =>
+  handleAuthConfirm(request, {
+    createClient: createServerClient,
+    defaultNext: "/dashboard",
+    // printkit: recovery: { path: "/reset-password", onRecovery: async ({ response }) => { response.cookies.set(...) } },
+  });
+```
+
+`handleAuthConfirm` options: `createClient`, `defaultNext`, `loginPath`
+(default `/login`; failures go to `loginPath?error=link`), `afterSignIn` and
+`recovery: { path, onRecovery? }` (a `recovery` token goes to `path`, and
+`onRecovery({ supabase, data, response })` may set a cookie such as printkit's
+recovery window). Every redirect is a 303. It rejects (to the login error) a
+non-POST, an `Origin` header that differs from the request origin, a request
+whose `Origin` is absent or the literal `null` (browsers send it on same-origin
+form posts under `Referrer-Policy: no-referrer`) and whose `Sec-Fetch-Site` is
+not `same-origin`, a missing, empty or over-512 character `token_hash`, an
+unknown `type`, and a failed or thrown verification. A client that sends
+neither a usable `Origin` nor `Sec-Fetch-Site` is sent to login with
+`error=link`. A throwing `afterSignIn` also goes to the login error although the
+session already exists, as in `handleAuthCallback`. `next` goes through
+`safeRedirectPath`.
+
+merqo's page is the entry for every kit's links (its origin is the `SiteURL`).
+It first forwards a link meant for another kit, so the token is verified on the
+origin that keeps the session:
+
+```tsx
+// merqo: src/app/auth/confirm/page.tsx
+import { redirect } from "next/navigation";
+import { AuthConfirmForm, AuthConfirmInvalid, AuthShell } from "@merqo/ui";
+import { authConfirmForwardUrl, readAuthConfirmParams } from "@merqo/ui/auth";
+
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const query = await searchParams;
+  const forward = authConfirmForwardUrl(query, {
+    allowedOrigins: KIT_ORIGINS,
+    selfOrigin: SITE_ORIGIN, // from env config, never the Host header
+  });
+  if (forward) redirect(forward);
+
+  const params = readAuthConfirmParams(query);
+  return (
+    <AuthShell>
+      {params ? (
+        <AuthConfirmForm tokenHash={params.tokenHash} type={params.type} next={params.next} />
+      ) : (
+        <AuthConfirmInvalid />
+      )}
+    </AuthShell>
+  );
+}
+```
+
+`authConfirmForwardUrl` takes the request URL (string or `URL`), a
+`URLSearchParams` or the page's `searchParams` object, and normalises
+`allowedOrigins` and `selfOrigin` with `new URL(x).origin` (unparsable entries
+are skipped). It returns `<kit origin>/auth/confirm?token_hash&type[&next]`
+when `redirect_to` is an absolute https URL (http only for localhost) whose
+origin exactly matches `allowedOrigins` and is not `selfOrigin`. Only the
+`next` query param of `redirect_to` is kept; its path is ignored. Otherwise it
+returns null and the app handles the link itself.
 
 `checkLegalAcceptance` asks merqo's `/api/merqo/legal-status` and compares
 the answer with `LEGAL_VERSIONS`. The answer is cached per lower-cased email

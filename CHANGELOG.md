@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-11-16
+
 ### Added
 
 - Journey landing pieces, moved from qkit's production landing: `Journey` and `JourneyStep` (section and a copy-plus-stage step, `stageRef` on the stage), `PhoneFrame` (labelled group, `rounded-3xl`, `size` of `"large"` or `"small"`), `PressButton` (44px, colour-only pressed state, defaults to `type="button"`), `FaqRows` and the `FaqRow` type (ruled native `<details>` rows), `ClosingCall` (heading, line, action and aside slots), and `useScrollPlay`, `usePrefersReducedMotion`, `scrollProgress` and `progressToStep` (scroll position as a play head). Only `use-scroll-play` is a client module.

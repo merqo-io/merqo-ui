@@ -26,6 +26,12 @@ export interface FooterProps {
   signInLabel?: React.ReactNode;
 }
 
+// Under sm the footer collapses to three centred rows (brand, links, copyright)
+// via order and wrapper groups; from sm up the groups are `display: contents`
+// so the original single row and DOM order are untouched. min-h-6 keeps each
+// phone link at the WCAG 2.2 24px target size.
+const LINK_TAP = "inline-flex min-h-6 items-center sm:min-h-0";
+
 // Shell only, same "fix drift in the shared shape" rationale as LandingNav:
 // every kit's own footer had converged on the exact same layout/copy order
 // (wordmark, tagline, copyright, About, legal links, sign-in) without it
@@ -43,21 +49,31 @@ export function Footer({
 }: FooterProps): React.ReactElement {
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-sm text-muted-foreground sm:flex-row">
-        {wordmark}
-        <span>{tagline}</span>
-        <span className="text-xs">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-5 text-sm text-muted-foreground sm:flex-row sm:gap-3 sm:py-6">
+        <div className="order-1 flex flex-wrap items-center justify-center gap-x-2 sm:contents">
+          {wordmark}
+          <span>{tagline}</span>
+        </div>
+        <span className="order-3 text-xs sm:order-none">
           {copyright ?? `© 2026 ${kitName} · a Merqo kit`}
         </span>
-        <a href="/about" className="hover:text-foreground">
-          About
-        </a>
-        <LegalFooterLinks />
-        {showSignIn && (
-          <a href="/login" className="hover:text-foreground">
-            {signInLabel}
+        <div className="order-2 flex flex-wrap items-center justify-center gap-x-4 sm:contents">
+          <a
+            href="/about"
+            className={`${LINK_TAP} text-xs hover:text-foreground sm:text-sm`}
+          >
+            About
           </a>
-        )}
+          <LegalFooterLinks className="gap-4 sm:gap-3 [&_a]:inline-flex [&_a]:min-h-6 [&_a]:items-center sm:[&_a]:min-h-0" />
+          {showSignIn && (
+            <a
+              href="/login"
+              className={`${LINK_TAP} text-xs hover:text-foreground sm:text-sm`}
+            >
+              {signInLabel}
+            </a>
+          )}
+        </div>
       </div>
     </footer>
   );

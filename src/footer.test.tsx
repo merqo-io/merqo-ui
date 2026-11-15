@@ -76,4 +76,18 @@ describe("Footer", () => {
       screen.queryByRole("link", { name: /vendor sign in/i }),
     ).not.toBeInTheDocument();
   });
+
+  it("renders every link exactly once in the desktop DOM order", () => {
+    render(<Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />);
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((a) => a.getAttribute("href"));
+    expect(hrefs).toEqual([
+      "/",
+      "/about",
+      "/legal/terms",
+      "/legal/privacy",
+      "/login",
+    ]);
+  });
 });

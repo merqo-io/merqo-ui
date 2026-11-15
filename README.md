@@ -598,6 +598,11 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
 `"Vendor sign in →"`) overrides that link's copy, again for merqo, where
 "Vendor sign in" reads oddly on the hub's own landing page.
 
+Under `sm` the footer is three centred rows (wordmark and tagline; About,
+Terms, Privacy and sign-in as one wrapping row; copyright), done with CSS
+`order` and wrapper groups that are `display: contents` from `sm` up, so the
+single-row desktop layout and DOM order are unchanged.
+
 - `BackToTop` — fixed bottom-right back-to-top button for a long landing
   page. Appears past ~600px of scroll, scrolls smoothly unless the visitor
   prefers reduced motion. It fades in with no slide and has a pressed state. Promoted 2026-09-19; was byte-identical in qkit,

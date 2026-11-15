@@ -117,6 +117,18 @@ export { qrSvg } from "./qr";
 export { Footer } from "./footer";
 export type { FooterProps } from "./footer";
 export { BackToTop } from "./back-to-top";
+export { Journey, JourneyStep } from "./journey";
+export { PhoneFrame } from "./phone-frame";
+export { PressButton } from "./press-button";
+export { FaqRows } from "./faq-rows";
+export type { FaqRow } from "./faq-rows";
+export { ClosingCall } from "./closing-call";
+export {
+  useScrollPlay,
+  usePrefersReducedMotion,
+  scrollProgress,
+  progressToStep,
+} from "./use-scroll-play";
 export { GoogleMark } from "./google-mark";
 export { AuthShell } from "./auth-shell";
 export type { AuthShellProps } from "./auth-shell";

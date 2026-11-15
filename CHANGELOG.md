@@ -4,6 +4,7 @@
 
 ### Added
 
+- Journey landing pieces, moved from qkit's production landing: `Journey` and `JourneyStep` (section and a copy-plus-stage step, `stageRef` on the stage), `PhoneFrame` (labelled group, `rounded-3xl`, `size` of `"large"` or `"small"`), `PressButton` (44px, colour-only pressed state, defaults to `type="button"`), `FaqRows` and the `FaqRow` type (ruled native `<details>` rows), `ClosingCall` (heading, line, action and aside slots), and `useScrollPlay`, `usePrefersReducedMotion`, `scrollProgress` and `progressToStep` (scroll position as a play head). Only `use-scroll-play` is a client module.
 - README: documented `AboutMerqo` (`kitName`, `className`, `children`), which was exported but missing from the component list.
 - `ResetPasswordForm`: the "set a new password" form for the emailed recovery link. Controlled `state` (`checking`, `ready`, `expired`, `failed`), password and confirm fields with submit-time length and match validation, `mapError` and `mapErrorObject`, optional `onRetry`, and no page shell.
 - `authErrorMessage`, `authErrorKind`, `AUTH_ERROR_MESSAGES` and `AUTH_ERROR_FALLBACKS`: map a Supabase-style auth error to friendly copy without returning raw provider text. Server-safe, with per-kind overrides and per-context fallbacks.

@@ -61,28 +61,48 @@ function validTokenHash(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= MAX_TOKEN_HASH_LENGTH;
 }
 
-/**
- * Reads `token_hash`, `type` and `next` from a query string and applies the
- * same validation as `handleAuthConfirm`. Returns null for a missing,
- * oversized or unknown-type link, so a page can show its "link invalid" state.
- */
-export function readAuthConfirmParams(searchParams: URLSearchParams): AuthConfirmParams | null {
-  const tokenHash = searchParams.get("token_hash");
-  const type = searchParams.get("type");
-  if (!validTokenHash(tokenHash) || !isAuthConfirmType(type)) return null;
-  return { tokenHash, type, next: searchParams.get("next") };
+/** A `URLSearchParams` or the `searchParams` object of a Next App Router page. */
+export type AuthConfirmSearchParamsInput =
+  | URLSearchParams
+  | Record<string, string | string[] | undefined>;
+
+// A repeated key is ambiguous, so it reads as absent.
+function readSingle(input: AuthConfirmSearchParamsInput, key: string): string | null {
+  if (input instanceof URLSearchParams) {
+    const all = input.getAll(key);
+    return all.length === 1 ? (all[0] ?? null) : null;
+  }
+  const value = input[key];
+  return typeof value === "string" ? value : null;
 }
 
 /**
- * Login-CSRF guard. With an `Origin` header it must equal the request origin;
- * without one, `Sec-Fetch-Site` must be present and exactly "same-origin".
- * A request carrying neither header is rejected, so an attacker cannot make a
- * victim's browser post the attacker's own token and sign them into the
- * attacker's account.
+ * Reads `token_hash`, `type` and `next` from a query string or a Next
+ * `searchParams` object and applies the same validation as
+ * `handleAuthConfirm`. Returns null for a missing, repeated, oversized or
+ * unknown-type `token_hash` / `type`, so a page can show its "link invalid"
+ * state. A repeated `next` is treated as absent.
+ */
+export function readAuthConfirmParams(
+  searchParams: AuthConfirmSearchParamsInput,
+): AuthConfirmParams | null {
+  const tokenHash = readSingle(searchParams, "token_hash");
+  const type = readSingle(searchParams, "type");
+  if (!validTokenHash(tokenHash) || !isAuthConfirmType(type)) return null;
+  return { tokenHash, type, next: readSingle(searchParams, "next") };
+}
+
+/**
+ * Login-CSRF guard. A present `Origin` other than the literal "null" must
+ * equal the request origin. An absent or "null" Origin (browsers send "null"
+ * on same-origin form posts under Referrer-Policy no-referrer) falls back to
+ * `Sec-Fetch-Site`, which must be exactly "same-origin". With no usable
+ * signal the post is rejected, so an attacker cannot make a victim's browser
+ * post the attacker's own token and sign them into the attacker's account.
  */
 function isSameOriginPost(request: Request, origin: string): boolean {
   const originHeader = request.headers.get("origin");
-  if (originHeader !== null) return originHeader === origin;
+  if (originHeader !== null && originHeader !== "null") return originHeader === origin;
   return request.headers.get("sec-fetch-site") === "same-origin";
 }
 
@@ -91,10 +111,10 @@ function isSameOriginPost(request: Request, origin: string): boolean {
  * `token_hash` with `verifyOtp`, then redirects (303). The GET page must never
  * verify, because email scanners pre-fetch links; only this POST consumes the
  * token. `next` passes through `safeRedirectPath`. A non-POST, a cross-origin
- * post (Origin must equal the request origin; with no Origin, Sec-Fetch-Site
- * must be "same-origin"), a missing, empty or over-512 character `token_hash`,
+ * post (Origin must equal the request origin; with no Origin or "null",
+ * Sec-Fetch-Site must be "same-origin"), a missing, empty or over-512 character `token_hash`,
  * an unknown `type`, a failed or thrown verification and a throwing
- * `afterSignIn` all go to `loginPath?error=link`.
+ * `afterSignIn` (the session already exists then, as in `handleAuthCallback`) all go to `loginPath?error=link`.
  */
 export async function handleAuthConfirm<TClient extends AuthConfirmClient>(
   request: Request,
@@ -144,7 +164,16 @@ export async function handleAuthConfirm<TClient extends AuthConfirmClient>(
   return response;
 }
 
-function parseAbsoluteOrigin(value: string): string | null {
+function originOf(value: string): string | null {
+  try {
+    const { origin } = new URL(value);
+    return origin === "null" ? null : origin;
+  } catch {
+    return null;
+  }
+}
+
+function parseRedirectTo(value: string): { origin: string; next: string | null } | null {
   let url: URL;
   try {
     url = new URL(value);
@@ -154,40 +183,49 @@ function parseAbsoluteOrigin(value: string): string | null {
   if (url.username || url.password) return null;
   const localhost = url.hostname === "localhost";
   if (url.protocol !== "https:" && !(url.protocol === "http:" && localhost)) return null;
-  return url.origin;
+  return { origin: url.origin, next: url.searchParams.get("next") };
+}
+
+function toSearchParams(
+  input: string | URL | AuthConfirmSearchParamsInput,
+): AuthConfirmSearchParamsInput | null {
+  if (typeof input === "string" || input instanceof URL) {
+    try {
+      return new URL(input).searchParams;
+    } catch {
+      return null;
+    }
+  }
+  return input;
 }
 
 /**
  * For the merqo entry page: a link whose `redirect_to` points at another
  * allowlisted kit origin is forwarded to that kit's own `/auth/confirm`, so the
- * session is verified on the origin that keeps it. Returns the forward URL, or
- * null when this app should handle the link itself (no, unparsable, unlisted or
- * own-origin `redirect_to`, or a missing or invalid `token_hash` / `type`).
- * Origins are compared exactly after `new URL` normalisation; the path of
+ * session is verified on the origin that keeps it. Takes the request URL or the
+ * page's `searchParams`. Returns the forward URL, or null when this app should
+ * handle the link itself (no, repeated, unparsable, unlisted or own-origin
+ * `redirect_to`, or a missing or invalid `token_hash` / `type`). Origins are
+ * compared exactly after `new URL` normalisation, on both sides; the path of
  * `redirect_to` is ignored and only its `next` query param is carried over.
  */
 export function authConfirmForwardUrl(
-  requestUrl: string | URL,
+  request: string | URL | AuthConfirmSearchParamsInput,
   options: { allowedOrigins: readonly string[]; selfOrigin: string },
 ): string | null {
-  let url: URL;
-  try {
-    url = new URL(requestUrl);
-  } catch {
-    return null;
-  }
-  const params = readAuthConfirmParams(url.searchParams);
-  const redirectTo = url.searchParams.get("redirect_to");
+  const searchParams = toSearchParams(request);
+  if (!searchParams) return null;
+  const params = readAuthConfirmParams(searchParams);
+  const redirectTo = readSingle(searchParams, "redirect_to");
   if (!params || !redirectTo) return null;
 
-  const target = parseAbsoluteOrigin(redirectTo);
-  if (!target || target === options.selfOrigin) return null;
-  if (!options.allowedOrigins.includes(target)) return null;
+  const target = parseRedirectTo(redirectTo);
+  if (!target || target.origin === originOf(options.selfOrigin)) return null;
+  if (!options.allowedOrigins.some((entry) => originOf(entry) === target.origin)) return null;
 
-  const forward = new URL("/auth/confirm", target);
+  const forward = new URL("/auth/confirm", target.origin);
   forward.searchParams.set("token_hash", params.tokenHash);
   forward.searchParams.set("type", params.type);
-  const next = new URL(redirectTo).searchParams.get("next");
-  if (next) forward.searchParams.set("next", next);
+  if (target.next) forward.searchParams.set("next", target.next);
   return forward.toString();
 }

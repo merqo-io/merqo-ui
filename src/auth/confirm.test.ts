@@ -101,10 +101,12 @@ describe("handleAuthConfirm", () => {
     expect(res.headers.get("location")).toBe(`${ORIGIN}/login?error=link`);
   });
 
-  it("runs afterSignIn and fails when it throws", async () => {
+  it("runs afterSignIn after verifying and fails when it throws, as the callback does", async () => {
+    const { client, verifyOtp } = clientWith();
     const afterSignIn = vi.fn().mockRejectedValue(new Error("boom"));
-    const res = await run(post(GOOD), { afterSignIn });
-    expect(afterSignIn).toHaveBeenCalled();
+    const res = await run(post(GOOD), { afterSignIn }, client);
+    expect(verifyOtp).toHaveBeenCalled();
+    expect(afterSignIn).toHaveBeenCalledWith(client);
     expect(res.headers.get("location")).toBe(`${ORIGIN}/login?error=link`);
   });
 
@@ -194,6 +196,12 @@ describe("handleAuthConfirm", () => {
       expect(verifyOtp).toHaveBeenCalled();
     });
 
+    it("accepts a null Origin with same-origin Sec-Fetch-Site", async () => {
+      const { client, verifyOtp } = clientWith();
+      await run(post(GOOD, { origin: "null", "sec-fetch-site": "same-origin" }), {}, client);
+      expect(verifyOtp).toHaveBeenCalled();
+    });
+
     it.each([
       ["a different Origin", { origin: "https://evil.example" }],
       ["a different Origin even with same-origin Sec-Fetch-Site", {
@@ -201,7 +209,8 @@ describe("handleAuthConfirm", () => {
         "sec-fetch-site": "same-origin",
       }],
       ["a sibling subdomain Origin", { origin: "https://a.kit.example" }],
-      ["the string null Origin", { origin: "null" }],
+      ["a null Origin with cross-site Sec-Fetch-Site", { origin: "null", "sec-fetch-site": "cross-site" }],
+      ["a null Origin without Sec-Fetch-Site", { origin: "null" }],
       ["cross-site Sec-Fetch-Site without Origin", { "sec-fetch-site": "cross-site" }],
       ["same-site Sec-Fetch-Site without Origin", { "sec-fetch-site": "same-site" }],
       ["none Sec-Fetch-Site without Origin", { "sec-fetch-site": "none" }],
@@ -226,6 +235,32 @@ describe("isAuthConfirmType", () => {
 });
 
 describe("readAuthConfirmParams", () => {
+  it("reads a Next searchParams object", () => {
+    expect(readAuthConfirmParams({ token_hash: "abc", type: "invite", next: "/x" })).toEqual({
+      tokenHash: "abc",
+      type: "invite",
+      next: "/x",
+    });
+  });
+
+  it.each([
+    [{ token_hash: ["a", "b"], type: "invite" }],
+    [{ token_hash: "a", type: ["invite", "signup"] }],
+    [{ token_hash: undefined, type: "invite" }],
+  ])("returns null for object %j", (input) => {
+    expect(readAuthConfirmParams(input)).toBeNull();
+  });
+
+  it("returns null for repeated token_hash or type in a query string", () => {
+    expect(readAuthConfirmParams(new URLSearchParams("token_hash=a&token_hash=b&type=signup"))).toBeNull();
+    expect(readAuthConfirmParams(new URLSearchParams("token_hash=a&type=signup&type=invite"))).toBeNull();
+  });
+
+  it("treats a repeated next as absent", () => {
+    expect(readAuthConfirmParams(new URLSearchParams("token_hash=a&type=signup&next=/a&next=/b"))?.next).toBeNull();
+    expect(readAuthConfirmParams({ token_hash: "a", type: "signup", next: ["/a", "/b"] })?.next).toBeNull();
+  });
+
   it("returns the validated params", () => {
     expect(
       readAuthConfirmParams(new URLSearchParams("token_hash=abc&type=recovery&next=/x")),
@@ -334,6 +369,34 @@ describe("authConfirmForwardUrl", () => {
     expect(
       authConfirmForwardUrl(`${url}&redirect_to=${encodeURIComponent("https://qkit.merqo.io")}`, options),
     ).toBeNull();
+  });
+
+  it("accepts a searchParams object and URLSearchParams", () => {
+    const query = { token_hash: "abc", type: "recovery", redirect_to: "https://qkit.merqo.io/auth/callback?next=/reset-password" };
+    const expected = "https://qkit.merqo.io/auth/confirm?token_hash=abc&type=recovery&next=%2Freset-password";
+    expect(authConfirmForwardUrl(query, options)).toBe(expected);
+    expect(authConfirmForwardUrl(new URLSearchParams(query), options)).toBe(expected);
+  });
+
+  it("returns null for a repeated redirect_to", () => {
+    expect(
+      authConfirmForwardUrl(
+        { token_hash: "abc", type: "recovery", redirect_to: ["https://qkit.merqo.io", "https://paykit.merqo.io"] },
+        options,
+      ),
+    ).toBeNull();
+  });
+
+  it("normalises allowedOrigins and selfOrigin entries before comparing", () => {
+    const url = withRedirect("https://qkit.merqo.io/x");
+    const expected = "https://qkit.merqo.io/auth/confirm?token_hash=abc&type=recovery";
+    const self = "https://merqo.io";
+    expect(authConfirmForwardUrl(url, { selfOrigin: self, allowedOrigins: ["https://qkit.merqo.io/"] })).toBe(expected);
+    expect(authConfirmForwardUrl(url, { selfOrigin: self, allowedOrigins: ["https://QKIT.merqo.io"] })).toBe(expected);
+    expect(authConfirmForwardUrl(url, { selfOrigin: self, allowedOrigins: ["https://qkit.merqo.io:443"] })).toBe(expected);
+    expect(authConfirmForwardUrl(url, { selfOrigin: self, allowedOrigins: ["::bad::", "https://qkit.merqo.io"] })).toBe(expected);
+    expect(authConfirmForwardUrl(url, { selfOrigin: self, allowedOrigins: ["::bad::"] })).toBeNull();
+    expect(authConfirmForwardUrl(url, { selfOrigin: "https://QKit.merqo.io/", allowedOrigins: ["https://qkit.merqo.io"] })).toBeNull();
   });
 
   it("returns null for an unparsable request URL", () => {

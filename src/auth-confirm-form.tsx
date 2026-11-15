@@ -11,7 +11,6 @@ export type AuthConfirmFormProps = {
   next?: string | null;
   /** Route that verifies the token on POST. Defaults to "/auth/confirm/verify". */
   action?: string;
-  loginHref?: string;
   title?: string;
   body?: string;
   buttonLabel?: string;

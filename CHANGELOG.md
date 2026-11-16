@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.49.1] - 2026-11-16
+
 ### Fixed
 
 - `FaqRows` has an explicit return type so the package builds when a kit installs it as a git dependency (v0.47.0 to v0.49.0 failed in `prepare` with TS2742).

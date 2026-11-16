@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-16
+
 ### Added
 
 - `@merqo/ui/auth`: `handleAuthConfirm`, `authConfirmForwardUrl`, `readAuthConfirmParams`, `isAuthConfirmType` and `AUTH_CONFIRM_TYPES` for emailed links that carry a `token_hash`. The POST handler verifies with `verifyOtp`, redirects with 303, rejects cross-origin posts (Origin, else Sec-Fetch-Site) and fails to `loginPath?error=link`; the forwarder sends a link to an allowlisted kit origin. `readAuthConfirmParams` and `authConfirmForwardUrl` accept a `URLSearchParams` or a Next `searchParams` object, and a repeated `token_hash` or `type` is invalid.

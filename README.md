@@ -464,6 +464,33 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   rows (44px summary, `+` and `-` marker) for the three landing objections
   under a `Journey`. Use `Faq` for a carded accordion with an eyebrow and
   title; use `FaqRows` for plain ruled rows. Server-safe.
+- `FaqPage({title, intro?, groups, closing?, jsonLd?, className?})`,
+  `type FaqGroup = {id?, heading?, rows}` and `faqJsonLd(groups)` — the body
+  of a kit's `/faq` page: an `h1`, optional intro, one `section` per group
+  (with `id` and `scroll-mt-24` so anchors clear a sticky nav, `h2` when
+  `heading` is set) of `FaqRows`, then a `closing` slot under a rule for the
+  kit's own contact line. Groups with no rows are skipped. Unless
+  `jsonLd={false}`, it adds schema.org `FAQPage` JSON-LD (`<` escaped as
+  `<`); `faqJsonLd` returns the same object. Renders no nav, footer or
+  `<main>`. Server-safe. Use `FaqRows` alone for a few objection rows on a
+  landing; use `FaqPage` for the full page.
+
+  ```tsx
+  // app/faq/page.tsx
+  import { FaqPage } from "@merqo/ui";
+
+  export const metadata = { title: "FAQ" };
+
+  export default function Page() {
+    return (
+      <FaqPage
+        title="Questions"
+        groups={[{ id: "orders", heading: "Orders", rows: [{ q: "...", a: "..." }] }]}
+        closing={<p>Still stuck? Email us.</p>}
+      />
+    );
+  }
+  ```
 - `Journey({title, id?, className?, children})` and
   `JourneyStep({label, heading, say, stage, extra?, stageRef?})` — the
   three-step landing layout: a section with a heading, then steps that pair

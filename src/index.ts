@@ -122,6 +122,8 @@ export { PhoneFrame } from "./phone-frame";
 export { PressButton } from "./press-button";
 export { FaqRows } from "./faq-rows";
 export type { FaqRow } from "./faq-rows";
+export { FaqPage, faqJsonLd } from "./faq-page";
+export type { FaqGroup, FaqPageProps } from "./faq-page";
 export { ClosingCall } from "./closing-call";
 export {
   useScrollPlay,

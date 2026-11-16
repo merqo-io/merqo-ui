@@ -36,6 +36,7 @@ const ENTRIES = {
   "phone-frame": "src/phone-frame.tsx",
   "press-button": "src/press-button.tsx",
   "faq-rows": "src/faq-rows.tsx",
+  "faq-page": "src/faq-page.tsx",
   "closing-call": "src/closing-call.tsx",
   "use-scroll-play": "src/use-scroll-play.ts",
   "tour-seen": "src/tour-seen.ts",

@@ -1,7 +1,9 @@
+import type { ReactElement } from "react";
+
 export type FaqRow = { q: string; a: string };
 
 // Native details keep the rows operable by keyboard and touch with no script.
-export function FaqRows({ rows }: { rows: readonly FaqRow[] }) {
+export function FaqRows({ rows }: { rows: readonly FaqRow[] }): ReactElement {
   return (
     <div className="border-t border-border">
       {rows.map((row) => (

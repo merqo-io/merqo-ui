@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.50.1] - 2026-11-17
+
 ### Fixed
 
 - `Footer` links (About, Terms, Privacy, sign-in) have a 44px minimum touch height at every width, not only on phones, and a visible keyboard focus ring.

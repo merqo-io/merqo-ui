@@ -4,6 +4,7 @@
 
 ### Added
 
+- `LoginForm` takes an optional `passwordLabelSlot` (a node, or a function of the current mode) rendered beside the "Password" label, for a kit's password-requirements hint. It sits next to the label, not inside it, so tapping it does not focus the input. Absent, the password row is unchanged.
 - `PasswordRequirementsHint` and `PASSWORD_REQUIREMENTS_HINT`: tap-to-show password policy for a `passwordLabelSlot`.
 - `weakPasswordMessage` and `errorReasons`: map Supabase `weak_password` reasons to specific copy; server-safe.
 - `ResetPasswordForm` takes an optional `passwordLabelSlot`, rendered beside the new-password label only.

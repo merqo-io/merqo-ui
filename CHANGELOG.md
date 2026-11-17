@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-11-17
+
 ### Added
 
 - `Footer` takes an optional `faqHref`; when set, a FAQ link renders after About. Off by default so kits without a FAQ page are unchanged.

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `LoginForm` takes an optional `passwordLabelSlot` (a node, or a function of the current mode) rendered beside the "Password" label, for a kit's password-requirements hint. It sits next to the label, not inside it, so tapping it does not focus the input. Absent, the password row is unchanged.
+
 ## [0.51.0] - 2026-11-17
 
 ### Added

@@ -67,6 +67,13 @@ export type LoginFormProps = {
   noticeDisplay?: "inline" | "none";
   emailPlaceholder?: string;
   passwordPlaceholder?: string;
+  /**
+   * Content rendered right beside the "Password" label, for example a
+   * password-requirements hint trigger. The function form receives the current
+   * mode so a kit can show it in sign-up only. It is a sibling of the label,
+   * so tapping it never focuses the input; give a button `type="button"`.
+   */
+  passwordLabelSlot?: React.ReactNode | ((mode: LoginMode) => React.ReactNode);
   /** Replaces the "New here?" and "Already have an account?" prompts. */
   modeTogglePrompt?: { signin: string; signup: string };
   /** Initial value of the email field. */
@@ -278,12 +285,14 @@ function CredentialFields({
   defaultEmail,
   emailPlaceholder,
   passwordPlaceholder,
+  passwordLabelSlot,
 }: {
   emailRef: React.RefObject<HTMLInputElement | null>;
   passwordRef: React.RefObject<HTMLInputElement | null>;
   defaultEmail: string | undefined;
   emailPlaceholder: string | undefined;
   passwordPlaceholder: string | undefined;
+  passwordLabelSlot: React.ReactNode;
   pending: boolean;
   invalid: boolean;
   isSignin: boolean;
@@ -296,6 +305,13 @@ function CredentialFields({
     "aria-invalid": invalid ? (true as const) : undefined,
     "aria-describedby": invalid ? ERROR_ID : undefined,
   };
+  const passwordLabel = (
+    <Label htmlFor="login-password" className={LABEL_CLASS}>
+      Password
+    </Label>
+  );
+  // Only wrap when there is a slot, so the row is unchanged for existing consumers.
+  const hasSlot = passwordLabelSlot !== null && passwordLabelSlot !== undefined && passwordLabelSlot !== false;
   return (
     <>
       <div className="space-y-2">
@@ -319,9 +335,14 @@ function CredentialFields({
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="login-password" className={LABEL_CLASS}>
-            Password
-          </Label>
+          {hasSlot ? (
+            <div className="flex items-center gap-1.5">
+              {passwordLabel}
+              {passwordLabelSlot}
+            </div>
+          ) : (
+            passwordLabel
+          )}
           {isSignin && forgotHref ? (
             <Link href={forgotHref} className={FORGOT_CLASS}>
               Forgot password?
@@ -351,6 +372,13 @@ function CredentialFields({
   );
 }
 
+function resolveSlot(
+  slot: LoginFormProps["passwordLabelSlot"],
+  mode: LoginMode,
+): React.ReactNode {
+  return typeof slot === "function" ? slot(mode) : slot;
+}
+
 export function LoginForm({
   onPasswordSignIn,
   onPasswordSignUp,
@@ -369,6 +397,7 @@ export function LoginForm({
   noticeDisplay,
   emailPlaceholder,
   passwordPlaceholder,
+  passwordLabelSlot,
   modeTogglePrompt,
   defaultEmail,
   confirmEmailTitle,
@@ -526,6 +555,7 @@ export function LoginForm({
           defaultEmail={emailValue}
           emailPlaceholder={emailPlaceholder}
           passwordPlaceholder={passwordPlaceholder}
+          passwordLabelSlot={resolveSlot(passwordLabelSlot, mode)}
         />
         <Feedback error={shown} notice={noticeDisplay === "none" ? null : notice} />
         <Button

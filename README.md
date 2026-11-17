@@ -818,6 +818,11 @@ Security duties that stay with the kit:
   - `emailPlaceholder`, `passwordPlaceholder`, `defaultEmail` (initial email)
     and `modeTogglePrompt={{signin, signup}}` (replaces "New here?" and
     "Already have an account?").
+  - `passwordLabelSlot` is a node, or `(mode) => node`, rendered right beside
+    the "Password" label (a sibling of it, so tapping does not focus the
+    input). The forgot-password link stays right-aligned. Absent or empty, the
+    row is unchanged. A button in the slot needs `type="button"`:
+    `passwordLabelSlot={(mode) => mode === "signup" ? <RequirementsHint /> : null}`
 - `AuthConfirmForm({tokenHash, type, next?, action?, title?, body?,
   buttonLabel?, className?})` and `AuthConfirmInvalid({loginHref?, title?, body?,
   loginLabel?, className?})` - the landing step for an emailed auth link. A

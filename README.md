@@ -624,6 +624,11 @@ copyright line, for merqo, which is the hub rather than a kit and so should
 not say "a Merqo kit". `signInLabel?: ReactNode` (default
 `"Vendor sign in →"`) overrides that link's copy, again for merqo, where
 "Vendor sign in" reads oddly on the hub's own landing page.
+`faqHref?: string` is opt-in and off by default: when set, a "FAQ" link to
+that URL renders right after About (same plain `<a>` and touch sizing). Kits
+with a `/faq` page pass `faqHref="/faq"`; printkit has none, and every kit
+renders this footer on public pages and inside dashboards, so it stays off
+unless asked for.
 
 Under `sm` the footer is three centred rows (wordmark and tagline; About,
 Terms, Privacy and sign-in as one wrapping row; copyright), done with CSS

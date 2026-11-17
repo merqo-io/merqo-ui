@@ -94,9 +94,77 @@ describe("Footer", () => {
     ]);
   });
 
-  it("gives every footer link a 44px touch height and a focus ring at every width", () => {
+  it("renders no FAQ link unless faqHref is given", () => {
     render(<Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />);
-    for (const name of ["About", /vendor sign in/i]) {
+    expect(screen.queryByRole("link", { name: "FAQ" })).not.toBeInTheDocument();
+  });
+
+  it("renders a FAQ link to faqHref when given", () => {
+    render(
+      <Footer
+        wordmark={<a href="/">Kit</a>}
+        tagline="t"
+        kitName="kit"
+        faqHref="/faq"
+      />,
+    );
+    expect(screen.getByRole("link", { name: "FAQ" })).toHaveAttribute(
+      "href",
+      "/faq",
+    );
+  });
+
+  it("places the FAQ link after About and before the legal links", () => {
+    render(
+      <Footer
+        wordmark={<a href="/">Kit</a>}
+        tagline="t"
+        kitName="kit"
+        faqHref="/faq"
+      />,
+    );
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((a) => a.getAttribute("href"));
+    expect(hrefs).toEqual([
+      "/",
+      "/about",
+      "/faq",
+      "/legal/terms",
+      "/legal/privacy",
+      "/login",
+    ]);
+  });
+
+  it("lets the FAQ link be tapped by touch", async () => {
+    const onClick = vi.fn((e: React.MouseEvent) => e.preventDefault());
+    const user = userEvent.setup();
+    render(
+      <div onClick={onClick}>
+        <Footer
+          wordmark={<a href="/">Kit</a>}
+          tagline="t"
+          kitName="kit"
+          faqHref="/faq"
+        />
+      </div>,
+    );
+    const link = screen.getByRole("link", { name: "FAQ" });
+    await user.pointer({ keys: "[TouchA]", target: link });
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClick.mock.calls[0][0].target).toBe(link);
+  });
+
+  it("gives every footer link a 44px touch height and a focus ring at every width", () => {
+    render(
+      <Footer
+        wordmark={<a href="/">Kit</a>}
+        tagline="t"
+        kitName="kit"
+        faqHref="/faq"
+      />,
+    );
+    for (const name of ["About", "FAQ", /vendor sign in/i]) {
       const link = screen.getByRole("link", { name });
       expect(link).toHaveClass("min-h-11", "inline-flex", "items-center");
       expect(link.className).not.toMatch(/sm:min-h-0/);

@@ -4,6 +4,7 @@
 
 ### Added
 
+- `docs/public-page-rules.md`: the shared rules for the kits' public pages (shape, shadow, hover and focus, motion, threes, copy), linked from each kit's `DESIGN.md`.
 - `LoginForm` takes an optional `passwordLabelSlot` (a node, or a function of the current mode) rendered beside the "Password" label, for a kit's password-requirements hint. It sits next to the label, not inside it, so tapping it does not focus the input. Absent, the password row is unchanged.
 
 ## [0.51.0] - 2026-11-17

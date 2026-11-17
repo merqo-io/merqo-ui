@@ -1,3 +1,5 @@
+import { errorReasons, weakPasswordMessage } from "./weak-password-message";
+
 /**
  * "reset" is sending the reset link; "update" is setting the new password.
  * The first four match `LoginForm`'s error context so a mapper can be passed
@@ -19,7 +21,7 @@ export const AUTH_ERROR_MESSAGES: Readonly<Record<AuthErrorKind, string>> = Obje
   invalid_credentials: "Email or password is wrong. Try again or reset your password.",
   email_not_confirmed: "Confirm your email first. Check your inbox for the link.",
   email_exists: "That email already has an account. Sign in instead.",
-  weak_password: "Pick a longer password.",
+  weak_password: "That password is too weak. Choose a longer, less common one.",
   same_password: "Pick a password you are not using now.",
   rate_limited: "Too many attempts. Wait a minute and try again.",
   mfa_code: "That code did not work. Enter the latest code from your app.",
@@ -57,7 +59,7 @@ const RULES: Rule[] = [
   {
     kind: "weak_password",
     codes: ["weak_password"],
-    message: /password should be at least|weak password|easy to guess/i,
+    message: /password should be at least|password should contain at least one character|weak password|easy to guess/i,
   },
   {
     kind: "same_password",
@@ -123,6 +125,9 @@ export function authErrorMessage(
   options: AuthErrorMessageOptions = {},
 ): string {
   const kind = authErrorKind(error);
+  if (kind === "weak_password" && !options.overrides?.weak_password) {
+    return weakPasswordMessage({ reasons: errorReasons(error), message: fieldsOf(error).message });
+  }
   if (kind) return options.overrides?.[kind] || AUTH_ERROR_MESSAGES[kind];
   return options.fallback || AUTH_ERROR_FALLBACKS[context];
 }

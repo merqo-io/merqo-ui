@@ -52,6 +52,8 @@ const ENTRIES = {
   "image-resize": "src/image-resize.ts",
   "image-uploader": "src/image-uploader.tsx",
   "info-tooltip": "src/info-tooltip.tsx",
+  "password-requirements-hint": "src/password-requirements-hint.tsx",
+  "weak-password-message": "src/weak-password-message.ts",
   "kit-family": "src/kit-family.ts",
   "landing-nav": "src/landing-nav.tsx",
   "legal-acceptance-checkbox": "src/legal-acceptance-checkbox.tsx",

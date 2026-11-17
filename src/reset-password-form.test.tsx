@@ -449,3 +449,31 @@ describe("ResetPasswordForm submit results", () => {
     expect(onSubmit).toHaveBeenCalledWith("hunter22x");
   });
 });
+
+describe("ResetPasswordForm passwordLabelSlot", () => {
+  const slot = <button type="button">Hint</button>;
+
+  it("renders beside the new-password label, outside the label", () => {
+    render(<ResetPasswordForm onSubmit={vi.fn()} passwordLabelSlot={slot} />);
+    const hint = screen.getByRole("button", { name: "Hint" });
+    expect(hint.closest("label")).toBeNull();
+    const label = screen.getByText("New password");
+    expect(hint.parentElement).toBe(label.parentElement);
+    expect(label.parentElement).toHaveClass("flex");
+  });
+
+  it("leaves the markup unchanged when absent or false", () => {
+    const base = render(<ResetPasswordForm onSubmit={vi.fn()} />).container.innerHTML;
+    const off = render(<ResetPasswordForm onSubmit={vi.fn()} passwordLabelSlot={false} />)
+      .container.innerHTML;
+    expect(off.replace(/id="[^"]*"/g, "").replace(/(for|aria-describedby)="[^"]*"/g, "")).toBe(
+      base.replace(/id="[^"]*"/g, "").replace(/(for|aria-describedby)="[^"]*"/g, ""),
+    );
+  });
+
+  it("gives the confirm field no slot", () => {
+    render(<ResetPasswordForm onSubmit={vi.fn()} passwordLabelSlot={slot} />);
+    expect(screen.getAllByRole("button", { name: "Hint" })).toHaveLength(1);
+    expect(screen.getByText("Confirm password").parentElement).not.toHaveClass("flex");
+  });
+});

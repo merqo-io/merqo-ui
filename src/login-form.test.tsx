@@ -257,6 +257,76 @@ describe("LoginForm", () => {
     expect(screen.queryByRole("button", { name: "Create an account" })).toBeNull();
   });
 
+  describe("passwordLabelSlot", () => {
+    it("renders a node beside the Password label, outside the label", () => {
+      render(<LoginForm onPasswordSignIn={vi.fn()} passwordLabelSlot={<span data-testid="hint">hint</span>} />);
+      const label = screen.getByText("Password", { selector: "label" });
+      const hint = screen.getByTestId("hint");
+      expect(label.contains(hint)).toBe(false);
+      expect(label.parentElement).toBe(hint.parentElement);
+      expect(screen.getByLabelText("Password")).toHaveAttribute("id", "login-password");
+    });
+
+    it("passes the current mode to the function form", async () => {
+      const slot = vi.fn((mode: string) => (mode === "signup" ? <span data-testid="hint">h</span> : null));
+      const user = userEvent.setup();
+      render(<LoginForm onPasswordSignIn={vi.fn()} onPasswordSignUp={vi.fn()} passwordLabelSlot={slot} />);
+      expect(slot).toHaveBeenLastCalledWith("signin");
+      expect(screen.queryByTestId("hint")).toBeNull();
+      await user.click(screen.getByRole("button", { name: "Create an account" }));
+      expect(slot).toHaveBeenLastCalledWith("signup");
+      expect(screen.getByTestId("hint")).toBeInTheDocument();
+    });
+
+    it("leaves the row markup unchanged without a slot", () => {
+      render(<LoginForm onPasswordSignIn={vi.fn()} forgotPasswordHref="/forgot" />);
+      const label = screen.getByText("Password", { selector: "label" });
+      const row = label.parentElement as HTMLElement;
+      expect(row.children).toHaveLength(2);
+      expect(row.children[0]).toBe(label);
+      expect(row.children[1]).toBe(screen.getByRole("link", { name: "Forgot password?" }));
+    });
+
+    it("treats a false slot like no slot", () => {
+      render(<LoginForm onPasswordSignIn={vi.fn()} passwordLabelSlot={false} />);
+      const label = screen.getByText("Password", { selector: "label" });
+      expect((label.parentElement as HTMLElement).children).toHaveLength(1);
+    });
+
+    it("keeps a type=button slot control from submitting or focusing the input", async () => {
+      const onPasswordSignIn = vi.fn();
+      const onHint = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <LoginForm
+          onPasswordSignIn={onPasswordSignIn}
+          passwordLabelSlot={
+            <button type="button" onClick={onHint}>
+              Requirements
+            </button>
+          }
+        />,
+      );
+      await user.type(screen.getByLabelText("Email"), "a@b.sg");
+      await user.click(screen.getByRole("button", { name: "Requirements" }));
+      expect(onHint).toHaveBeenCalledTimes(1);
+      expect(onPasswordSignIn).not.toHaveBeenCalled();
+      expect(screen.getByLabelText("Password")).not.toHaveFocus();
+    });
+
+    it("still renders the forgot-password control in signin mode", () => {
+      render(
+        <LoginForm
+          onPasswordSignIn={vi.fn()}
+          onForgotPassword={vi.fn()}
+          passwordLabelSlot={<span>hint</span>}
+        />,
+      );
+      expect(screen.getByRole("button", { name: "Forgot password?" })).toBeInTheDocument();
+      expect(screen.getByText("hint")).toBeInTheDocument();
+    });
+  });
+
   it("clears the error when the mode changes", async () => {
     const user = userEvent.setup();
     render(

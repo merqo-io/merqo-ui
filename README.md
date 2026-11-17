@@ -628,7 +628,10 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
 Under `sm` the footer is three centred rows (wordmark and tagline; About,
 Terms, Privacy and sign-in as one wrapping row; copyright), done with CSS
 `order` and wrapper groups that are `display: contents` from `sm` up, so the
-single-row desktop layout and DOM order are unchanged.
+single-row desktop layout and DOM order are unchanged. Every footer link
+has a 44px minimum touch height at every width and a visible keyboard focus
+ring. The footer ends with 80px of bottom padding so the fixed `BackToTop`
+button never sits over a link when the page is scrolled to the end.
 
 - `BackToTop` — fixed bottom-right back-to-top button for a long landing
   page. Appears past ~600px of scroll, scrolls smoothly unless the visitor

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `Footer` links (About, Terms, Privacy, sign-in) have a 44px minimum touch height at every width, not only on phones, and a visible keyboard focus ring.
+- `Footer` reserves `pb-20` below its links so the fixed `BackToTop` button no longer covers the sign-in link (from `sm`) or the wrapped link row (phones) at the end of the page. `BackToTop` is unchanged and stays visible.
+
 ## [0.50.0] - 2026-11-17
 
 ### Added

@@ -12,6 +12,9 @@ drive the rendered brand color automatically.
 > not reachable from a standalone clone — this README is the
 > source of truth for consumers of the package.
 
+Design rules for the kits' public pages (landing, about, FAQ, legal, guides):
+[`docs/public-page-rules.md`](docs/public-page-rules.md).
+
 ## Install
 
 No npm registry — installed as a git dependency, pinned to a tag:

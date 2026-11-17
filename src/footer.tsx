@@ -24,6 +24,12 @@ export interface FooterProps {
    * reads oddly, so it passes "Sign in ->" (with a real arrow).
    */
   signInLabel?: React.ReactNode;
+  /**
+   * Adds a FAQ link after About. Opt-in because not every kit has a FAQ page
+   * (printkit has none), and all kits render this footer on public pages and
+   * inside dashboards. Kits with a `/faq` page pass `"/faq"`.
+   */
+  faqHref?: string;
 }
 
 // Under sm the footer collapses to three centred rows (brand, links, copyright)
@@ -39,8 +45,8 @@ const LEGAL_LINK_TAP =
 
 // Shell only, same "fix drift in the shared shape" rationale as LandingNav:
 // every kit's own footer had converged on the exact same layout/copy order
-// (wordmark, tagline, copyright, About, legal links, sign-in) without it
-// ever being one component. About/sign-in use a plain `<a>`, same as the
+// (wordmark, tagline, copyright, About, optional FAQ, legal links, sign-in) without it
+// ever being one component. About/FAQ/sign-in use a plain `<a>`, same as the
 // composed LegalFooterLinks — a footer link is low-frequency enough that a
 // full page load is an acceptable, deliberate simplification (unlike
 // DashboardNav's dense nav bar, which takes a LinkComponent for this reason).
@@ -51,6 +57,7 @@ export function Footer({
   copyright,
   showSignIn = true,
   signInLabel = "Vendor sign in →",
+  faqHref,
 }: FooterProps): React.ReactElement {
   return (
     <footer className="border-t border-border">
@@ -70,6 +77,14 @@ export function Footer({
           >
             About
           </a>
+          {faqHref && (
+            <a
+              href={faqHref}
+              className={`${LINK_TAP} text-xs hover:text-foreground sm:text-sm`}
+            >
+              FAQ
+            </a>
+          )}
           <LegalFooterLinks className={LEGAL_LINK_TAP} />
           {showSignIn && (
             <a

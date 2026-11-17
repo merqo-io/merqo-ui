@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-11-17
+
 ### Added
 
 - `FaqPage`, `FaqGroup` and `faqJsonLd`: the shared body of a kit's `/faq` page. A title, optional intro, grouped ruled `FaqRows` sections with anchor ids, a `closing` slot for the kit's own contact line, and schema.org `FAQPage` JSON-LD (escaped so a `<` cannot close the script). No nav, footer or client code.

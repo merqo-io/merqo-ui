@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { BackToTop } from "./back-to-top";
 import { Footer } from "./footer";
 
 describe("Footer", () => {
@@ -89,5 +92,51 @@ describe("Footer", () => {
       "/legal/privacy",
       "/login",
     ]);
+  });
+
+  it("gives every footer link a 44px touch height and a focus ring at every width", () => {
+    render(<Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />);
+    for (const name of ["About", /vendor sign in/i]) {
+      const link = screen.getByRole("link", { name });
+      expect(link).toHaveClass("min-h-11", "inline-flex", "items-center");
+      expect(link.className).not.toMatch(/sm:min-h-0/);
+      expect(link.className).toMatch(/focus-visible:ring-\[3px\]/);
+      expect(link.className).toMatch(/focus-visible:ring-ring\/50/);
+      expect(link).toHaveClass("outline-none");
+    }
+    const nav = screen.getByRole("link", { name: "Terms" }).closest("nav")!;
+    expect(nav).toHaveClass("[&_a]:min-h-11", "[&_a]:inline-flex");
+    expect(nav).toHaveClass("[&_a]:focus-visible:ring-[3px]");
+    expect(nav).toHaveClass("[&_a]:focus-visible:ring-ring/50");
+    expect(nav.className).not.toMatch(/sm:\[&_a\]:min-h-0/);
+  });
+
+  it("reserves room below the links so Back to top never covers one", () => {
+    const { container } = render(
+      <Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />,
+    );
+    const inner = container.querySelector("footer > div") as HTMLElement;
+    expect(inner).toHaveClass("pb-20");
+    expect(inner.className).not.toMatch(/(^|\s)(sm:)?py-/);
+  });
+
+  it("keeps Back to top tappable by touch beside the footer", async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+    }) as unknown as typeof window.matchMedia;
+    Object.defineProperty(window, "scrollY", { value: 900, configurable: true });
+    const user = userEvent.setup();
+    render(
+      <>
+        <Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />
+        <BackToTop />
+      </>,
+    );
+    const button = screen.getByRole("button", { name: "Back to top" });
+    await user.pointer({ keys: "[TouchA]", target: button });
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    Object.defineProperty(window, "scrollY", { value: 0, configurable: true });
   });
 });

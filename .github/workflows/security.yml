@@ -61,4 +61,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
+      # Audits all dependencies, dev included. Fails closed on high/critical advisories, tool or network
+      # failure and unparseable output; only .claude/dep-audit-allow.txt (expiring entries) suppresses one.
+      - run: bash .claude/deps-gate.sh

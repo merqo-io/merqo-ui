@@ -469,14 +469,19 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
 ### Destructive actions
 
 Pick the lightest tier that fits, and prefer undo over confirm whenever a
-restore exists.
+restore exists. A dialog is for permanent actions only, never for routine
+reversible ones.
 
 1. Reversible: act immediately, then offer `undoToast()`.
 2. Irreversible (hard delete, refund, revoke): `ConfirmDialog` with
-   `variant="destructive"` and a `consequence` naming what is lost. Keep the
-   confirm label a verb for the action, such as "Delete booth".
-3. High-stakes (cascading deletes, money leaving the vendor): add
-   `confirmPhrase` so the vendor types the name of the thing first.
+   `variant="destructive"` and a `consequence` that says what is lost and
+   whether it can be recovered. The confirm label is the specific verb, such
+   as "Delete booth", never "Yes" or "OK". Focus starts on Cancel.
+3. High-stakes (wide blast radius, irreversible: cascading deletes, money
+   leaving the vendor): add `confirmPhrase` so the vendor types the name of
+   the thing first. The visible instruction beside the field explains why
+   Confirm is disabled.
+
 - `EmptyState({icon?, title, description?, children?, actions?, className, size?, role?})`
   — dashed "nothing here yet" card with up to two actions. `size="compact"`
   is for a one-line message inside a list or card ("No vendors yet."): the

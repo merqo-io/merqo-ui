@@ -182,4 +182,38 @@ describe("ConfirmDialog stakes", () => {
     await open(user);
     expect(screen.getByRole("button", { name: "Yes, delete" })).not.toHaveClass("bg-destructive");
   });
+
+  it("focuses Cancel on open, with and without a phrase", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(
+      <ConfirmDialog
+        trigger={<button>Delete</button>}
+        title="Delete it?"
+        description="Sure?"
+        confirmLabel="Delete booth"
+        onConfirm={() => undefined}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
+    unmount();
+    setup(() => undefined, { confirmPhrase: "go" });
+    await open(user);
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
+    expect(screen.getByLabelText(/Type/)).not.toHaveFocus();
+  });
+
+  it("links the visible instruction to the input and keeps a specific confirm label", async () => {
+    const user = userEvent.setup();
+    setup(() => undefined, {
+      confirmPhrase: "Corner Stall",
+      confirmLabel: "Delete booth",
+      consequence: "All 42 orders are lost and cannot be recovered.",
+    });
+    await open(user);
+    const input = screen.getByLabelText("Type Corner Stall to confirm");
+    expect(input).toHaveAccessibleDescription("Type Corner Stall to confirm");
+    expect(screen.getByRole("button", { name: "Delete booth" })).toBeDisabled();
+    expect(screen.getByText(/cannot be recovered/)).toBeInTheDocument();
+  });
 });

@@ -95,13 +95,15 @@ function PhraseField({
   onSubmit: () => void;
 }) {
   const id = React.useId();
+  const hintId = `${id}-hint`;
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="text-sm">
+      <label htmlFor={id} id={hintId} className="text-sm">
         Type <span className="font-medium">{phrase}</span> to confirm
       </label>
       <Input
         id={id}
+        aria-describedby={hintId}
         size="lg"
         value={value}
         onChange={(e) => onChange(e.target.value)}

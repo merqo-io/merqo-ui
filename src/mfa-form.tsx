@@ -207,7 +207,7 @@ export function MfaForm({
               setCode(event.target.value.replace(/\D/g, "").slice(0, 6));
               clearError();
             }}
-            className="h-11 rounded-xl text-base"
+            size="lg"
           />
         </div>
         {alert}

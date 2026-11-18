@@ -65,7 +65,6 @@ type FieldError = { field: "password" | "confirm"; message: string };
 
 const LINK_CLASS =
   "inline-flex min-h-11 items-center justify-center text-sm font-semibold text-primary underline-offset-4 hover:underline";
-const INPUT_CLASS = "h-11 rounded-xl text-base";
 
 function DefaultLink(props: LoginFormLinkProps) {
   return <a {...props} />;
@@ -242,7 +241,7 @@ function PasswordField({
         aria-invalid={invalid ? true : undefined}
         aria-describedby={describedBy}
         onChange={onChange}
-        className={INPUT_CLASS}
+        size="lg"
       />
       {errorText ? (
         <p id={errorId} className={FORM_ERROR_CLASS}>

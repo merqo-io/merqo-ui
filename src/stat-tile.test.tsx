@@ -13,6 +13,13 @@ describe("DeltaPill", () => {
     expect(screen.getByText("12%")).toBeInTheDocument();
   });
 
+  it("colours the up pill with the success token, no literal emerald", () => {
+    render(<DeltaPill pct={3} />);
+    const pill = screen.getByText("3%").closest("span");
+    expect(pill).toHaveClass("bg-success/12", "text-success");
+    expect(pill?.className).not.toContain("emerald");
+  });
+
   it("renders a down arrow and the default down color for a negative pct", () => {
     render(<DeltaPill pct={-8} />);
     const pill = screen.getByText("8%").closest("span");

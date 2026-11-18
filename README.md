@@ -394,7 +394,14 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   richer indicator (e.g. a 3-state trend) that doesn't fit `DeltaPill`'s
   2-state up/down contract. `DeltaPill` itself takes `size?: "xs" | "sm"`
   and `downClassName?` since real kits don't share identical pill sizing or
-  down-state color — only the up-state emerald is fixed across the family.
+  down-state color. The up state is `bg-success/12 text-success`, so a kit
+  must define `--success` and expose it as the `success` colour (qkit's
+  `globals.css`: `--success` in `:root` and `.dark`, and `--color-success:
+  var(--success)` in `@theme inline`; it also maps `--text-color-success`
+  for the text). Without it the up pill renders with no tint. paykit,
+  loopkit, stockkit and merqo have no `--success` yet and must add it when
+  they move their pin. The token should give at least 4.5:1 for
+  `text-success` on the 12% tint over the card, in light and dark.
 - `StatusBadge<T>({status, config})` — the dot + bordered-pill status chip
   shared across kits. `config: Record<T,
 {label, className}>` is caller-supplied (same "caller supplies the map"
@@ -578,7 +585,7 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   error text a kit lays out itself. `FormError({message, id?, className?})` — inline
   `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
 - `ElevatedCard({as?, className, children})` — the polished lifted-shadow
-  card shell (`rounded-2xl` and `shadow-md`, both standard utilities, so no
+  card shell (`rounded-2xl` and `shadow-sm`, both standard utilities, so no
   literal radius or shadow value ships) used across profile/dashboard/setup pages, deliberately not
   qkit's own scalloped `Ticket` theme (that stays local to qkit). `as`
   picks `div`/`section`/`li`. Promoted 2026-09-16, same "found

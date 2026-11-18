@@ -26,7 +26,8 @@ describe("ElevatedCard shape", () => {
   it("uses standard radius and shadow utilities, no arbitrary values", () => {
     render(<ElevatedCard>content</ElevatedCard>);
     const el = screen.getByText("content");
-    expect(el).toHaveClass("rounded-2xl", "shadow-md");
+    expect(el).toHaveClass("rounded-2xl", "shadow-sm");
+    expect(el).not.toHaveClass("shadow-md");
     expect(el.className).not.toMatch(/(rounded|shadow)-\[|rgba?\(|oklch/);
   });
 });

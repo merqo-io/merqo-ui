@@ -9,7 +9,7 @@ export interface DeltaPillProps {
   tooltip?: string;
   /** "xs" matches loopkit's smaller pill; "sm" (default) matches qkit's. */
   size?: "xs" | "sm";
-  /** Overrides the down-state background/text classes (up-state stays a fixed emerald across every kit). */
+  /** Overrides the down-state background/text classes (the up state uses the kit's `success` token, so a kit must define `--success` and expose it as the `success` colour). */
   downClassName?: string;
 }
 
@@ -31,7 +31,7 @@ export function DeltaPill({
         "text-xs",
         size === "xs" ? "px-1" : "px-1.5",
         up
-          ? "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400"
+          ? "bg-success/12 text-success"
           : downClassName,
       )}
       title={tooltip}

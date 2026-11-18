@@ -803,7 +803,9 @@ Security duties that stay with the kit:
   password with correct `autocomplete` (`current-password` or
   `new-password`), `name` attributes, and `aria-invalid` /
   `aria-describedby` tied to the error. Typing clears the error, and
-  overlapping taps run a callback once. The Google button needs
+  overlapping taps run a callback once. A failed attempt shakes the
+  fields briefly (not for a notice; skipped under reduced motion). The
+  Google button needs
   `onGoogleSignIn` and `showGoogle` (default true). The "Create an account"
   toggle shows only with `onPasswordSignUp`; `onModeChange` lets the kit
   update the `AuthShell` title or `?mode=signup`. A callback may return
@@ -931,7 +933,8 @@ Security duties that stay with the kit:
   (default label "Sign out"). Returned strings from all three callbacks go
   through `mapError(raw)` like thrown errors. Covers the qkit, loopkit and
   merqo form and the paykit and stockkit variants, which differ only in
-  radius and error copy.
+  radius and error copy. A failed attempt, including a code that is too
+  short, shakes the code field briefly; skipped under reduced motion.
 - `AdminShell({wordmark, tabs, pathname, actions?, badge?, backHref?,
   backLabel?, LinkComponent?, children?})` - header with the wordmark and a
   badge (default "Admin"), then a tab bar that scrolls sideways on phones.

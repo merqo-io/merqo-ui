@@ -26,7 +26,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tool
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 const HIT_AREA = ["pointer-coarse:after:size-11", "pointer-coarse:after:content-['']"];
-const REDUCED = "motion-reduce:animate-none";
+const REDUCED = "motion-reduce:animate-none!";
 
 describe("touch hit areas", () => {
   it("gives Switch a 44px coarse hit area and toggles on touch", async () => {
@@ -206,5 +206,65 @@ describe("overlay motion", () => {
       </Select>,
     );
     expect(document.querySelector("[data-slot=select-content]")).toHaveClass(REDUCED);
+  });
+});
+
+describe("touch operation", () => {
+  it("closes a Sheet by tapping its close button", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(
+      <Sheet open onOpenChange={onOpenChange}>
+        <SheetContent>
+          <SheetTitle>T</SheetTitle>
+          <SheetDescription>D</SheetDescription>
+        </SheetContent>
+      </Sheet>,
+    );
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("button", { name: "Close" }) });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("selects dropdown items and radio items by tapping", async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    const onValueChange = vi.fn();
+    render(
+      <DropdownMenu open>
+        <DropdownMenuTrigger>m</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onSelect={onSelect}>Item</DropdownMenuItem>
+          <DropdownMenuRadioGroup value="a" onValueChange={onValueChange}>
+            <DropdownMenuRadioItem value="a">Alpha</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="b">Beta</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>,
+    );
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("menuitem", { name: "Item" }) });
+    expect(onSelect).toHaveBeenCalled();
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("menuitemradio", { name: "Beta" }),
+    });
+    expect(onValueChange).toHaveBeenCalledWith("b");
+  });
+
+  it("selects a Select item by tapping", async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+    render(
+      <Select open value="a" onValueChange={onValueChange}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="a">Alpha</SelectItem>
+          <SelectItem value="b">Beta</SelectItem>
+        </SelectContent>
+      </Select>,
+    );
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("option", { name: "Beta" }) });
+    expect(onValueChange).toHaveBeenCalledWith("b");
   });
 });

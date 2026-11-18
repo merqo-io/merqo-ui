@@ -1211,7 +1211,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.
-- `Switch` (`size`: `default` or `sm`), `Checkbox`. Both keep their compact desktop size and get a 44px hit area on coarse pointers.
+- `Switch` (`size`: `default` or `sm`), `Checkbox`. Both keep their compact desktop size and get a 44px hit area on coarse pointers. The hit area extends beyond the visible control (about 13px above and below the `Switch`, 14px around the `Checkbox`), so dense rows should leave that space.
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.

@@ -1211,7 +1211,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.
-- `Switch` (`size`: `default` or `sm`), `Checkbox`.
+- `Switch` (`size`: `default` or `sm`), `Checkbox`. Both keep their compact desktop size and get a 44px hit area on coarse pointers.
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.
@@ -1222,7 +1222,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Sheet`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`,
   `SheetFooter`, `SheetTitle`, `SheetDescription`. `SheetContent` takes
   `side` and `showCloseButton` (default `true`; `false` drops the built-in X
-  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon.
+  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon. The sheet opens in 300ms and closes in 200ms. `Dialog` close buttons get the same hit area. Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select content skip their animation under `prefers-reduced-motion`. Dropdown menu and select items are at least 44px tall on coarse pointers, and the close buttons show a focus ring for keyboard focus only.
 - `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
   `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
   `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,

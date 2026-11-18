@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ConfirmDialog } from "./confirm-dialog";
@@ -211,9 +211,43 @@ describe("ConfirmDialog stakes", () => {
       consequence: "All 42 orders are lost and cannot be recovered.",
     });
     await open(user);
-    const input = screen.getByLabelText("Type Corner Stall to confirm");
-    expect(input).toHaveAccessibleDescription("Type Corner Stall to confirm");
+    screen.getByLabelText("Type Corner Stall to confirm");
     expect(screen.getByRole("button", { name: "Delete booth" })).toBeDisabled();
     expect(screen.getByText(/cannot be recovered/)).toBeInTheDocument();
+  });
+
+  it("does not repeat the instruction as a description of the input", async () => {
+    const user = userEvent.setup();
+    setup(() => undefined, { confirmPhrase: "go" });
+    await open(user);
+    expect(screen.getByLabelText("Type go to confirm")).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("wraps the description in a div so block content is valid", async () => {
+    const user = userEvent.setup();
+    setup(() => undefined, { description: <ul><li>One</li></ul>, consequence: "Lost." });
+    await open(user);
+    expect(screen.getByText("One").closest("p")).toBeNull();
+  });
+
+  it("ignores Enter during IME composition", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    setup(onConfirm, { confirmPhrase: "go" });
+    await open(user);
+    const input = screen.getByLabelText(/Type/);
+    await user.type(input, "go");
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it("treats a blank phrase as no phrase", async () => {
+    const user = userEvent.setup();
+    setup(() => undefined, { confirmPhrase: "  ", variant: undefined });
+    await open(user);
+    expect(screen.queryByLabelText(/Type/)).not.toBeInTheDocument();
+    const confirm = screen.getByRole("button", { name: "Yes, delete" });
+    expect(confirm).toBeEnabled();
+    expect(confirm).not.toHaveClass("bg-destructive");
   });
 });

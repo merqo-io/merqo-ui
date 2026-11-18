@@ -54,6 +54,11 @@ export interface ConfirmDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+// A blank phrase would gate nothing, so it counts as no phrase.
+function usablePhrase(phrase: string | undefined): string | undefined {
+  return phrase?.trim() ? phrase : undefined;
+}
+
 // Case-insensitive because mobile keyboards auto-capitalise.
 function phraseMatches(typed: string, phrase: string | undefined): boolean {
   if (phrase === undefined) return true;
@@ -74,7 +79,7 @@ function ConfirmDescription({
   return (
     <AlertDialogDescription asChild>
       <div className="space-y-2">
-        <p>{children}</p>
+        <div>{children}</div>
         <p className="text-sm text-foreground">{consequence}</p>
       </div>
     </AlertDialogDescription>
@@ -95,20 +100,18 @@ function PhraseField({
   onSubmit: () => void;
 }) {
   const id = React.useId();
-  const hintId = `${id}-hint`;
   return (
     <div className="space-y-2">
-      <label htmlFor={id} id={hintId} className="text-sm">
+      <label htmlFor={id} className="text-sm">
         Type <span className="font-medium">{phrase}</span> to confirm
       </label>
       <Input
         id={id}
-        aria-describedby={hintId}
         size="lg"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") onSubmit();
+          if (e.key === "Enter" && !e.nativeEvent.isComposing) onSubmit();
         }}
         disabled={disabled}
         autoComplete="off"
@@ -137,7 +140,7 @@ export function ConfirmDialog({
   pendingLabel,
   variant,
   consequence,
-  confirmPhrase,
+  confirmPhrase: confirmPhraseProp,
   onConfirm,
   errorMessage = "Could not complete that action. Try again.",
   open: openProp,
@@ -152,7 +155,8 @@ export function ConfirmDialog({
   const [typed, setTyped] = React.useState("");
 
   const open = openProp ?? openState;
-  const resolvedVariant = variant ?? (confirmPhrase ? "destructive" : "default");
+  const confirmPhrase = usablePhrase(confirmPhraseProp);
+  const resolvedVariant = variant ?? (confirmPhrase !== undefined ? "destructive" : "default");
   const matched = phraseMatches(typed, confirmPhrase);
 
   // Reset during render, not in an effect, so a controlled parent that opens

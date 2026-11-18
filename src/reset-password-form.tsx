@@ -52,6 +52,12 @@ export type ResetPasswordFormProps = {
   signInLabel?: string;
   /** Renders the sign-in link; pass `next/link`'s `Link` for client-side navigation. */
   LinkComponent?: React.ComponentType<LoginFormLinkProps>;
+  /**
+   * Rendered beside the first ("New password") label, as a sibling of the
+   * `<Label>` so tapping it never focuses the input. Pass
+   * `<PasswordRequirementsHint />`. The confirm field never gets it.
+   */
+  passwordLabelSlot?: React.ReactNode;
   className?: string;
 };
 
@@ -187,6 +193,7 @@ function StatePanel({ props }: { props: ResetPasswordFormProps }) {
 
 function PasswordField({
   label,
+  labelSlot,
   name,
   id,
   inputRef,
@@ -198,6 +205,7 @@ function PasswordField({
   onChange,
 }: {
   label: string;
+  labelSlot?: React.ReactNode;
   name: string;
   id: string;
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -208,11 +216,21 @@ function PasswordField({
   errorText: string | undefined;
   onChange: () => void;
 }) {
+  const labelEl = (
+    <Label htmlFor={id} className={FORM_LABEL_CLASS}>
+      {label}
+    </Label>
+  );
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className={FORM_LABEL_CLASS}>
-        {label}
-      </Label>
+      {labelSlot === null || labelSlot === undefined || labelSlot === false ? (
+        labelEl
+      ) : (
+        <div className="flex items-center gap-1.5">
+          {labelEl}
+          {labelSlot}
+        </div>
+      )}
       <Input
         ref={inputRef}
         id={id}
@@ -314,6 +332,7 @@ function ReadyForm({ props }: { props: ResetPasswordFormProps }) {
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <PasswordField
           label={props.passwordLabel ?? "New password"}
+          labelSlot={props.passwordLabelSlot}
           name="password"
           id={`${id}-password`}
           inputRef={passwordRef}

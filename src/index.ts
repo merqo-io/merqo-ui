@@ -1,5 +1,9 @@
 export { InfoTooltip } from "./info-tooltip";
 export type { InfoTooltipProps } from "./info-tooltip";
+export { PasswordRequirementsHint, PASSWORD_REQUIREMENTS_HINT } from "./password-requirements-hint";
+export type { PasswordRequirementsHintProps } from "./password-requirements-hint";
+export { weakPasswordMessage, errorReasons } from "./weak-password-message";
+export type { WeakPasswordReason } from "./weak-password-message";
 export { useAsyncAction, navigatingAway } from "./use-async-action";
 export { isRedirectError } from "./redirect-error";
 export { TwoColumnSections } from "./two-column-sections";

@@ -161,6 +161,7 @@ works locally.
   That box reaches 14px past each edge of the icon: leave that much room, or
   size the trigger with `triggerClassName`, where it sits against another
   control. Needs Tailwind 4.1 or later for the `pointer-coarse` variant.
+- `PasswordRequirementsHint({content?, ariaLabel?, triggerClassName?, contentClassName?})` — tap-to-show password policy (`PASSWORD_REQUIREMENTS_HINT`) built on `InfoTooltip`; drop it into the `passwordLabelSlot` of `LoginForm` or `ResetPasswordForm`: `<LoginForm passwordLabelSlot={(mode) => mode === "signup" ? <PasswordRequirementsHint /> : null} mapErrorObject={(e, ctx) => authErrorMessage(e, ctx)} />`
 - `useAsyncAction` — pending-state hook that always resets, even on throw.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the
@@ -841,9 +842,12 @@ Security duties that stay with the kit:
   mismatchMessage?, title?, subtitle?, passwordLabel?, confirmLabel?,
   submitLabel?, pendingLabel?, checkingLabel?, expiredTitle?, expiredBody?,
   failedTitle?, failedBody?, signInHref?, signInLabel?, LinkComponent?,
+  passwordLabelSlot?,
   className?})` - the "set a new password" form shown after the emailed
   recovery link. It renders no card or page shell; wrap it in `AuthShell` or
   the kit's own card. Only `onSubmit` is required.
+  `passwordLabelSlot` renders beside the "New password" label only (a sibling
+  of the `<Label>`, never inside it); pass `<PasswordRequirementsHint />`.
   - `onSubmit(password)` runs after validation and may return nothing, a
     string (error copy), or `{error: unknown}`, sync or async, or throw. The
     form never navigates or toasts: the kit does that inside `onSubmit`. A
@@ -887,6 +891,11 @@ Security duties that stay with the kit:
   `AUTH_ERROR_FALLBACKS`. `options.overrides` replaces the copy per kind, and
   an empty override is ignored. `AUTH_ERROR_MESSAGES` and
   `AUTH_ERROR_FALLBACKS` are frozen and exported for reading.
+  - A `weak_password` error gets specific copy from `weakPasswordMessage`
+    (length, missing character classes, breached password) unless
+    `overrides.weak_password` is set. `weakPasswordMessage({reasons?, message?})`
+    and `errorReasons(error)` are exported and server-safe. The numbers come
+    from the server message; unknown reasons fall back to a generic line.
   - The default `email_exists` copy tells the user an account exists. A kit
     that wants a neutral line should override it, for example
     `{overrides: {email_exists: "Check your email to continue."}}`.

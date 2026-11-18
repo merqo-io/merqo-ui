@@ -116,7 +116,7 @@ describe("authErrorMessage", () => {
       invalid_credentials: "Email or password is wrong. Try again or reset your password.",
       email_not_confirmed: "Confirm your email first. Check your inbox for the link.",
       email_exists: "That email already has an account. Sign in instead.",
-      weak_password: "Pick a longer password.",
+      weak_password: "That password is too weak. Choose a longer, less common one.",
       same_password: "Pick a password you are not using now.",
       rate_limited: "Too many attempts. Wait a minute and try again.",
       mfa_code: "That code did not work. Enter the latest code from your app.",
@@ -178,5 +178,53 @@ describe("build output", () => {
   it('dist/auth-error-message.js carries no "use client" directive', () => {
     const built = path.resolve(__dirname, "../dist/auth-error-message.js");
     expect(readFileSync(built, "utf-8")).not.toMatch(/["']use client["']/);
+  });
+});
+
+describe("authErrorMessage weak_password copy", () => {
+  const CHARS =
+    "Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789, !@#$%^&*()_+-=[]{};':\"|<>?,./`~.";
+
+  it("is specific when reasons are present", () => {
+    expect(
+      authErrorMessage(
+        {
+          code: "weak_password",
+          message: "Password should be at least 8 characters.",
+          reasons: ["length"],
+        },
+        "signup",
+      ),
+    ).toBe("Password is too short. Use at least 8 characters.");
+  });
+
+  it("lets an override win", () => {
+    expect(
+      authErrorMessage({ code: "weak_password", reasons: ["pwned"] }, "signup", {
+        overrides: { weak_password: "Nope." },
+      }),
+    ).toBe("Nope.");
+  });
+
+  it("classifies a string-only characters message as weak_password", () => {
+    expect(authErrorKind(CHARS)).toBe("weak_password");
+    expect(authErrorMessage(CHARS, "update")).toBe(
+      "Password must include a lowercase letter, an uppercase letter, a number and a symbol.",
+    );
+  });
+
+  it("never leaks raw provider text", () => {
+    const out = authErrorMessage(
+      { code: "weak_password", message: "Secret provider detail for a@b.co", reasons: ["length"] },
+      "signup",
+    );
+    expect(out).not.toContain("Secret");
+    expect(out).not.toContain("a@b.co");
+  });
+
+  it("leaves other kinds unchanged", () => {
+    expect(authErrorMessage({ code: "same_password" }, "update")).toBe(
+      AUTH_ERROR_MESSAGES.same_password,
+    );
   });
 });

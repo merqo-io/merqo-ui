@@ -6,6 +6,14 @@
 
 - `docs/public-page-rules.md`: the shared rules for the kits' public pages (shape, shadow, hover and focus, motion, threes, copy), linked from each kit's `DESIGN.md`.
 - `LoginForm` takes an optional `passwordLabelSlot` (a node, or a function of the current mode) rendered beside the "Password" label, for a kit's password-requirements hint. It sits next to the label, not inside it, so tapping it does not focus the input. Absent, the password row is unchanged.
+- `PasswordRequirementsHint` and `PASSWORD_REQUIREMENTS_HINT`: tap-to-show password policy for a `passwordLabelSlot`.
+- `weakPasswordMessage` and `errorReasons`: map Supabase `weak_password` reasons to specific copy; server-safe.
+- `ResetPasswordForm` takes an optional `passwordLabelSlot`, rendered beside the new-password label only.
+
+### Changed
+
+- `authErrorMessage` returns specific copy for `weak_password` errors (length, character classes, breached) unless overridden, and also classifies "Password should contain at least one character" as `weak_password`.
+- `AUTH_ERROR_MESSAGES.weak_password` is now "That password is too weak. Choose a longer, less common one."
 
 ## [0.51.0] - 2026-11-17
 

@@ -395,15 +395,15 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   2-state up/down contract. `DeltaPill` itself takes `size?: "xs" | "sm"`
   and `downClassName?` since real kits don't share identical pill sizing or
   down-state color — only the up-state emerald is fixed across the family.
-- `StatusBadge<T>({status, config})` — the dot + uppercase-tracked
-  bordered-pill status chip shared across kits. `config: Record<T,
+- `StatusBadge<T>({status, config})` — the dot + bordered-pill status chip
+  shared across kits. `config: Record<T,
 {label, className}>` is caller-supplied (same "caller supplies the map"
   contract `AuditLogTable`'s `formatAction` established), so each kit keeps
   its own status set and colors — only the rendering shape (dot, border,
-  tint, tracking) is shared. Extracted from qkit's original implementation
-  over printkit's/paykit's plain shadcn `Badge` uses, since qkit's was the
-  one built on real semantic status tokens rather than raw Tailwind
-  literals mixed in ad hoc.
+  tint) is shared; the label is `text-xs` semibold, not uppercase. Extracted
+  from qkit's original implementation over printkit's/paykit's plain shadcn
+  `Badge` uses, since qkit's was the one built on real semantic status
+  tokens rather than raw Tailwind literals mixed in ad hoc.
 - `DataTable<T>({rows, columns, getRowKey, emptyState?})` — the
   rows-of-columns table shell shared across kits' transaction/booking/job-
   history/vendor-list tables. Self-contained plain `<table>` + Tailwind
@@ -556,7 +556,12 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   in order when `actions` is not set.
 - `TierChip({tier, className?})` — plan badge for `AccountMenu`/`DashboardNav`
   `tierBadge`, labelled by `tierLabel(tier)`: muted for free, primary tint
-  for starter, filled for any paid tier.
+  for starter, filled for any paid tier. The label is `text-xs` medium (no
+  uppercase, mono or tracking) so it stays readable at small sizes.
+- `AccountMenu` draws a rule only under the identity label, before Theme and
+  before Sign out; the top extra link and "Switch products" no longer get a
+  rule of their own, so no rule renders first, last or doubled. `StatTile` and
+  `DeltaPill` text is `text-xs` minimum (the label is no longer uppercase).
 - `AccountMenu` also takes `tier?: string`, rendered as a `TierChip` in the dropdown header
   (needs `vendor.subtitle`); `tierBadge` still works and wins when both are set. The trigger
   is an `AvatarIdentity`.

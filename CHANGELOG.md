@@ -4,6 +4,9 @@
 
 ### Changed
 
+- `AccountMenu` no longer draws a rule around the top extra link or "Switch products"; rules remain under the identity label, before Theme and before Sign out.
+- `StatusBadge`, `TierChip`, `StatTile` labels and `DeltaPill` now use `text-xs` at minimum with no arbitrary size or tracking. Uppercase, mono and heavy weight are dropped; props and variants are unchanged. Labels now render in the case the caller passes (sentence case stays sentence case), so check any label that relied on forced uppercase.
+- `DeltaPill` `size` now only changes horizontal padding (`px-1` for `xs`, `px-1.5` for `sm`); text is `text-xs` in both sizes.
 - Primitives are operable by touch: `Switch`, `Checkbox` and the `Dialog` close button get a 44px hit area on coarse pointers without changing their desktop size, and `DropdownMenuItem`, `DropdownMenuRadioItem`, `DropdownMenuSubTrigger` and `SelectItem` are at least 44px tall on coarse pointers.
 - `SheetContent` opens in 300ms (was 500ms) and closes in 200ms (was 300ms).
 - `Sheet`, `Dialog`, `AlertDialog`, `DropdownMenu`, `Popover`, `Tooltip` and `Select` content no longer animate under `prefers-reduced-motion`; they still appear and disappear.

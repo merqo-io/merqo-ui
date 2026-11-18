@@ -27,8 +27,9 @@ export function DeltaPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-semibold tabular-nums",
-        size === "xs" ? "text-[0.65rem]" : "font-mono text-[0.7rem]",
+        "inline-flex items-center gap-0.5 rounded-full py-0.5 font-semibold tabular-nums",
+        "text-xs",
+        size === "xs" ? "px-1" : "px-1.5",
         up
           ? "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400"
           : downClassName,
@@ -108,7 +109,7 @@ export function StatTile({
     <div className="flex items-start justify-between gap-2">
       <p
         className={cn(
-          "text-[0.7rem] font-semibold uppercase tracking-wider",
+          "text-xs font-medium",
           primary ? "text-primary" : "text-muted-foreground",
           labelClassName,
         )}

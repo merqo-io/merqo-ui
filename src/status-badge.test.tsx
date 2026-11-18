@@ -35,3 +35,12 @@ describe("StatusBadge", () => {
     expect(badge?.querySelector("span.rounded-full.bg-current")).toBeInTheDocument();
   });
 });
+
+describe("StatusBadge legibility", () => {
+  it("uses at least text-xs with no arbitrary size or tracking", () => {
+    render(<StatusBadge status="pending" config={CONFIG} />);
+    const badge = screen.getByText("Waiting for you").closest("span");
+    expect(badge).toHaveClass("text-xs");
+    expect(badge?.className).not.toMatch(/text-\[|tracking-\[|uppercase|font-bold/);
+  });
+});

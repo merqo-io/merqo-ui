@@ -608,3 +608,64 @@ describe("AccountMenu identity and tier", () => {
     expect(await screen.findByRole("menuitem", { name: /profile/i })).toBeInTheDocument();
   });
 });
+
+describe("AccountMenu separators", () => {
+  const extra = { href: "/guide", label: "User guide" };
+  const kits = [{ label: "loopkit", href: "https://loopkit-sg.vercel.app" }];
+
+  function menuChildren() {
+    const content = document.querySelector('[data-slot="dropdown-menu-content"]')!;
+    return Array.from(content.children).map((el) =>
+      el.getAttribute("data-slot") === "dropdown-menu-separator"
+        ? "|"
+        : (el.textContent ?? "").trim(),
+    );
+  }
+
+  const cases = [
+    { subtitle: true, placement: "top", switchKits: true, settings: true, plan: true },
+    { subtitle: true, placement: "default", switchKits: true, settings: true, plan: true },
+    { subtitle: true, placement: undefined, switchKits: false, settings: false, plan: false },
+    { subtitle: false, placement: "top", switchKits: false, settings: false, plan: true },
+    { subtitle: false, placement: "default", switchKits: true, settings: true, plan: false },
+    { subtitle: false, placement: undefined, switchKits: true, settings: false, plan: false },
+  ] as const;
+
+  it.each(cases)("renders only meaningful rules for %j", async (c) => {
+    await openMenu({
+      vendor: { name: "Manfred", ...(c.subtitle ? { subtitle: "Stall 4" } : {}) },
+      extraLink: c.placement ? { ...extra, placement: c.placement } : undefined,
+      switchKits: c.switchKits ? kits : undefined,
+      kitLocalSettingsHref: c.settings ? "/dashboard/settings" : undefined,
+      showPlanItem: c.plan,
+    });
+    await screen.findByRole("menuitem", { name: /profile/i });
+    const kids = menuChildren();
+    const rules = kids.filter((k) => k === "|").length;
+    expect(rules).toBe(c.subtitle ? 3 : 2);
+    expect(kids[0]).not.toBe("|");
+    expect(kids[kids.length - 1]).not.toBe("|");
+    kids.forEach((k, i) => {
+      if (k === "|") expect(kids[i + 1]).not.toBe("|");
+    });
+    expect(kids[kids.length - 2]).toBe("|");
+    const theme = kids.findIndex((k) => k.startsWith("Theme"));
+    expect(kids[theme - 1]).toBe("|");
+    if (c.subtitle) expect(kids[1]).toBe("|");
+    const switchIdx = kids.findIndex((k) => k.startsWith("Switch products"));
+    if (switchIdx >= 0) {
+      expect(kids[switchIdx - 1] === "|" && kids[switchIdx + 1] === "|").toBe(false);
+    }
+    const extraIdx = kids.findIndex((k) => k.includes("User guide"));
+    if (extraIdx >= 0) {
+      expect(kids[extraIdx - 1] === "|" && kids[extraIdx + 1] === "|").toBe(false);
+    }
+  });
+
+  it("opens the Theme submenu by touch", async () => {
+    const user = await openMenu();
+    const trigger = await screen.findByText(/^Theme/);
+    await user.pointer({ keys: "[TouchA]", target: trigger });
+    expect(await screen.findByRole("menuitemradio", { name: /dark/i })).toBeInTheDocument();
+  });
+});

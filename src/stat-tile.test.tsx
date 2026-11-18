@@ -143,3 +143,19 @@ describe("StatTile card", () => {
     expect(container.firstElementChild).not.toHaveClass("bg-card");
   });
 });
+
+describe("StatTile legibility", () => {
+  it("keeps the label at text-xs or larger with no arbitrary size or tracking", () => {
+    render(<StatTile label="Legible" value="1" />);
+    const label = screen.getByText("Legible");
+    expect(label).toHaveClass("text-xs");
+    expect(label.className).not.toMatch(/text-\[|tracking-|uppercase/);
+  });
+
+  it.each(["xs", "sm"] as const)("keeps the %s delta pill at text-xs", (deltaSize) => {
+    render(<StatTile label="Delta" value="1" delta={12} deltaSize={deltaSize} />);
+    const pill = screen.getByText("12%").closest("span");
+    expect(pill).toHaveClass("text-xs");
+    expect(pill?.className).not.toMatch(/text-\[/);
+  });
+});

@@ -234,32 +234,24 @@ export function AccountMenu({
               <DropdownMenuSeparator />
             </>
           )}
-          {extraLinkOnTop ? (
-            <>
-              {extraLinkItem}
-              <DropdownMenuSeparator />
-            </>
-          ) : null}
+          {extraLinkOnTop ? extraLinkItem : null}
 
           {switchKits && switchKits.length > 0 ? (
-            <>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <span className="flex items-center gap-2">
-                    <LayoutGrid className="size-4" />
-                    Switch products
-                  </span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {switchKits.map((kit) => (
-                    <DropdownMenuItem key={kit.href} asChild>
-                      <a href={kit.href}>{kit.label}</a>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-            </>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <span className="flex items-center gap-2">
+                  <LayoutGrid className="size-4" />
+                  Switch products
+                </span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {switchKits.map((kit) => (
+                  <DropdownMenuItem key={kit.href} asChild>
+                    <a href={kit.href}>{kit.label}</a>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           ) : null}
 
           <DropdownMenuItem asChild>

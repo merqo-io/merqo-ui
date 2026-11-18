@@ -34,7 +34,7 @@ export function TierChip({
   return (
     <span
       className={cn(
-        "shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[0.6rem] font-semibold uppercase tracking-wider ring-1 ring-inset",
+        "shrink-0 rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset",
         toneFor(tier),
         className,
       )}

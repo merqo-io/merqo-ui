@@ -112,3 +112,12 @@ describe("TierChip", () => {
     expect(screen.getByText("Enterprise")).toHaveClass("bg-secondary");
   });
 });
+
+describe("TierChip legibility", () => {
+  it("uses at least text-xs with no arbitrary size or tracking", () => {
+    render(<TierChip tier="free" />);
+    const chip = screen.getByText("Free");
+    expect(chip).toHaveClass("text-xs");
+    expect(chip.className).not.toMatch(/text-\[|tracking-|uppercase|font-mono/);
+  });
+});

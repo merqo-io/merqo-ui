@@ -1,5 +1,5 @@
 import * as React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { DashboardTour, type DashboardTourProps } from "./dashboard-tour";
 
@@ -625,5 +625,62 @@ describe("DashboardTour — regressions (N1, N2)", () => {
     await waitFor(() => expect(drive).toHaveBeenCalledTimes(1));
 
     vi.doUnmock("driver.js");
+  });
+});
+
+describe("DashboardTour reduced motion", () => {
+  const original = window.matchMedia;
+  afterEach(() => {
+    window.matchMedia = original;
+    vi.doUnmock("driver.js");
+  });
+
+  async function startWith(reduced: boolean | "missing") {
+    window.matchMedia =
+      reduced === "missing"
+        ? (undefined as unknown as typeof window.matchMedia)
+        : (((q: string) => ({
+            matches: reduced,
+            media: q,
+            addEventListener() {},
+            removeEventListener() {},
+          })) as unknown as typeof window.matchMedia);
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive: vi.fn(),
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: Fresh } = await import("./dashboard-tour");
+    render(<Fresh {...baseProps({ seen: true })} />);
+    const button = await screen.findByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+    await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
+    return driverSpy.mock.calls[0]![0];
+  }
+
+  it("turns animation and smooth scrolling off when motion is reduced", async () => {
+    const config = await startWith(true);
+    expect(config).toMatchObject({ animate: false, smoothScroll: false });
+  });
+
+  it("keeps them on otherwise", async () => {
+    const config = await startWith(false);
+    expect(config).toMatchObject({ animate: true, smoothScroll: true });
+  });
+
+  it("falls back to animated when matchMedia is missing", async () => {
+    const config = await startWith("missing");
+    expect(config).toMatchObject({ animate: true, smoothScroll: true });
+  });
+
+  it("guards the replay button hover scale", () => {
+    render(<DashboardTour {...baseProps()} />);
+    expect(
+      screen.getByRole("button", { name: "Replay onboarding tour" }),
+    ).toHaveClass("motion-reduce:hover:scale-100", "motion-reduce:transition-none");
   });
 });

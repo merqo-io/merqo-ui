@@ -275,11 +275,13 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   **must** pass `variant="banner"` explicitly when migrating, or it will
   silently render as a small square with the wrong resize target. The
   preview `<img>` takes `previewAlt` (default "Uploaded image preview",
-  since v0.35.0).
+  since v0.35.0). The remove button has a 44px hit area on coarse
+  pointers and the pending spinner stays still under reduced motion.
 - `DashboardTour` — wires up `driver.js` (config, lifecycle, floating
   replay button, `driver.js` + its CSS both lazily self-imported) from an
   injected `steps` array/resolver, `onFirstSeen` callback, `isHomeRoute`,
-  and `navigateHome` — the tour mechanism is shared, tour content, routing,
+  and `navigateHome` (animation and smooth scrolling are off under
+  `prefers-reduced-motion`) — the tour mechanism is shared, tour content, routing,
   and "has this user seen it" persistence stay entirely kit-local. The
   replay button renders on every page (not just the tour's home route);
   replaying from elsewhere navigates home first, then auto-runs once
@@ -400,8 +402,8 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   its own status set and colors — only the rendering shape (dot, border,
   tint) is shared; the label is `text-xs` semibold, not uppercase. Extracted
   from qkit's original implementation over printkit's/paykit's plain shadcn
-  `Badge` uses, since qkit's was the one built on real semantic status tokens rather than raw Tailwind
-  literals mixed in ad hoc.
+  `Badge` uses, since qkit's was the one built on real semantic status
+  tokens rather than raw Tailwind literals mixed in ad hoc.
 - `DataTable<T>({rows, columns, getRowKey, emptyState?})` — the
   rows-of-columns table shell shared across kits' transaction/booking/job-
   history/vendor-list tables. Self-contained plain `<table>` + Tailwind
@@ -1216,7 +1218,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.
-- `Switch` (`size`: `default` or `sm`), `Checkbox`.
+- `Switch` (`size`: `default` or `sm`), `Checkbox`. Both keep their compact desktop size and get a 44px hit area on coarse pointers. The hit area extends beyond the visible control (about 13px above and below the `Switch`, 14px around the `Checkbox`), so dense rows should leave that space.
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.
@@ -1227,7 +1229,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Sheet`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`,
   `SheetFooter`, `SheetTitle`, `SheetDescription`. `SheetContent` takes
   `side` and `showCloseButton` (default `true`; `false` drops the built-in X
-  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon.
+  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon. The sheet opens in 300ms and closes in 200ms. `Dialog` close buttons get the same hit area. Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select content skip their animation under `prefers-reduced-motion`. Dropdown menu and select items are at least 44px tall on coarse pointers, and the close buttons show a focus ring for keyboard focus only.
 - `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
   `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
   `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,

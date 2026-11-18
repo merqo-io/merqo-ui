@@ -13,12 +13,12 @@ export interface StatusBadgeProps<T extends string> {
 }
 
 /**
- * The dot + tinted-pill status chip shared across every
+ * The dot + bordered-pill status chip shared across every
  * kit — qkit's original shape, chosen as the extraction target over
  * printkit's/paykit's plain shadcn `Badge` uses since it's the one built on
  * real semantic status tokens rather than raw Tailwind literals mixed in ad
  * hoc. Deliberately not a `Badge` wrapper — this shape carries its own
- * treatment (dot, tint) that `Badge`'s variants don't offer.
+ * treatment (dot, border, tint) that `Badge`'s variants don't offer.
  */
 export function StatusBadge<T extends string>({
   status,
@@ -28,7 +28,7 @@ export function StatusBadge<T extends string>({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium select-none",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium select-none",
         className,
       )}
     >

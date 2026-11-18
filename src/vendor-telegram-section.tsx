@@ -55,7 +55,7 @@ function DisconnectButton({
       )}
     >
       {disconnectAction.pending ? (
-        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
       ) : null}
       {disconnectAction.pending ? "Disconnecting…" : "Disconnect"}
     </button>
@@ -125,7 +125,7 @@ function ConnectPanel({
       )}
     >
       {connectAction.pending ? (
-        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
       ) : null}
       {connectAction.pending ? "Connecting…" : "Connect Telegram"}
     </button>

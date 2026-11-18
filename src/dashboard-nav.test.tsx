@@ -245,3 +245,11 @@ describe("DashboardNav", () => {
     });
   });
 });
+
+describe("DashboardNav touch target", () => {
+  it("gives the burger a 44px coarse-pointer hit area", () => {
+    render(<DashboardNav {...baseProps} />);
+    const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+    expect(burger).toHaveClass("relative", "pointer-coarse:after:size-11");
+  });
+});

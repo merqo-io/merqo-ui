@@ -58,3 +58,11 @@ describe("Faq summary", () => {
     expect(summary).toHaveClass("items-start");
   });
 });
+
+describe("Faq reduced motion", () => {
+  it("drops the icon rotation transition when motion is reduced", () => {
+    render(<Faq items={ITEMS} />);
+    const icon = document.querySelector("summary [aria-hidden='true']")!;
+    expect(icon).toHaveClass("motion-reduce:transition-none");
+  });
+});

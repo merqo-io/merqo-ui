@@ -648,3 +648,28 @@ describe("ImageUploader object paths", () => {
     }
   });
 });
+
+describe("ImageUploader touch and legibility", () => {
+  it("gives the remove button a 44px coarse-pointer hit area", () => {
+    render(<ImageUploader {...baseProps({ value: "https://cdn.example.test/a.webp" })} />);
+    expect(screen.getByRole("button", { name: "Remove image" })).toHaveClass(
+      "pointer-coarse:after:size-11",
+    );
+  });
+
+  it("uses no text smaller than text-xs in the thumb trigger", () => {
+    const { container } = render(<ImageUploader {...baseProps()} />);
+    expect(container.innerHTML).not.toMatch(/text-\[\d+px\]/);
+  });
+
+  it("spins the pending icon only when motion is allowed", async () => {
+    const onUpload = vi.fn(() => new Promise<string>(() => {}));
+    const { container } = render(<ImageUploader {...baseProps({ onUpload })} />);
+    await selectFile(container, makeFile());
+    const trigger = screen.getByRole("button", { name: /add photo|optimizing|…/i });
+    await waitFor(() => expect(trigger).toHaveAttribute("aria-busy", "true"));
+    const tokens = trigger.querySelector("svg")!.getAttribute("class")!.split(" ");
+    expect(tokens).toContain("motion-safe:animate-spin");
+    expect(tokens).not.toContain("animate-spin");
+  });
+});

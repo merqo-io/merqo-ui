@@ -86,7 +86,7 @@ export function DashboardNav({
             aria-controls={MOBILE_PANEL_ID}
             data-tour="nav-menu"
             className={cn(
-              "focus-visible:ring-ring/50 inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2",
+              "focus-visible:ring-ring/50 relative inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2 pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']",
               collapse.burger,
             )}
             onClick={() => setMobileOpen((open) => !open)}

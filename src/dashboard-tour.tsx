@@ -72,7 +72,10 @@ function buildDriverConfig(
   scopeClassName: string,
   onDestroyed: () => void,
 ) {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   return {
+    animate: !reduced,
+    smoothScroll: !reduced,
     showProgress: true,
     allowClose: true,
     overlayOpacity: 0.6,
@@ -332,7 +335,7 @@ export function DashboardTour({
       data-tour="tour-replay"
       onClick={onReplay}
       aria-label="Replay onboarding tour"
-      className="bg-primary text-primary-foreground ring-border fixed right-5 bottom-5 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full shadow-lg ring-1 transition-transform hover:scale-105"
+      className="bg-primary text-primary-foreground ring-border fixed right-5 bottom-5 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full shadow-lg ring-1 transition-transform motion-reduce:transition-none motion-reduce:hover:scale-100 hover:scale-105"
     >
       <CircleHelp className="h-6 w-6" />
     </button>

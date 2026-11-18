@@ -183,3 +183,25 @@ describe("VendorTelegramSection", () => {
     expect(await screen.findByRole("link")).toHaveAttribute("href", deepLink);
   });
 });
+
+describe("VendorTelegramSection reduced motion", () => {
+  it("spins the connect icon only when motion is allowed", async () => {
+    const onConnect = vi.fn(() => new Promise<never>(() => {}));
+    render(<VendorTelegramSection connected={false} onConnect={onConnect} />);
+    fireEvent.click(screen.getByRole("button", { name: /connect telegram/i }));
+    const button = await screen.findByRole("button", { name: /connecting/i });
+    const tokens = button.querySelector("svg")!.getAttribute("class")!.split(" ");
+    expect(tokens).toContain("motion-safe:animate-spin");
+    expect(tokens).not.toContain("animate-spin");
+  });
+
+  it("spins the disconnect icon only when motion is allowed", async () => {
+    const onDisconnect = vi.fn(() => new Promise<never>(() => {}));
+    render(<VendorTelegramSection connected={true} onDisconnect={onDisconnect} />);
+    fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
+    const button = await screen.findByRole("button", { name: /disconnecting/i });
+    const tokens = button.querySelector("svg")!.getAttribute("class")!.split(" ");
+    expect(tokens).toContain("motion-safe:animate-spin");
+    expect(tokens).not.toContain("animate-spin");
+  });
+});

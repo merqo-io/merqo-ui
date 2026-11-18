@@ -49,7 +49,7 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
                 </span>
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-border text-lg leading-none text-muted-foreground transition-transform group-open:rotate-45"
+                  className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-border text-lg leading-none text-muted-foreground transition-transform motion-reduce:transition-none group-open:rotate-45"
                 >
                   +
                 </span>

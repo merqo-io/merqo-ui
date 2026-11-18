@@ -627,3 +627,49 @@ describe("DashboardTour — regressions (N1, N2)", () => {
     vi.doUnmock("driver.js");
   });
 });
+
+describe("DashboardTour reduced motion", () => {
+  async function startWith(reduced: boolean) {
+    const original = window.matchMedia;
+    window.matchMedia = ((q: string) => ({
+      matches: reduced,
+      media: q,
+      addEventListener() {},
+      removeEventListener() {},
+    })) as unknown as typeof window.matchMedia;
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive: vi.fn(),
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: Fresh } = await import("./dashboard-tour");
+    render(<Fresh {...baseProps({ seen: true })} />);
+    const button = await screen.findByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+    await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
+    window.matchMedia = original;
+    vi.doUnmock("driver.js");
+    return driverSpy.mock.calls[0]![0];
+  }
+
+  it("turns animation and smooth scrolling off when motion is reduced", async () => {
+    const config = await startWith(true);
+    expect(config).toMatchObject({ animate: false, smoothScroll: false });
+  });
+
+  it("keeps them on otherwise", async () => {
+    const config = await startWith(false);
+    expect(config).toMatchObject({ animate: true, smoothScroll: true });
+  });
+
+  it("guards the replay button hover scale", () => {
+    render(<DashboardTour {...baseProps()} />);
+    expect(
+      screen.getByRole("button", { name: "Replay onboarding tour" }),
+    ).toHaveClass("motion-reduce:hover:scale-100", "motion-reduce:transition-none");
+  });
+});

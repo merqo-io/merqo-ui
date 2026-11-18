@@ -235,3 +235,21 @@ describe("SegmentedControl", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 });
+
+describe("SegmentedControl coarse pointer height", () => {
+  it.each(["track", "pill"] as const)("%s options reach 44px on touch", (variant) => {
+    render(
+      <SegmentedControl
+        ariaLabel="x"
+        size="sm"
+        variant={variant}
+        value="a"
+        onChange={() => {}}
+        options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]}
+      />,
+    );
+    for (const radio of screen.getAllByRole("radio")) {
+      expect(radio.className).toMatch(/pointer(-coarse:min-h-11|:coarse\)\]:min-h-11)/);
+    }
+  });
+});

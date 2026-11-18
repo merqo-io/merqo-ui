@@ -133,14 +133,14 @@ export function SegmentedControl<T extends string = string>({
               track
                 ? [
                     // Finger-sized on a touch screen whatever the mouse size.
-                    "rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [@media(pointer:coarse)]:min-h-11",
+                    "rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11",
                     TRACK_SIZE[size].item,
                     checked
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:text-foreground",
                   ]
                 : [
-                    "flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+                    "flex items-center justify-center rounded-md border px-2 py-2 pointer-coarse:min-h-11 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
                     checked
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-input text-muted-foreground hover:border-primary/50",

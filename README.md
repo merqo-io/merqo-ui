@@ -1267,6 +1267,13 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipProvider`. A tooltip
   opens on hover and keyboard focus only, so never make it the sole place a
   vendor can read something on touch; use `InfoTooltip` with `trigger="tap"`.
+  `TooltipProvider` defaults to `delayDuration={300}` and
+  `skipDelayDuration={300}`: the first hover settles for 300ms, then
+  neighbouring tooltips open instantly while the pointer keeps browsing.
+  Keyboard focus always opens at once. A `Tooltip` inside an outer
+  `TooltipProvider` uses that provider's settings (so the skip delay carries
+  between tooltips); without one it wraps itself in a default provider. Wrap
+  the app once, and pass the props to change the delays.
 
 ## Shared tooling entries (since v0.35.0)
 

@@ -8,7 +8,11 @@ import {
   type ImagePreviewProps,
 } from "./image-uploader";
 import { toast } from "sonner";
-import { commitPendingImages, isPendingImage } from "./pending-image";
+import {
+  commitPendingImages,
+  isPendingImage,
+  registerPendingImage,
+} from "./pending-image";
 
 vi.mock("sonner", () => {
   let next = 0;
@@ -917,5 +921,68 @@ describe("ImageUploader: undo remove", () => {
     expect(onChange).toHaveBeenLastCalledWith(
       "https://cdn.example.test/two.webp",
     );
+  });
+});
+
+describe("ImageUploader: undo is withdrawn when the value changes elsewhere", () => {
+  const a = "https://cdn.example.test/a.webp";
+  const b = "https://cdn.example.test/b.webp";
+
+  it("an external value dismisses the toast and a late Undo cannot overwrite it", () => {
+    const onChange = vi.fn();
+    const props = baseProps({ value: a, onChange });
+    const { rerender } = render(<ImageUploader {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const { id, options } = lastToast();
+    rerender(<ImageUploader {...props} value={b} />);
+    expect(toast.dismiss).toHaveBeenCalledWith(id);
+    act(() => options.action.onClick());
+    expect(onChange).not.toHaveBeenCalledWith(a);
+  });
+
+  it("discards a deferred removed image once when the value is set elsewhere", () => {
+    const revoke = vi.spyOn(URL, "revokeObjectURL");
+    const blobUrl = registerPendingImage(new Blob(["x"]), vi.fn());
+    const onChange = vi.fn();
+    const props = baseProps({ deferUpload: true, onChange, value: blobUrl });
+    const { rerender } = render(<ImageUploader {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const { options } = lastToast();
+    rerender(<ImageUploader {...props} value={b} />);
+    expect(isPendingImage(blobUrl)).toBe(false);
+    act(() => options.onDismiss());
+    act(() => options.action.onClick());
+    expect(onChange).not.toHaveBeenLastCalledWith(blobUrl);
+    expect(revoke.mock.calls.filter(([u]) => u === blobUrl)).toHaveLength(1);
+    revoke.mockRestore();
+  });
+
+  it("Undo still works after an unrelated rerender while the value is null", () => {
+    const onChange = vi.fn();
+    const props = baseProps({ value: a, onChange });
+    const { rerender } = render(<ImageUploader {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    rerender(<ImageUploader {...props} value={null} />);
+    rerender(<ImageUploader {...props} value={null} className="other" />);
+    act(() => lastToast().options.action.onClick());
+    expect(onChange).toHaveBeenLastCalledWith(a);
+  });
+
+  it("a throwing onChange leaves no open removal and shows no toast", () => {
+    const blobUrl = registerPendingImage(new Blob(["x"]), vi.fn());
+    const onChange = vi.fn(() => {
+      throw new Error("boom");
+    });
+    const { unmount } = render(
+      <ImageUploader {...baseProps({ deferUpload: true, onChange, value: blobUrl })} />,
+    );
+    const button = screen.getByRole("button", { name: "Remove image" });
+    const swallow = (event: ErrorEvent) => event.preventDefault();
+    window.addEventListener("error", swallow);
+    fireEvent.click(button);
+    window.removeEventListener("error", swallow);
+    expect(toast).not.toHaveBeenCalled();
+    expect(isPendingImage(blobUrl)).toBe(true);
+    unmount();
   });
 });

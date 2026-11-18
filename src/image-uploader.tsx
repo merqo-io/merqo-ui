@@ -327,16 +327,30 @@ export function ImageUploader({
   const focusTriggerOnEmpty = React.useRef(false);
   // Undo outlives the render that created it, so it must call the latest handler.
   const onChangeRef = React.useRef(onChange);
+  const valueRef = React.useRef(value);
   React.useEffect(() => {
     onChangeRef.current = onChange;
+    valueRef.current = value;
   });
 
   // The remove button unmounts with the image, which would drop focus to the body.
   React.useEffect(() => {
+    const entry = removed.current;
+    if (entry && value) {
+      // The parent set a value while Undo was open; restoring would overwrite it.
+      if (value === entry.value) {
+        entry.settled = true;
+        removed.current = null;
+        toast.dismiss(entry.toastId);
+        if (isPendingImage(value)) owned.current.add(value);
+      } else {
+        settleOpenRemoval(removed);
+      }
+    }
     if (!focusTriggerOnEmpty.current) return;
     focusTriggerOnEmpty.current = false;
     if (!value) triggerRef.current?.focus();
-  }, [value]);
+  }, [value, owned]);
 
   function removeImage(current: string) {
     settleOpenRemoval(removed);
@@ -346,7 +360,17 @@ export function ImageUploader({
     owned.current.delete(current);
     setErrorMessage(null);
     focusTriggerOnEmpty.current = true;
-    onChange(null);
+    // Ordered before onChange because the owned-previews sweep may run in the
+    // render it triggers; a throwing consumer must leave no half-open removal.
+    try {
+      onChange(null);
+    } catch (error) {
+      entry.settled = true;
+      removed.current = null;
+      focusTriggerOnEmpty.current = false;
+      if (isPendingImage(current)) owned.current.add(current);
+      throw error;
+    }
     entry.toastId = toast("Image removed", {
       duration: UNDO_TOAST_MS,
       action: { label: "Undo", onClick: () => undoRemove(entry) },
@@ -357,6 +381,10 @@ export function ImageUploader({
 
   function undoRemove(entry: RemovedImage) {
     if (entry.settled || !mounted.current) return;
+    if (valueRef.current) {
+      settleRemoved(entry, removed, true);
+      return;
+    }
     entry.settled = true;
     if (removed.current === entry) removed.current = null;
     if (isPendingImage(entry.value)) owned.current.add(entry.value);

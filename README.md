@@ -283,7 +283,8 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   stays pending until the toast closes, a new image is picked or the
   component unmounts, so Undo restores a still-committable image. Undo needs
   the kit to render a sonner `Toaster` (the `Providers` export does); without
-  one, removal still works but offers no undo.
+  one, removal still works but offers no undo. Undo is withdrawn when the
+  `value` prop is set to something else while the toast is open.
 - `DashboardTour` — wires up `driver.js` (config, lifecycle, floating
   replay button, `driver.js` + its CSS both lazily self-imported) from an
   injected `steps` array/resolver, `onFirstSeen` callback, `isHomeRoute`,

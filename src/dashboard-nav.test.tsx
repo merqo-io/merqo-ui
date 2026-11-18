@@ -252,4 +252,12 @@ describe("DashboardNav touch target", () => {
     const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
     expect(burger).toHaveClass("relative", "pointer-coarse:after:size-11");
   });
+
+  it("opens the mobile panel by touch", async () => {
+    const user = userEvent.setup();
+    render(<DashboardNav {...baseProps} />);
+    const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+    await user.pointer({ keys: "[TouchA]", target: burger });
+    expect(burger).toHaveAttribute("aria-expanded", "true");
+  });
 });

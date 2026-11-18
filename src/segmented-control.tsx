@@ -133,7 +133,7 @@ export function SegmentedControl<T extends string = string>({
               track
                 ? [
                     // Finger-sized on a touch screen whatever the mouse size.
-                    "rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [@media(pointer:coarse)]:min-h-11",
+                    "rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11",
                     TRACK_SIZE[size].item,
                     checked
                       ? "bg-primary/10 text-primary"

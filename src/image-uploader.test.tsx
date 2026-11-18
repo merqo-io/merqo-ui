@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
   ImageUploader,
   type ImageUploaderProps,
@@ -655,6 +656,29 @@ describe("ImageUploader touch and legibility", () => {
     expect(screen.getByRole("button", { name: "Remove image" })).toHaveClass(
       "pointer-coarse:after:size-11",
     );
+  });
+
+  it("keeps the coarse hit area inside the clipping preview box", () => {
+    render(<ImageUploader {...baseProps({ value: "https://cdn.example.test/a.webp" })} />);
+    expect(screen.getByRole("button", { name: "Remove image" })).toHaveClass(
+      "pointer-coarse:top-2",
+      "pointer-coarse:right-2",
+    );
+  });
+
+  it("removes the image by touch", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <ImageUploader
+        {...baseProps({ value: "https://cdn.example.test/a.webp", onChange })}
+      />,
+    );
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Remove image" }),
+    });
+    expect(onChange).toHaveBeenCalledWith(null);
   });
 
   it("uses no text smaller than text-xs in the thumb trigger", () => {

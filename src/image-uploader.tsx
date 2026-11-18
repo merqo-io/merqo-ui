@@ -187,7 +187,8 @@ function UploadTrigger({
       aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
       aria-busy={uploading}
       className={cn(
-        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed transition-colors disabled:opacity-60",
+        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center rounded-xl border border-dashed transition-colors disabled:opacity-60",
+        variant === "thumb" ? "gap-1" : "gap-1.5",
         box,
       )}
     >
@@ -220,7 +221,7 @@ function UploadTrigger({
           </span>
           {!uploading && (
             <span className="text-muted-foreground/80 px-1 text-center text-xs leading-tight">
-              JPG · PNG · WebP
+              {"JPG · PNG · WebP"}
             </span>
           )}
         </>
@@ -388,7 +389,7 @@ export function ImageUploader({
               discardPendingImage(value);
               onChange(null);
             }}
-            className="bg-background/90 text-foreground hover:bg-background absolute top-1.5 right-1.5 inline-flex size-7 items-center justify-center rounded-full shadow-sm backdrop-blur pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']"
+            className="bg-background/90 text-foreground hover:bg-background absolute top-1.5 right-1.5 pointer-coarse:top-2 pointer-coarse:right-2 inline-flex size-7 items-center justify-center rounded-full shadow-sm backdrop-blur pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']"
             aria-label="Remove image"
           >
             <X className="size-3.5" />

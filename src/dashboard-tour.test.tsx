@@ -1,5 +1,5 @@
 import * as React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { DashboardTour, type DashboardTourProps } from "./dashboard-tour";
 
@@ -629,14 +629,22 @@ describe("DashboardTour — regressions (N1, N2)", () => {
 });
 
 describe("DashboardTour reduced motion", () => {
-  async function startWith(reduced: boolean) {
-    const original = window.matchMedia;
-    window.matchMedia = ((q: string) => ({
-      matches: reduced,
-      media: q,
-      addEventListener() {},
-      removeEventListener() {},
-    })) as unknown as typeof window.matchMedia;
+  const original = window.matchMedia;
+  afterEach(() => {
+    window.matchMedia = original;
+    vi.doUnmock("driver.js");
+  });
+
+  async function startWith(reduced: boolean | "missing") {
+    window.matchMedia =
+      reduced === "missing"
+        ? (undefined as unknown as typeof window.matchMedia)
+        : (((q: string) => ({
+            matches: reduced,
+            media: q,
+            addEventListener() {},
+            removeEventListener() {},
+          })) as unknown as typeof window.matchMedia);
     const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
       drive: vi.fn(),
       destroy: vi.fn(),
@@ -651,8 +659,6 @@ describe("DashboardTour reduced motion", () => {
       button.click();
     });
     await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
-    window.matchMedia = original;
-    vi.doUnmock("driver.js");
     return driverSpy.mock.calls[0]![0];
   }
 
@@ -663,6 +669,11 @@ describe("DashboardTour reduced motion", () => {
 
   it("keeps them on otherwise", async () => {
     const config = await startWith(false);
+    expect(config).toMatchObject({ animate: true, smoothScroll: true });
+  });
+
+  it("falls back to animated when matchMedia is missing", async () => {
+    const config = await startWith("missing");
     expect(config).toMatchObject({ animate: true, smoothScroll: true });
   });
 

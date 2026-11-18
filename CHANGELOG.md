@@ -4,7 +4,7 @@
 
 ### Changed
 
-- `DashboardNav` burger and `ImageUploader` remove button get a 44px hit area on coarse pointers; `SegmentedControl` `pill` options reach 44px tall on coarse pointers. Desktop size is unchanged.
+- `DashboardNav` burger and `ImageUploader` remove button get a 44px hit area on coarse pointers; `SegmentedControl` `pill` options reach 44px tall on coarse pointers. Desktop size is unchanged. The `ImageUploader` remove button shifts 2px inward on coarse pointers so its hit area is not clipped by the preview box.
 - `ImageUploader` thumb trigger text is `text-xs` (was 10px and 9px); the format hint wraps inside the 80px square.
 - `AsyncSubmitButton`, `ImageUploader` and `VendorTelegramSection` spinners stay as a static icon under `prefers-reduced-motion`.
 - `DashboardTour` turns off driver.js animation and smooth scrolling under `prefers-reduced-motion`, and its replay button drops the hover scale.

@@ -72,7 +72,8 @@ function buildDriverConfig(
   scopeClassName: string,
   onDestroyed: () => void,
 ) {
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
   return {
     animate: !reduced,
     smoothScroll: !reduced,

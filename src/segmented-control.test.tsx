@@ -249,7 +249,7 @@ describe("SegmentedControl coarse pointer height", () => {
       />,
     );
     for (const radio of screen.getAllByRole("radio")) {
-      expect(radio.className).toMatch(/pointer(-coarse:min-h-11|:coarse\)\]:min-h-11)/);
+      expect(radio).toHaveClass("pointer-coarse:min-h-11");
     }
   });
 });

@@ -437,11 +437,13 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   near-identical in the other 2 (one kit's own copy literally commented
   "Mirrors qkit's identical component").
 - `SearchField({aria-label | aria-labelledby, placeholder?, value?,
-  defaultValue?, onValueChange?, size?, wrapperClassName?, className?,
+  defaultValue?, onValueChange?, clearLabel?, size?, wrapperClassName?, className?,
   ...inputProps})` (`ref` forwarded to the input) — a `type="search"` `Input`
   with a leading search icon and a clear button. Controlled (`value` +
   `onValueChange`) or uncontrolled (`defaultValue`); `onValueChange(text)`
-  fires on typing and with `""` on clear, and `onChange` still works. The
+  fires on typing and with `""` on clear and Escape; `onChange` fires on typing
+  only, so use `onValueChange` to observe a clear. `clearLabel` (default
+  `"Clear search"`) names the clear button. The
   clear button ("Clear search") shows only while there is text, has a 44px
   hit area around a 16px icon, empties the field and returns focus to it;
   Escape does the same. The native WebKit cancel button is hidden so there is

@@ -54,6 +54,16 @@ describe("SearchField", () => {
     expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull();
   });
 
+  it("gives the clear button a touch pressed state", () => {
+    render(<SearchField aria-label="Search" defaultValue="x" />);
+    expect(screen.getByRole("button", { name: "Clear search" }).className).toContain("active:bg-accent");
+  });
+
+  it("lets the clear button label be overridden", () => {
+    render(<SearchField aria-label="Search" defaultValue="x" clearLabel="Clear filter" />);
+    expect(screen.getByRole("button", { name: "Clear filter" })).toBeInTheDocument();
+  });
+
   it("gives the clear button a 44px hit area", () => {
     render(<SearchField aria-label="Search" defaultValue="x" />);
     expect(screen.getByRole("button", { name: "Clear search" })).toHaveClass("size-11");

@@ -18,6 +18,8 @@ export type SearchFieldProps = Omit<
     value?: string;
     defaultValue?: string;
     onValueChange?: (value: string) => void;
+    /** Accessible name of the clear button. */
+    clearLabel?: string;
     /** Classes for the wrapper; `className` goes to the input. */
     wrapperClassName?: string;
   };
@@ -32,6 +34,7 @@ const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
       onKeyDown,
       className,
       wrapperClassName,
+      clearLabel = "Clear search",
       disabled,
       ...props
     },
@@ -89,9 +92,9 @@ const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
         {current !== "" && !disabled && (
           <button
             type="button"
-            aria-label="Clear search"
+            aria-label={clearLabel}
             onClick={clear}
-            className="absolute top-1/2 right-0 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="absolute top-1/2 right-0 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none hover:text-foreground active:bg-accent active:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <X aria-hidden="true" className="size-4" />
           </button>

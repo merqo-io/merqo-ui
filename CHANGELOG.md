@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Primitives are operable by touch: `Switch`, `Checkbox` and the `Dialog` close button get a 44px hit area on coarse pointers without changing their desktop size, and `DropdownMenuItem`, `DropdownMenuRadioItem`, `DropdownMenuSubTrigger` and `SelectItem` are at least 44px tall on coarse pointers.
+- `SheetContent` opens in 300ms (was 500ms) and closes in 200ms (was 300ms).
+- `Sheet`, `Dialog`, `AlertDialog`, `DropdownMenu`, `Popover`, `Tooltip` and `Select` content no longer animate under `prefers-reduced-motion`; they still appear and disappear.
+- The `Dialog` and `Sheet` close buttons show their focus ring on `:focus-visible` only, so a mouse or touch press leaves no ring.
 - `DashboardNav` burger and `ImageUploader` remove button get a 44px hit area on coarse pointers; `SegmentedControl` `pill` options reach 44px tall on coarse pointers. Desktop size is unchanged. The `ImageUploader` remove button shifts 2px inward on coarse pointers so its hit area is not clipped by the preview box.
 - `ImageUploader` thumb trigger text is `text-xs` (was 10px and 9px); the format hint wraps inside the 80px square.
 - `AsyncSubmitButton`, `ImageUploader` and `VendorTelegramSection` spinners stay as a static icon under `prefers-reduced-motion`.

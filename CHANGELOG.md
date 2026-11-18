@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-11-18
+
 ### Added
 
 - `docs/public-page-rules.md`: the shared rules for the kits' public pages (shape, shadow, hover and focus, motion, threes, copy), linked from each kit's `DESIGN.md`.

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-11-18
+
 ### Changed
 
 - `AccountMenu` no longer draws a rule around the top extra link or "Switch products"; rules remain under the identity label, before Theme and before Sign out.

@@ -275,11 +275,13 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   **must** pass `variant="banner"` explicitly when migrating, or it will
   silently render as a small square with the wrong resize target. The
   preview `<img>` takes `previewAlt` (default "Uploaded image preview",
-  since v0.35.0).
+  since v0.35.0). The remove button has a 44px hit area on coarse
+  pointers and the pending spinner stays still under reduced motion.
 - `DashboardTour` — wires up `driver.js` (config, lifecycle, floating
   replay button, `driver.js` + its CSS both lazily self-imported) from an
   injected `steps` array/resolver, `onFirstSeen` callback, `isHomeRoute`,
-  and `navigateHome` — the tour mechanism is shared, tour content, routing,
+  and `navigateHome` (animation and smooth scrolling are off under
+  `prefers-reduced-motion`) — the tour mechanism is shared, tour content, routing,
   and "has this user seen it" persistence stay entirely kit-local. The
   replay button renders on every page (not just the tour's home route);
   replaying from elsewhere navigates home first, then auto-runs once

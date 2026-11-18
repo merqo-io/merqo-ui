@@ -33,3 +33,13 @@ describe("AsyncSubmitButton", () => {
     expect(button).toHaveAttribute("aria-busy", "true");
   });
 });
+
+describe("AsyncSubmitButton reduced motion", () => {
+  it("spins only when motion is allowed and keeps the icon", () => {
+    render(<AsyncSubmitButton pending>Save</AsyncSubmitButton>);
+    const icon = screen.getByRole("button").querySelector("svg")!;
+    const tokens = icon.getAttribute("class")!.split(" ");
+    expect(tokens).toContain("motion-safe:animate-spin");
+    expect(tokens).not.toContain("animate-spin");
+  });
+});

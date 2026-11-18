@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import * as React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -775,5 +775,60 @@ describe("LoginForm", () => {
         expect(screen.getByLabelText("Password")).toBeInTheDocument();
       });
     });
+  });
+});
+
+describe("LoginForm shake on failure", () => {
+  function stubAnimate() {
+    const animate = vi.fn();
+    HTMLElement.prototype.animate = animate;
+    window.matchMedia = vi
+      .fn()
+      .mockImplementation(() => ({ matches: false })) as unknown as typeof window.matchMedia;
+    return animate;
+  }
+
+  afterEach(() => {
+    // @ts-expect-error restoring jsdom, which has no animate
+    delete HTMLElement.prototype.animate;
+  });
+
+  it("shakes the fields after a failed attempt, again on an identical one, not on mount", async () => {
+    const animate = stubAnimate();
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn().mockResolvedValue("Wrong password")} mapError={(raw) => raw} />);
+    expect(animate).not.toHaveBeenCalled();
+    await fill(user);
+    const button = screen.getByRole("button", { name: "Sign in" });
+    await user.pointer({ keys: "[TouchA]", target: button });
+    await waitFor(() => expect(animate).toHaveBeenCalledTimes(1));
+    expect((animate.mock.instances[0] as HTMLElement).contains(screen.getByLabelText("Email"))).toBe(true);
+    await user.pointer({ keys: "[TouchA]", target: button });
+    await waitFor(() => expect(animate).toHaveBeenCalledTimes(2));
+  });
+
+  it("shakes when the callback throws", async () => {
+    const animate = stubAnimate();
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn().mockRejectedValue(new Error("boom"))} />);
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Sign in" })).catch(() => {});
+    await waitFor(() => expect(animate).toHaveBeenCalledTimes(1));
+  });
+
+  it("does not shake on a notice or an initial error", async () => {
+    const animate = stubAnimate();
+    const user = userEvent.setup();
+    render(<LoginForm onPasswordSignIn={vi.fn().mockResolvedValue({ notice: "Check your email" })} />);
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await screen.findByText("Check your email");
+    expect(animate).not.toHaveBeenCalled();
+  });
+
+  it("does not shake for an error passed in on mount", () => {
+    const animate = stubAnimate();
+    render(<LoginForm onPasswordSignIn={vi.fn()} initialError="Link expired" />);
+    expect(animate).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MfaForm } from "./mfa-form";
@@ -262,5 +262,53 @@ describe("MfaForm enrolment", () => {
     render(<MfaForm hasFactor={false} onVerify={vi.fn()} onEnrol={vi.fn().mockRejectedValue(undefined)} />);
     await user.click(screen.getByRole("button", { name: "Set up authenticator" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not start setup. Try again.");
+  });
+});
+
+describe("MfaForm shake on failure", () => {
+  function stubAnimate() {
+    const animate = vi.fn();
+    HTMLElement.prototype.animate = animate;
+    window.matchMedia = vi
+      .fn()
+      .mockImplementation(() => ({ matches: false })) as unknown as typeof window.matchMedia;
+    return animate;
+  }
+
+  afterEach(() => {
+    // @ts-expect-error restoring jsdom, which has no animate
+    delete HTMLElement.prototype.animate;
+  });
+
+  it("shakes the code field after a wrong code and again on the same wrong code", async () => {
+    const animate = stubAnimate();
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn().mockResolvedValue("Invalid code")} mapError={(raw) => raw} />);
+    await user.type(screen.getByLabelText("6-digit code"), "123456");
+    const button = screen.getByRole("button", { name: "Verify" });
+    await user.pointer({ keys: "[TouchA]", target: button });
+    await waitFor(() => expect(animate).toHaveBeenCalledTimes(1));
+    expect((animate.mock.instances[0] as HTMLElement).contains(screen.getByLabelText("6-digit code"))).toBe(true);
+    await user.pointer({ keys: "[TouchA]", target: button });
+    await waitFor(() => expect(animate).toHaveBeenCalledTimes(2));
+  });
+
+  it("shakes for a code that is too short", async () => {
+    const animate = stubAnimate();
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn()} />);
+    await user.type(screen.getByLabelText("6-digit code"), "12");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    expect(animate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not shake on success or on mount", async () => {
+    const animate = stubAnimate();
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn().mockResolvedValue(undefined)} />);
+    await user.type(screen.getByLabelText("6-digit code"), "123456");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Verify" })).toBeEnabled());
+    expect(animate).not.toHaveBeenCalled();
   });
 });

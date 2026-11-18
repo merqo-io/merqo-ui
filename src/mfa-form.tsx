@@ -5,6 +5,7 @@ import { rawErrorText, runOnce } from "./auth-form-utils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { shake, useShakeOnFailure } from "./lib/shake";
 import { useAsyncAction } from "./use-async-action";
 
 export type MfaEnrolment = {
@@ -84,6 +85,7 @@ export function MfaForm({
   const [lastKind, setLastKind] = React.useState<keyof typeof COPY>("verify");
 
   const inflight = React.useRef(false);
+  const fieldRef = React.useRef<HTMLDivElement>(null);
 
   // Provider strings and thrown errors can leak account state, so without a
   // kit-supplied mapError only the generic line is ever shown.
@@ -111,6 +113,7 @@ export function MfaForm({
 
   const shown =
     message ?? (error !== null ? translate(rawErrorText(error), lastKind) : null);
+  useShakeOnFailure(fieldRef, pending, Boolean(shown));
 
   const showMessage = (result: string | void, kind: keyof typeof COPY) => {
     if (typeof result === "string" && result) setMessage(translate(result, kind));
@@ -122,6 +125,7 @@ export function MfaForm({
     event.preventDefault();
     if (!CODE.test(code)) {
       setMessage(COPY.short);
+      shake(fieldRef.current);
       return;
     }
     submit({
@@ -190,7 +194,7 @@ export function MfaForm({
         {enrolment ? (
           <EnrolmentDetails enrolment={enrolment} />
         ) : null}
-        <div className="space-y-2">
+        <div ref={fieldRef} className="space-y-2">
           <Label htmlFor="mfa-code">6-digit code</Label>
           <Input
             id="mfa-code"

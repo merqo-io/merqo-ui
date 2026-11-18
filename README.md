@@ -436,6 +436,20 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   Promoted 2026-09-16 after being found byte-identical in 2 of 4 kits and
   near-identical in the other 2 (one kit's own copy literally commented
   "Mirrors qkit's identical component").
+- `SearchField({aria-label | aria-labelledby, placeholder?, value?,
+  defaultValue?, onValueChange?, size?, wrapperClassName?, className?,
+  ...inputProps})` (`ref` forwarded to the input) — a `type="search"` `Input`
+  with a leading search icon and a clear button. Controlled (`value` +
+  `onValueChange`) or uncontrolled (`defaultValue`); `onValueChange(text)`
+  fires on typing and with `""` on clear, and `onChange` still works. The
+  clear button ("Clear search") shows only while there is text, has a 44px
+  hit area around a 16px icon, empties the field and returns focus to it;
+  Escape does the same. The native WebKit cancel button is hidden so there is
+  one clear control. An accessible name is required. `className` styles the
+  input, `wrapperClassName` the wrapper (for example `sm:w-64`); `size="lg"`
+  is the `Input` size. It does not debounce: debounce in the caller if the
+  list is expensive. A form-submit search (loopkit's customer search) can use
+  it uncontrolled with `name="q"`.
 - `PageHeader({eyebrow?, title, description?, children?, action?, back?,
   responsive?, className, ...rest})` — top of a dashboard/admin page:
   `back` slot, small-caps eyebrow, display-font h1, muted line

@@ -24,6 +24,7 @@ const ENTRIES = {
   avatar: "src/avatar.tsx",
   "form-field": "src/form-field.tsx",
   "back-button": "src/back-button.tsx",
+  "search-field": "src/search-field.tsx",
   "back-to-top": "src/back-to-top.tsx",
   "dashboard-nav": "src/dashboard-nav.tsx",
   "dashboard-tour": "src/dashboard-tour.tsx",

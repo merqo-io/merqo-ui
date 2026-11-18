@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import * as React from "react";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
@@ -6,6 +7,25 @@ import {
   type ImageUploaderProps,
   type ImagePreviewProps,
 } from "./image-uploader";
+import { toast } from "sonner";
+import {
+  commitPendingImages,
+  isPendingImage,
+  registerPendingImage,
+} from "./pending-image";
+
+vi.mock("sonner", () => {
+  let next = 0;
+  const toast = Object.assign(
+    vi.fn((_message: string, _options?: unknown) => `toast-${++next}`),
+    { dismiss: vi.fn() },
+  );
+  return { toast };
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 function makeFile(
   name = "photo.jpg",
@@ -695,5 +715,274 @@ describe("ImageUploader touch and legibility", () => {
     const tokens = trigger.querySelector("svg")!.getAttribute("class")!.split(" ");
     expect(tokens).toContain("motion-safe:animate-spin");
     expect(tokens).not.toContain("animate-spin");
+  });
+});
+
+interface ToastOptions {
+  duration: number;
+  action: { label: string; onClick: () => void };
+  onDismiss: () => void;
+  onAutoClose: () => void;
+}
+
+function lastToast(): { id: string; message: string; options: ToastOptions } {
+  const calls = vi.mocked(toast).mock.calls;
+  const index = calls.length - 1;
+  return {
+    id: vi.mocked(toast).mock.results[index].value as string,
+    message: calls[index][0] as string,
+    options: calls[index][1] as unknown as ToastOptions,
+  };
+}
+
+function Harness({
+  initial,
+  onChange,
+  ...rest
+}: {
+  initial: string | null;
+  onChange?: (url: string | null) => void;
+} & Partial<ImageUploaderProps>) {
+  const [value, setValue] = React.useState<string | null>(initial);
+  return (
+    <ImageUploader
+      {...baseProps({
+        ...rest,
+        value,
+        onChange: (url) => {
+          onChange?.(url);
+          setValue(url);
+        },
+      })}
+    />
+  );
+}
+
+describe("ImageUploader: undo remove", () => {
+  const url = "https://cdn.example.test/a.webp";
+
+  it("a touch tap on remove removes at once and shows the Undo toast", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Harness initial={url} onChange={onChange} />);
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Remove image" }),
+    });
+    expect(onChange).toHaveBeenCalledWith(null);
+    const { message, options } = lastToast();
+    expect(message).toBe("Image removed");
+    expect(options.action.label).toBe("Undo");
+    expect(options.duration).toBe(8000);
+  });
+
+  it("moves focus to the upload trigger after remove", async () => {
+    render(<Harness initial={url} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Add photo" })).toHaveFocus(),
+    );
+  });
+
+  it("undo restores a plain URL through onChange", () => {
+    const onChange = vi.fn();
+    render(<Harness initial={url} onChange={onChange} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    act(() => lastToast().options.action.onClick());
+    expect(onChange).toHaveBeenLastCalledWith(url);
+    expect(
+      screen.getByRole("button", { name: "Remove image" }),
+    ).toBeInTheDocument();
+  });
+
+  it("undo restores a deferred value that is still committable", async () => {
+    const onUpload = vi
+      .fn()
+      .mockResolvedValue("https://cdn.example.test/up.webp");
+    const onChange = vi.fn();
+    const { container } = render(
+      <Harness
+        initial={null}
+        deferUpload
+        onUpload={onUpload}
+        onChange={onChange}
+      />,
+    );
+    await selectFile(container, makeFile());
+    const blobUrl = onChange.mock.calls[0][0] as string;
+    expect(isPendingImage(blobUrl)).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    await act(async () => {});
+    expect(isPendingImage(blobUrl)).toBe(true);
+    act(() => lastToast().options.action.onClick());
+    await act(async () => {});
+
+    expect(onChange).toHaveBeenLastCalledWith(blobUrl);
+    expect(isPendingImage(blobUrl)).toBe(true);
+    const committed = await commitPendingImages([blobUrl]);
+    expect(committed.urls).toEqual(["https://cdn.example.test/up.webp"]);
+  });
+
+  it("discards the pending image once when the toast closes without undo", async () => {
+    const revoke = vi.spyOn(URL, "revokeObjectURL");
+    const onChange = vi.fn();
+    const { container } = render(
+      <Harness initial={null} deferUpload onChange={onChange} />,
+    );
+    await selectFile(container, makeFile());
+    const blobUrl = onChange.mock.calls[0][0] as string;
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    await act(async () => {});
+    expect(isPendingImage(blobUrl)).toBe(true);
+
+    const { options } = lastToast();
+    act(() => options.onAutoClose());
+    act(() => options.onDismiss());
+    expect(isPendingImage(blobUrl)).toBe(false);
+    expect(revoke.mock.calls.filter(([u]) => u === blobUrl)).toHaveLength(1);
+
+    act(() => options.action.onClick());
+    expect(onChange).toHaveBeenLastCalledWith(null);
+    revoke.mockRestore();
+  });
+
+  it("picking a new image dismisses the open toast and a late Undo cannot overwrite it", async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <Harness
+        initial="https://cdn.example.test/old.webp"
+        onChange={onChange}
+        onUpload={vi
+          .fn()
+          .mockResolvedValue("https://cdn.example.test/new.webp")}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const first = lastToast();
+    await selectFile(container, makeFile());
+    expect(toast.dismiss).toHaveBeenCalledWith(first.id);
+    expect(onChange).toHaveBeenLastCalledWith(
+      "https://cdn.example.test/new.webp",
+    );
+    const calls = onChange.mock.calls.length;
+    act(() => first.options.action.onClick());
+    expect(onChange).toHaveBeenCalledTimes(calls);
+  });
+
+  it("unmounting with the toast open discards once, dismisses, and Undo is inert", async () => {
+    const revoke = vi.spyOn(URL, "revokeObjectURL");
+    const onChange = vi.fn();
+    const { container, unmount } = render(
+      <Harness initial={null} deferUpload onChange={onChange} />,
+    );
+    await selectFile(container, makeFile());
+    const blobUrl = onChange.mock.calls[0][0] as string;
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const { id, options } = lastToast();
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    unmount();
+    await act(async () => {});
+    expect(isPendingImage(blobUrl)).toBe(false);
+    expect(toast.dismiss).toHaveBeenCalledWith(id);
+
+    const calls = onChange.mock.calls.length;
+    act(() => options.action.onClick());
+    act(() => options.onDismiss());
+    expect(onChange).toHaveBeenCalledTimes(calls);
+    expect(revoke.mock.calls.filter(([u]) => u === blobUrl)).toHaveLength(1);
+    expect(errors).not.toHaveBeenCalled();
+    errors.mockRestore();
+    revoke.mockRestore();
+  });
+
+  it("removing twice keeps each toast tied to its own value", async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <Harness
+        initial="https://cdn.example.test/one.webp"
+        onChange={onChange}
+        onUpload={vi
+          .fn()
+          .mockResolvedValue("https://cdn.example.test/two.webp")}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const first = lastToast();
+    await selectFile(container, makeFile());
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const second = lastToast();
+    expect(second.id).not.toBe(first.id);
+
+    act(() => first.options.action.onClick());
+    expect(onChange).toHaveBeenLastCalledWith(null);
+    act(() => second.options.action.onClick());
+    expect(onChange).toHaveBeenLastCalledWith(
+      "https://cdn.example.test/two.webp",
+    );
+  });
+});
+
+describe("ImageUploader: undo is withdrawn when the value changes elsewhere", () => {
+  const a = "https://cdn.example.test/a.webp";
+  const b = "https://cdn.example.test/b.webp";
+
+  it("an external value dismisses the toast and a late Undo cannot overwrite it", () => {
+    const onChange = vi.fn();
+    const props = baseProps({ value: a, onChange });
+    const { rerender } = render(<ImageUploader {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const { id, options } = lastToast();
+    rerender(<ImageUploader {...props} value={b} />);
+    expect(toast.dismiss).toHaveBeenCalledWith(id);
+    act(() => options.action.onClick());
+    expect(onChange).not.toHaveBeenCalledWith(a);
+  });
+
+  it("discards a deferred removed image once when the value is set elsewhere", () => {
+    const revoke = vi.spyOn(URL, "revokeObjectURL");
+    const blobUrl = registerPendingImage(new Blob(["x"]), vi.fn());
+    const onChange = vi.fn();
+    const props = baseProps({ deferUpload: true, onChange, value: blobUrl });
+    const { rerender } = render(<ImageUploader {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    const { options } = lastToast();
+    rerender(<ImageUploader {...props} value={b} />);
+    expect(isPendingImage(blobUrl)).toBe(false);
+    act(() => options.onDismiss());
+    act(() => options.action.onClick());
+    expect(onChange).not.toHaveBeenLastCalledWith(blobUrl);
+    expect(revoke.mock.calls.filter(([u]) => u === blobUrl)).toHaveLength(1);
+    revoke.mockRestore();
+  });
+
+  it("Undo still works after an unrelated rerender while the value is null", () => {
+    const onChange = vi.fn();
+    const props = baseProps({ value: a, onChange });
+    const { rerender } = render(<ImageUploader {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    rerender(<ImageUploader {...props} value={null} />);
+    rerender(<ImageUploader {...props} value={null} className="other" />);
+    act(() => lastToast().options.action.onClick());
+    expect(onChange).toHaveBeenLastCalledWith(a);
+  });
+
+  it("a throwing onChange leaves no open removal and shows no toast", () => {
+    const blobUrl = registerPendingImage(new Blob(["x"]), vi.fn());
+    const onChange = vi.fn(() => {
+      throw new Error("boom");
+    });
+    const { unmount } = render(
+      <ImageUploader {...baseProps({ deferUpload: true, onChange, value: blobUrl })} />,
+    );
+    const button = screen.getByRole("button", { name: "Remove image" });
+    const swallow = (event: ErrorEvent) => event.preventDefault();
+    window.addEventListener("error", swallow);
+    fireEvent.click(button);
+    window.removeEventListener("error", swallow);
+    expect(toast).not.toHaveBeenCalled();
+    expect(isPendingImage(blobUrl)).toBe(true);
+    unmount();
   });
 });

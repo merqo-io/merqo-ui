@@ -5,27 +5,34 @@ import { Tooltip as TooltipPrimitive } from "radix-ui";
 
 import { cn } from "../lib/utils";
 
+// Lets Tooltip tell whether an app-level provider exists. A provider per
+// tooltip would reset Radix's skip-delay window, so neighbouring tooltips
+// could never open instantly while the user is browsing a toolbar.
+const TooltipProviderContext = React.createContext(false);
+
 function TooltipProvider({
-  delayDuration = 0,
+  delayDuration = 300,
+  skipDelayDuration = 300,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
-      {...props}
-    />
+    <TooltipProviderContext.Provider value={true}>
+      <TooltipPrimitive.Provider
+        data-slot="tooltip-provider"
+        delayDuration={delayDuration}
+        skipDelayDuration={skipDelayDuration}
+        {...props}
+      />
+    </TooltipProviderContext.Provider>
   );
 }
 
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  );
+  const hasProvider = React.useContext(TooltipProviderContext);
+  const root = <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
+  return hasProvider ? root : <TooltipProvider>{root}</TooltipProvider>;
 }
 
 function TooltipTrigger({

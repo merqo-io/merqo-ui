@@ -8,6 +8,7 @@
 
 ### Changed
 
+- `Faq` answers expand and collapse smoothly where the browser supports `::details-content` and `interpolate-size`; others toggle instantly as before; reduced motion turns it off.
 - `DeltaPill` up state now uses the semantic `bg-success/12 text-success` instead of fixed emerald, with no `dark:` variant. A kit must define `--success` and expose it as the `success` colour (as qkit and printkit do, via `--color-success: var(--success)` in `@theme inline`), otherwise the up pill renders with no tint. paykit, loopkit, stockkit and merqo must add it when they move their pin. The token should give at least 4.5:1 for `text-success` on the 12% tint over the card, in light and dark.
 - `ElevatedCard` uses `shadow-sm` instead of `shadow-md`: a quieter soft shadow on `AuthShell`, `StatusCard`, `StatTile` and `Section` (elevated). Border and `rounded-2xl` are unchanged.
 - Comments now explain the deliberate literals: the white QR frame in `VendorTelegramSection` and the `Dialog` overlay scrim.

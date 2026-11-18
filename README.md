@@ -480,7 +480,9 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   native `<details>`, so it works by touch, keyboard and screen reader.
   `items` is `{question, answer}[]` (nodes allowed); the content stays in
   the kit. Renders nothing for an empty list. Items use `rounded-lg`, so
-  the kit's `--radius` token sets the corners. Server-safe.
+  the kit's `--radius` token sets the corners. Answers animate their height
+  where the browser supports `::details-content` and `interpolate-size`
+  (others toggle instantly); reduced motion turns it off. Server-safe.
 - `FaqRows({rows})` and `type FaqRow = {q, a}` — ruled native `<details>`
   rows (44px summary, `+` and `-` marker) for the three landing objections
   under a `Journey`. Use `Faq` for a carded accordion with an eyebrow and

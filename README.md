@@ -590,6 +590,15 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   on its right, hidden below `sm` and truncated. The side is fixed across kits; there is no prop to flip it.
 - `AsyncSubmitButton({pending, pendingChildren?, className?, children})` — submit button with a spinner,
   `aria-busy` and disabled state while pending. Also used inside `FeedbackSheet` and `HelpSheet`.
+- `CopyButton({value, label?="Copy", copiedLabel?="Copied", onCopied?, onError?, variant?="outline", size?="sm", ...buttonProps})` —
+  copies `value` with `navigator.clipboard.writeText`, swaps the icon to a check and shows `copiedLabel` for 2s, and
+  announces it through a polite live region. On failure (or no clipboard) it calls `onError` and shows no copied state.
+  It never toasts; the caller decides. Built on `Button`, so it keeps the 44px touch target on coarse pointers.
+- `downloadBlob(blob, filename)` — plain helper (no `"use client"`, browser only): creates an object URL, clicks a
+  temporary anchor and revokes the URL after 1s. Also at `@merqo/ui/download`. Kits keep building their own CSV text.
+- `DownloadButton({label?="Download", pendingLabel?, onDownload, onError?, variant?="outline", size?="sm", ...buttonProps})` —
+  runs `onDownload` (sync or async), stays disabled with `aria-busy` and a spinner until it settles, and passes a
+  rejection to `onError`.
 - `FORM_LABEL_CLASS` — small-caps field label classes. `FORM_ERROR_CLASS` —
   the `text-sm font-medium text-destructive` classes `FormError` renders, for
   error text a kit lays out itself. `FormError({message, id?, className?})` — inline

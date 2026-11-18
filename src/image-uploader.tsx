@@ -2,9 +2,14 @@
 
 import * as React from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "./lib/utils";
-import { discardPendingImage, registerPendingImage } from "./pending-image";
+import {
+  discardPendingImage,
+  isPendingImage,
+  registerPendingImage,
+} from "./pending-image";
 
 /** Wide booth/banner shape vs. the small square avatar/product shape. */
 export type ImageUploaderVariant = "banner" | "thumb";
@@ -88,6 +93,9 @@ export interface ImageUploaderProps {
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 
 const DEFAULT_MAX_BYTES = 15 * 1024 * 1024;
+// Sonner's 4s default is too short to reach an Undo action by thumb after a
+// mis-tap on a phone.
+const UNDO_TOAST_MS = 8000;
 // Longest-side target per use: a wide banner vs a small square photo.
 const DEFAULT_MAX_DIM: Record<ImageUploaderVariant, number> = {
   banner: 1600,
@@ -166,11 +174,13 @@ function trimSlashes(value: string): string {
 }
 
 function UploadTrigger({
+  buttonRef,
   variant,
   uploading,
   box,
   onPick,
 }: {
+  buttonRef: React.Ref<HTMLButtonElement>;
   variant: ImageUploaderVariant;
   uploading: boolean;
   box: string;
@@ -178,6 +188,7 @@ function UploadTrigger({
 }) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onPick}
       disabled={uploading}
@@ -230,7 +241,41 @@ function UploadTrigger({
   );
 }
 
-function useOwnedPreviews(value: string | null) {
+/**
+ * An image the vendor just removed. A deferred `blob:` preview stays
+ * registered as pending until `settled`, so Undo can restore a value that
+ * `commitPendingImages` still uploads.
+ */
+interface RemovedImage {
+  value: string;
+  toastId: string | number;
+  settled: boolean;
+}
+
+/**
+ * Ends an undo window exactly once: the pending image is dropped and, when
+ * the toast is still open, it is dismissed so a late Undo cannot fire.
+ */
+function settleRemoved(
+  entry: RemovedImage,
+  slot: React.RefObject<RemovedImage | null>,
+  dismiss: boolean,
+) {
+  if (entry.settled) return;
+  entry.settled = true;
+  if (slot.current === entry) slot.current = null;
+  if (dismiss) toast.dismiss(entry.toastId);
+  discardPendingImage(entry.value);
+}
+
+function settleOpenRemoval(slot: React.RefObject<RemovedImage | null>) {
+  if (slot.current) settleRemoved(slot.current, slot, true);
+}
+
+function useOwnedPreviews(
+  value: string | null,
+  removed: React.RefObject<RemovedImage | null>,
+) {
   const owned = React.useRef(new Set<string>());
   const mounted = React.useRef(false);
   React.useEffect(() => {
@@ -243,9 +288,10 @@ function useOwnedPreviews(value: string | null) {
         if (mounted.current) return;
         previews.forEach(discardPendingImage);
         previews.clear();
+        settleOpenRemoval(removed);
       });
     };
-  }, []);
+  }, [removed]);
   React.useEffect(() => {
     for (const preview of owned.current) {
       if (preview === value) continue;
@@ -273,9 +319,49 @@ export function ImageUploader({
   className,
 }: ImageUploaderProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const { owned, mounted } = useOwnedPreviews(value);
+  const removed = React.useRef<RemovedImage | null>(null);
+  const { owned, mounted } = useOwnedPreviews(value, removed);
   const [uploading, setUploading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const focusTriggerOnEmpty = React.useRef(false);
+  // Undo outlives the render that created it, so it must call the latest handler.
+  const onChangeRef = React.useRef(onChange);
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  });
+
+  // The remove button unmounts with the image, which would drop focus to the body.
+  React.useEffect(() => {
+    if (!focusTriggerOnEmpty.current) return;
+    focusTriggerOnEmpty.current = false;
+    if (!value) triggerRef.current?.focus();
+  }, [value]);
+
+  function removeImage(current: string) {
+    settleOpenRemoval(removed);
+    const entry: RemovedImage = { value: current, toastId: "", settled: false };
+    removed.current = entry;
+    // Keep a deferred preview alive; the owned-previews sweep would discard it.
+    owned.current.delete(current);
+    setErrorMessage(null);
+    focusTriggerOnEmpty.current = true;
+    onChange(null);
+    entry.toastId = toast("Image removed", {
+      duration: UNDO_TOAST_MS,
+      action: { label: "Undo", onClick: () => undoRemove(entry) },
+      onDismiss: () => settleRemoved(entry, removed, false),
+      onAutoClose: () => settleRemoved(entry, removed, false),
+    });
+  }
+
+  function undoRemove(entry: RemovedImage) {
+    if (entry.settled || !mounted.current) return;
+    entry.settled = true;
+    if (removed.current === entry) removed.current = null;
+    if (isPendingImage(entry.value)) owned.current.add(entry.value);
+    onChangeRef.current(entry.value);
+  }
 
   const [previousValue, setPreviousValue] = React.useState(value);
   // Reset stale errors before children render the replacement image.
@@ -356,6 +442,7 @@ export function ImageUploader({
     // consumer's own onChange throws, that's the consumer's bug, not an
     // upload failure — letting it propagate avoids silently orphaning the
     // just-written storage object behind a misleading "failed" message.
+    settleOpenRemoval(removed);
     discardPendingImage(value);
     onChange(uploadedUrl);
   }
@@ -384,11 +471,7 @@ export function ImageUploader({
           />
           <button
             type="button"
-            onClick={() => {
-              setErrorMessage(null);
-              discardPendingImage(value);
-              onChange(null);
-            }}
+            onClick={() => removeImage(value)}
             className="bg-background/90 text-foreground hover:bg-background absolute top-1.5 right-1.5 pointer-coarse:top-2 pointer-coarse:right-2 inline-flex size-7 items-center justify-center rounded-full shadow-sm backdrop-blur pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']"
             aria-label="Remove image"
           >
@@ -397,6 +480,7 @@ export function ImageUploader({
         </div>
       ) : (
         <UploadTrigger
+          buttonRef={triggerRef}
           variant={variant}
           uploading={uploading}
           box={box}

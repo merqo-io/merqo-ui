@@ -148,12 +148,17 @@ describe("ImageUploader with deferUpload", () => {
     expect(paths[0]).not.toBe(paths[1]);
   });
 
-  it("discards the pending image when the vendor removes it", () => {
+  it("keeps a removed pending image for Undo and discards it when the form unmounts", async () => {
     const preview = registerPendingImage(blob(), vi.fn());
     const onChange = vi.fn();
-    render(<ImageUploader {...baseProps({ onChange, value: preview })} />);
+    const { unmount } = render(
+      <ImageUploader {...baseProps({ onChange, value: preview })} />,
+    );
     fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
     expect(onChange).toHaveBeenCalledWith(null);
+    expect(isPendingImage(preview)).toBe(true);
+    unmount();
+    await act(async () => {});
     expect(isPendingImage(preview)).toBe(false);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith(preview);
   });

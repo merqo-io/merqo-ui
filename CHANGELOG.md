@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `ImageUploader` removal now shows an "Image removed" toast with an "Undo" action (8 seconds) and moves focus to the upload trigger. Undo restores the removed value through `onChange`, including a deferred `blob:` preview, which is discarded only when the toast closes, a new image is picked or the component unmounts. The toast needs a sonner `Toaster` (the `Providers` export renders one); without one, removal still works with no undo.
+
 ## [0.53.0] - 2026-11-18
 
 ### Changed

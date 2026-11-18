@@ -66,3 +66,29 @@ describe("Faq reduced motion", () => {
     expect(icon).toHaveClass("motion-reduce:transition-none");
   });
 });
+
+describe("Faq height motion", () => {
+  it("animates the details content height with a reduced-motion guard", () => {
+    render(<Faq items={ITEMS} />);
+    const details = document.querySelector("details")!;
+    for (const cls of [
+      "[interpolate-size:allow-keywords]",
+      "details-content:h-0",
+      "details-content:overflow-clip",
+      "details-content:transition-[height,content-visibility]",
+      "details-content:[transition-behavior:allow-discrete]",
+      "open:details-content:h-auto",
+      "open:details-content:duration-250",
+      "motion-reduce:details-content:transition-none",
+    ]) {
+      expect(details).toHaveClass(cls);
+    }
+  });
+
+  it("renders on the server and carries no client directive", async () => {
+    const { renderToString } = await import("react-dom/server");
+    const { readFileSync } = await import("node:fs");
+    expect(renderToString(<Faq items={ITEMS} />)).toContain("Is it free?");
+    expect(readFileSync(`${process.cwd()}/src/faq.tsx`, "utf8")).not.toContain("use client");
+  });
+});

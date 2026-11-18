@@ -41,7 +41,13 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
           {items.map((item, i) => (
             <details
               key={i}
-              className="group overflow-hidden rounded-lg border border-border bg-card open:border-primary/50"
+              className={cn(
+                "group overflow-hidden rounded-lg border border-border bg-card open:border-primary/50",
+                // The height animation needs ::details-content and interpolate-size; without them the toggle stays instant.
+                "[interpolate-size:allow-keywords] details-content:h-0 details-content:overflow-clip",
+                "details-content:transition-[height,content-visibility] details-content:duration-180 details-content:ease-[cubic-bezier(0.16,1,0.3,1)] details-content:[transition-behavior:allow-discrete]",
+                "open:details-content:h-auto open:details-content:duration-250 motion-reduce:details-content:transition-none",
+              )}
             >
               <summary className="flex min-h-11 cursor-pointer list-none [&::-webkit-details-marker]:hidden items-start justify-between gap-4 px-5 py-4 outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset">
                 <span className="text-base font-semibold leading-snug text-foreground">
@@ -49,7 +55,7 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
                 </span>
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-border text-lg leading-none text-muted-foreground transition-transform motion-reduce:transition-none group-open:rotate-45"
+                  className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-border text-lg leading-none text-muted-foreground transition-transform duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none group-open:rotate-45 group-open:duration-250"
                 >
                   +
                 </span>

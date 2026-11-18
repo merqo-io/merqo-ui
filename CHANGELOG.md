@@ -9,6 +9,7 @@
 
 ### Changed
 
+- `StatusBadge` reads as a label: no border, `px-2 py-0.5`, `font-medium`, not selectable. Border colour classes in a kit's status `config` no longer render; the tint and text colour carry the status. `StatTile` captions sit at `mt-auto`, so captions line up at the bottom of cards in a grid row.
 - `Faq` answers expand and collapse smoothly where the browser supports `::details-content` and `interpolate-size`; others toggle instantly as before; reduced motion turns it off.
 - `TooltipProvider` now defaults to `delayDuration={300}` and `skipDelayDuration={300}` (was an instant open), so moving across a toolbar no longer flashes every tooltip; neighbours open instantly while browsing. `Tooltip` reuses an outer `TooltipProvider` when one exists, so its settings and skip delay apply; it only wraps itself in a default provider otherwise. Keyboard focus still opens at once and `InfoTooltip` tap mode is unchanged. Kits whose tests hover and assert a tooltip synchronously may need `findBy` or fake timers when they move their pin.
 - `DeltaPill` up state now uses the semantic `bg-success/12 text-success` instead of fixed emerald, with no `dark:` variant. A kit must define `--success` and expose it as the `success` colour (as qkit and printkit do, via `--color-success: var(--success)` in `@theme inline`), otherwise the up pill renders with no tint. paykit, loopkit, stockkit and merqo must add it when they move their pin. The token should give at least 4.5:1 for `text-success` on the 12% tint over the card, in light and dark.

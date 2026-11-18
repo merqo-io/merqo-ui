@@ -107,4 +107,31 @@ describe("CopyButton", () => {
     expect(btn).toHaveAttribute("data-x", "1");
     expect(btn).toHaveAttribute("type", "button");
   });
+
+  it("renders a single root element", () => {
+    const { container } = render(<CopyButton value="x" />);
+    expect(container.children).toHaveLength(1);
+  });
+
+  it("re-announces a second copy within the reset window", async () => {
+    const user = setup();
+    render(<CopyButton value="x" />);
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("button") });
+    const first = screen.getByRole("status");
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("button") });
+    expect(screen.getByRole("status")).not.toBe(first);
+    expect(screen.getByRole("status")).toHaveTextContent("Copied");
+  });
+
+  it("does not call onCopied after unmount", async () => {
+    let resolve!: () => void;
+    writeText.mockReturnValue(new Promise<void>((r) => (resolve = r)));
+    const onCopied = vi.fn();
+    const user = setup();
+    const { unmount } = render(<CopyButton value="x" onCopied={onCopied} />);
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("button") });
+    unmount();
+    await act(async () => resolve());
+    expect(onCopied).not.toHaveBeenCalled();
+  });
 });

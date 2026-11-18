@@ -32,7 +32,18 @@ export function CopyButton({
   const [copied, setCopied] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const mounted = React.useRef(true);
+  // Remounting the status span per copy makes a repeat copy within the reset
+  // window announce again; unchanged live-region text is not re-read.
+  const [copyCount, setCopyCount] = React.useState(0);
+
+  React.useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(timer.current);
+    };
+  }, []);
 
   async function copy() {
     try {
@@ -42,14 +53,16 @@ export function CopyButton({
       onError?.(err);
       return;
     }
+    if (!mounted.current) return;
     setCopied(true);
+    setCopyCount((n) => n + 1);
     onCopied?.();
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setCopied(false), RESET_MS);
   }
 
   return (
-    <>
+    <span className="inline-flex">
       <Button
         type="button"
         variant={variant}
@@ -60,9 +73,9 @@ export function CopyButton({
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
         {copied ? copiedLabel : label}
       </Button>
-      <span role="status" aria-live="polite" className="sr-only">
+      <span key={copyCount} role="status" aria-live="polite" className="sr-only">
         {copied ? copiedLabel : ""}
       </span>
-    </>
+    </span>
   );
 }

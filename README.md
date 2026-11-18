@@ -454,12 +454,29 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   Adds `icon` (label-row icon, ignored when `delta`/`deltaSlot` is set),
   `featured` (tinted card, primary value) and `className` for the card.
 - `ConfirmDialog({trigger?, title, description, confirmLabel, cancelLabel?,
-  pendingLabel?, variant?, onConfirm, errorMessage?, open?, onOpenChange?})`
+  pendingLabel?, variant?, consequence?, confirmPhrase?, onConfirm, errorMessage?, open?, onOpenChange?})`
   — confirm/cancel alert dialog. `onConfirm` may be async: the dialog stays
   open and busy until it settles, closes on success, and on a throw stays
   open with the message inline (retry allowed). A Next.js redirect error is
   treated as navigation. Callers fire their own success toast inside
   `onConfirm`.
+  `consequence` is what is permanently lost: shown after the description in
+  full-strength text and announced with it. `confirmPhrase` adds a "Type
+  <phrase> to confirm" field and keeps the confirm button disabled until the
+  trimmed entry matches, ignoring case; Enter confirms once it matches. With
+  a phrase set and no `variant`, the button is destructive.
+
+### Destructive actions
+
+Pick the lightest tier that fits, and prefer undo over confirm whenever a
+restore exists.
+
+1. Reversible: act immediately, then offer `undoToast()`.
+2. Irreversible (hard delete, refund, revoke): `ConfirmDialog` with
+   `variant="destructive"` and a `consequence` naming what is lost. Keep the
+   confirm label a verb for the action, such as "Delete booth".
+3. High-stakes (cascading deletes, money leaving the vendor): add
+   `confirmPhrase` so the vendor types the name of the thing first.
 - `EmptyState({icon?, title, description?, children?, actions?, className, size?, role?})`
   — dashed "nothing here yet" card with up to two actions. `size="compact"`
   is for a one-line message inside a list or card ("No vendors yet."): the

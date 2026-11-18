@@ -45,7 +45,7 @@ export function undoToast({
     if (settled) return;
     settled = true;
     if (reason !== "expired") toast.dismiss(id);
-    if (reason !== "undone") onSettle?.(reason);
+    onSettle?.(reason);
   };
 
   id = toast(message, {
@@ -54,10 +54,12 @@ export function undoToast({
       label: undoLabel,
       onClick: () => {
         if (settled) return;
+        // Marked settled before onUndo so a dismiss() inside it cannot report a second reason.
+        settled = true;
         try {
           onUndo();
         } finally {
-          settle("undone");
+          toast.dismiss(id);
           onSettle?.("undone");
         }
       },

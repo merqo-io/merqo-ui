@@ -123,6 +123,18 @@ describe("undoToast", () => {
     expect(onSettle).toHaveBeenCalledWith("undone");
   });
 
+  it("settles once as undone when onUndo calls dismiss()", () => {
+    const onSettle = vi.fn();
+    const handle: UndoToastHandle = undoToast({
+      message: "Item removed",
+      onUndo: () => handle.dismiss(),
+      onSettle,
+    });
+    lastOptions().action.onClick();
+    expect(onSettle).toHaveBeenCalledTimes(1);
+    expect(onSettle).toHaveBeenCalledWith("undone");
+  });
+
   it("still settles when onUndo throws", () => {
     const onSettle = vi.fn();
     undoToast({

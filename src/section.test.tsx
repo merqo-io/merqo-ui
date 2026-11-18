@@ -256,7 +256,8 @@ describe("Section surface", () => {
     );
     const shell = container.querySelector("section");
     expect(shell).toHaveClass("bg-card", "border", "p-6", "mine");
-    expect(shell).not.toHaveClass("shadow-sm");
+    expect(shell).toHaveClass("rounded-2xl");
+    expect(shell).not.toHaveClass("rounded-lg");
   });
 
   it('surface="none" drops the card chrome', () => {

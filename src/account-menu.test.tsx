@@ -669,3 +669,30 @@ describe("AccountMenu separators", () => {
     expect(await screen.findByRole("menuitemradio", { name: /dark/i })).toBeInTheDocument();
   });
 });
+
+describe("AccountMenu pressed feedback", () => {
+  it("gives the trigger a pressed state that respects reduced motion", () => {
+    render(<AccountMenu {...baseProps} />);
+    const trigger = screen.getByRole("button", { name: "Account menu" });
+    expect(trigger).toHaveClass("active:opacity-70", "motion-reduce:transition-none");
+  });
+
+  it("gives every item, sub trigger and theme option a touch-pressed state", async () => {
+    const user = await openMenu({
+      switchKits: [{ label: "loopkit", href: "https://loopkit-sg.vercel.app" }],
+      kitLocalSettingsHref: "/dashboard/settings",
+      showPlanItem: true,
+    });
+    await screen.findByRole("menuitem", { name: /profile/i });
+    await user.pointer({ keys: "[TouchA]", target: await screen.findByText(/^Theme/) });
+    await screen.findAllByRole("menuitemradio");
+    const slots =
+      '[data-slot="dropdown-menu-item"], [data-slot="dropdown-menu-sub-trigger"], [data-slot="dropdown-menu-radio-item"]';
+    const targets = Array.from(document.querySelectorAll(slots));
+    expect(targets.length).toBeGreaterThan(6);
+    for (const el of targets) {
+      expect(el.className).toMatch(/(^|\s)active:bg-/);
+    }
+    expect(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]')).toHaveLength(3);
+  });
+});

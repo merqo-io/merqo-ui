@@ -84,6 +84,7 @@ function ConnectPanel({
   if (link) {
     return (
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+        {/* Literal white on purpose: a QR code needs a light quiet zone to scan, including in dark mode. */}
         <div className="shrink-0 rounded-xl border bg-white p-2">
           {/* An <img> never executes script or handlers inside SVG, unlike injected markup. */}
           <img

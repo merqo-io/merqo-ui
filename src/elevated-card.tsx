@@ -21,7 +21,7 @@ export function ElevatedCard({
   return (
     <As
       className={cn(
-        "rounded-2xl border bg-card shadow-md",
+        "rounded-2xl border bg-card shadow-sm",
         className,
       )}
       {...props}

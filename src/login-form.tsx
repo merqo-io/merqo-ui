@@ -330,7 +330,7 @@ function CredentialFields({
           disabled={pending}
           {...aria}
           onChange={onChange}
-          className="h-11 rounded-xl text-base"
+          size="lg"
         />
       </div>
       <div className="space-y-2">
@@ -365,7 +365,7 @@ function CredentialFields({
           disabled={pending}
           {...aria}
           onChange={onChange}
-          className="h-11 rounded-xl text-base"
+          size="lg"
         />
       </div>
     </>

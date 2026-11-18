@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Input` `size` prop: `"default"` (unchanged) or `"lg"` (`h-11 rounded-xl text-base`). Kits can replace their `className="h-11 rounded-xl text-base"` overrides with `size="lg"`. The native numeric `size` attribute is no longer accepted on `Input`; no kit used it. `LoginForm`, `MfaForm`, `ResetPasswordForm` and `SocialLinksFields` use `size="lg"` with identical output.
+
 ### Changed
 
 - `DeltaPill` up state now uses the semantic `bg-success/12 text-success` instead of fixed emerald, with no `dark:` variant. A kit must define `--success` and expose it as the `success` colour (as qkit and printkit do, via `--color-success: var(--success)` in `@theme inline`), otherwise the up pill renders with no tint. paykit, loopkit, stockkit and merqo must add it when they move their pin. The token should give at least 4.5:1 for `text-success` on the 12% tint over the card, in light and dark.

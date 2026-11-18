@@ -54,7 +54,7 @@ export function SocialLinksFields({
               id={id}
               value={value[key] ?? ""}
               placeholder={placeholder}
-              className="h-11 rounded-xl"
+              size="lg"
               onChange={(e) => setField(key, e.target.value)}
             />
           </div>

@@ -1227,6 +1227,9 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   pointers.
 - `Input` and `SelectTrigger` are 36px (32px for `sm`) and 44px on coarse
   pointers. `Textarea` and `Label` have no size.
+- `Input` takes `size="default" | "lg"`. `lg` is `h-11 rounded-xl text-base`, the
+  large field style the kits used to copy as a className override; `className`
+  still merges last. The native numeric `size` attribute is not accepted.
 - `Badge`, `badgeVariants`, `BadgeProps`. Variants: `default`, `secondary`,
   `destructive`, `outline`, `ghost`, `link`, `muted`, `success`. A kit that needs a gold badge wraps
   `Badge` locally.

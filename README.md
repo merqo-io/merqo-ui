@@ -1074,8 +1074,13 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
   `"dismissed"` (swipe, close or `handle.dismiss()`), so a caller can defer a
   hard delete until the window closes. `dismiss()` withdraws Undo and is safe
   to repeat. It does no focus management; move focus yourself. Needs a
-  `Toaster` (`Providers` renders one). Use it for reversible actions only;
-  irreversible ones use `ConfirmDialog`.
+  `Toaster` (`Providers` renders one). Use it only when the action is truly
+  reversible (a deferred commit or a soft delete); irreversible ones use
+  `ConfirmDialog`. The message names the object and the outcome ("Photo
+  removed"); the button verb is Undo. Keyboard users reach toasts with Alt+T,
+  sonner's default hotkey. Sonner pauses the timer on hover, swipe and a hidden
+  tab but not on keyboard focus, so when the toast is the only way back, pass a
+  longer `duration` (or `Infinity`) to meet WCAG 2.2.1.
 - `Wordmark({children, size?, href?, label?, LinkComponent?, className?})` -
   the frame only: display font, weight, tracking, a `size` of `sm`
   (`text-lg`), `md` (default, `text-xl`), `lg` or `xl` (`text-3xl`), and an

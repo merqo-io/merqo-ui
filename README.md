@@ -1060,8 +1060,22 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
 - `ThemeProvider`, `Toaster` and `Providers({children, theme?, toaster?})` -
   `ThemeProvider` is next-themes preloaded with `themeProps` from
   `@merqo/ui/next`; `Toaster` is sonner (top-right, `richColors`) that follows
-  the resolved theme. `Providers` is both together. Needs the `next-themes`
-  and `sonner` peers; replaces stockkit's local `theme-provider`.
+  the resolved theme and gives toast action buttons a 44px touch target on
+  coarse pointers (desktop size unchanged). `Providers` is both together. Needs
+  the `next-themes` and `sonner` peers; replaces stockkit's local
+  `theme-provider`.
+- `undoToast({message, onUndo, undoLabel?, duration?, onSettle?})` - the Undo
+  toast for a reversible action that has already happened. Returns
+  `{id, dismiss()}`. `message` is past tense and reuses the verb of the control
+  that triggered it ("Item removed" after "Remove"); `undoLabel` defaults to
+  "Undo"; `duration` defaults to 8000 ms because sonner's 4 s is too short to
+  reach by thumb. `onUndo` runs at most once and the toast then closes.
+  `onSettle(reason)` fires exactly once with `"undone"`, `"expired"` or
+  `"dismissed"` (swipe, close or `handle.dismiss()`), so a caller can defer a
+  hard delete until the window closes. `dismiss()` withdraws Undo and is safe
+  to repeat. It does no focus management; move focus yourself. Needs a
+  `Toaster` (`Providers` renders one). Use it for reversible actions only;
+  irreversible ones use `ConfirmDialog`.
 - `Wordmark({children, size?, href?, label?, LinkComponent?, className?})` -
   the frame only: display font, weight, tracking, a `size` of `sm`
   (`text-lg`), `md` (default, `text-xl`), `lg` or `xl` (`text-3xl`), and an

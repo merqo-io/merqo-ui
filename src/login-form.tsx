@@ -6,6 +6,7 @@ import { rawErrorText, runOnce } from "./auth-form-utils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { useShakeOnFailure } from "./lib/shake";
 import { useAsyncAction } from "./use-async-action";
 
 export type LoginMode = "signin" | "signup";
@@ -280,6 +281,7 @@ function CredentialFields({
   onForgot,
   Link,
   onChange,
+  fieldsRef,
   emailRef,
   passwordRef,
   defaultEmail,
@@ -287,6 +289,7 @@ function CredentialFields({
   passwordPlaceholder,
   passwordLabelSlot,
 }: {
+  fieldsRef: React.RefObject<HTMLDivElement | null>;
   emailRef: React.RefObject<HTMLInputElement | null>;
   passwordRef: React.RefObject<HTMLInputElement | null>;
   defaultEmail: string | undefined;
@@ -313,7 +316,7 @@ function CredentialFields({
   // Only wrap when there is a slot, so the row is unchanged for existing consumers.
   const hasSlot = passwordLabelSlot !== null && passwordLabelSlot !== undefined && passwordLabelSlot !== false;
   return (
-    <>
+    <div ref={fieldsRef} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="login-email" className={LABEL_CLASS}>
           Email
@@ -368,7 +371,7 @@ function CredentialFields({
           size="lg"
         />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -422,6 +425,7 @@ export function LoginForm({
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const refocusPassword = React.useRef(false);
+  const fieldsRef = React.useRef<HTMLDivElement>(null);
 
   // Provider strings and thrown errors can leak account state, so without a
   // kit-supplied mapError only the generic line is ever shown.
@@ -462,6 +466,7 @@ export function LoginForm({
   const thrown =
     error === null ? null : thrownMessage(error, lastContext, translate, connectErrorMessage);
   const shown = message ?? thrown;
+  useShakeOnFailure(fieldsRef, pending, Boolean(shown));
 
   const isSignin = mode === "signin";
   let submitLabel = "Create account";
@@ -550,6 +555,7 @@ export function LoginForm({
           onForgot={onForgotPassword ? forgot : undefined}
           Link={Link}
           onChange={clearError}
+          fieldsRef={fieldsRef}
           emailRef={emailRef}
           passwordRef={passwordRef}
           defaultEmail={emailValue}

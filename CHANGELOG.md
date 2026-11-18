@@ -5,7 +5,8 @@
 ### Changed
 
 - `AccountMenu` no longer draws a rule around the top extra link or "Switch products"; rules remain under the identity label, before Theme and before Sign out.
-- `StatusBadge`, `TierChip`, `StatTile` labels and `DeltaPill` now use `text-xs` at minimum with no arbitrary size or tracking. Uppercase, mono and heavy weight are dropped; props and variants are unchanged. Labels are slightly wider, so check tight table cells and rows.
+- `StatusBadge`, `TierChip`, `StatTile` labels and `DeltaPill` now use `text-xs` at minimum with no arbitrary size or tracking. Uppercase, mono and heavy weight are dropped; props and variants are unchanged. Labels now render in the case the caller passes (sentence case stays sentence case), so check any label that relied on forced uppercase.
+- `DeltaPill` `size` now only changes horizontal padding (`px-1` for `xs`, `px-1.5` for `sm`); text is `text-xs` in both sizes.
 
 ## [0.52.0] - 2026-11-18
 

@@ -166,6 +166,24 @@ works locally.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the
   route transition instead of the button re-enabling mid-navigation.
+- `usePolling(tick, {intervalMs, enabled})`: run `tick` (sync or async) every
+  `intervalMs` while `enabled`. It ticks once at once, then on each interval,
+  pauses while the tab is hidden (a pocketed phone stops hitting the server) and
+  ticks again the moment the tab is visible. A tick that is still pending is not
+  overlapped, and a rejected or throwing tick is retried on the next interval.
+  `tick` is read through a ref, so a new closure each render does not restart the
+  timer; only `intervalMs` and `enabled` do. To stop on a condition, flip
+  `enabled` to false when it is met; cleanup also runs on unmount.
+  ```tsx
+  const [done, setDone] = useState(false);
+  usePolling(
+    async () => {
+      const s = await getStatus(id);
+      if (s !== "pending") setDone(true);
+    },
+    { intervalMs: 3000, enabled: !done },
+  );
+  ```
   An action that throws a Next.js `redirect()` is treated the same way:
   `pending` stays true, `error` stays null and `run()` still rejects with
   the redirect, so a server action that ends in `redirect("/login")` never

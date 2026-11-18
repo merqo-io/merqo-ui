@@ -5,6 +5,7 @@ export type { PasswordRequirementsHintProps } from "./password-requirements-hint
 export { weakPasswordMessage, errorReasons } from "./weak-password-message";
 export type { WeakPasswordReason } from "./weak-password-message";
 export { useAsyncAction, navigatingAway } from "./use-async-action";
+export { usePolling } from "./use-polling";
 export { isRedirectError } from "./redirect-error";
 export { TwoColumnSections } from "./two-column-sections";
 export type { TwoColumnSectionsProps } from "./two-column-sections";

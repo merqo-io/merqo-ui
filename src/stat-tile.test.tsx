@@ -166,3 +166,17 @@ describe("StatTile legibility", () => {
     expect(pill?.className).not.toMatch(/text-\[/);
   });
 });
+
+describe("StatTile bottom anchoring", () => {
+  it("pushes the caption to the bottom of a stretched card", () => {
+    render(<StatTile card label="Orders" value="4" caption="3 pending" />);
+    const caption = screen.getByText("3 pending");
+    expect(caption).toHaveClass("mt-auto");
+    expect(caption.parentElement).toHaveClass("flex-col");
+  });
+
+  it("keeps the label row top-aligned so the label stays on one baseline", () => {
+    render(<StatTile card label="Orders" value="4" delta={5} />);
+    expect(screen.getByText("Orders").parentElement).toHaveClass("items-start");
+  });
+});

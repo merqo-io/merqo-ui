@@ -409,13 +409,16 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   for the text). Without it the up pill renders with no tint. paykit,
   loopkit, stockkit and merqo have no `--success` yet and must add it when
   they move their pin. The token should give at least 4.5:1 for
-  `text-success` on the 12% tint over the card, in light and dark.
+  `text-success` on the 12% tint over the card, in light and dark. The
+  caption sits at `mt-auto`, so in a grid of stretched cards the captions
+  line up at the bottom.
 - `StatusBadge<T>({status, config})` — the dot + bordered-pill status chip
-  shared across kits. `config: Record<T,
+  shared across kits; it is a label, so it has no shadow or hover state and
+  is never a button. `config: Record<T,
 {label, className}>` is caller-supplied (same "caller supplies the map"
   contract `AuditLogTable`'s `formatAction` established), so each kit keeps
   its own status set and colors — only the rendering shape (dot, border,
-  tint) is shared; the label is `text-xs` semibold, not uppercase. Extracted
+  tint) is shared; the label is `text-xs` medium, not uppercase. Extracted
   from qkit's original implementation over printkit's/paykit's plain shadcn
   `Badge` uses, since qkit's was the one built on real semantic status
   tokens rather than raw Tailwind literals mixed in ad hoc.

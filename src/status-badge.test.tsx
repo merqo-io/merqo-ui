@@ -44,3 +44,13 @@ describe("StatusBadge legibility", () => {
     expect(badge?.className).not.toMatch(/text-\[|tracking-\[|uppercase|font-bold/);
   });
 });
+
+describe("StatusBadge reads as a label", () => {
+  it("keeps the outline but has no shadow or hover affordance and is not a button", () => {
+    render(<StatusBadge status="pending" config={CONFIG} />);
+    const badge = screen.getByText("Waiting for you").closest("span");
+    expect(badge).toHaveClass("border");
+    expect(badge?.className).not.toMatch(/shadow|hover:|cursor-pointer|px-2\.5|py-1(\s|$)/);
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+});

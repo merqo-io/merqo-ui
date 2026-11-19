@@ -22,6 +22,7 @@
 - `ImageUploader` removal now shows an "Image removed" toast with an "Undo" action (8 seconds) and moves focus to the upload trigger. Undo restores the removed value through `onChange`, including a deferred `blob:` preview, which is discarded only when the toast closes, a new image is picked or the component unmounts. The toast needs a sonner `Toaster` (the `Providers` export renders one); without one, removal still works with no undo. Undo is withdrawn if the `value` prop changes elsewhere while the toast is open.
 - `LegalDocument` Back button and the `LegalFooterLinks` links now have a 44px tall hit area, an `active:` colour for touch and a focus-visible ring. Text size and position are unchanged; inside `Footer` the links render as before.
 - `SegmentedControl` options, the `AccountMenu` trigger, every menu item, sub-menu trigger and Light/Dark/System option now show a pressed state on touch (`active:` colour or opacity, no movement), not only on hover or focus. Transitions are off under `prefers-reduced-motion`. `BackToTop` already had one.
+- `StatusBadge` reads as a label: tighter `px-2 py-0.5`, `font-medium`, not selectable, no shadow or hover state; the outline stays. `StatTile` captions sit at `mt-auto`, so captions line up at the bottom of cards in a grid row.
 
 ## [0.53.0] - 2026-11-18
 

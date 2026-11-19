@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 import { authCookieOptions, type SupabaseConfig } from "./types";
+import { createRetryingFetch } from "./retry-fetch";
 
 export type UpdateSessionOptions = SupabaseConfig & {
   /** Path prefixes that need a session. Matched with `startsWith`, so "/admin" covers "/admin/x". */
@@ -81,6 +82,7 @@ export async function updateSupabaseSession(
     },
     ...(options.schema ? { db: { schema: options.schema } } : {}),
     cookieOptions: authCookieOptions(options.cookieDomain),
+    global: { fetch: createRetryingFetch() },
   });
 
   const pathname = request.nextUrl.pathname;

@@ -1617,6 +1617,9 @@ arguments, so the package reads no environment variables.
   `createSupabaseServerClient(config)` for the signed-in user, and
   `createSupabaseServiceClient({ url, secretKey, schema? })`, which bypasses
   RLS, attaches no request cookies and throws when `secretKey` is empty.
+  Both factories and `updateSupabaseSession` retry a GET or HEAD once when the
+  connection drops (a thrown network error); writes, aborts, timeouts and
+  HTTP error responses are never retried.
 - `@merqo/ui/supabase/middleware` (imports `next/server`):
   `updateSupabaseSession(request, { url, publishableKey, schema?, cookieDomain?, protectedPrefixes, loginPath?, refreshPublicRoutes? })`
   refreshes the session cookies, redirects an anonymous visitor on a
@@ -1797,10 +1800,13 @@ returns null and the app handles the link itself.
 `checkLegalAcceptance` asks merqo's `/api/merqo/legal-status` and compares
 the answer with `LEGAL_VERSIONS`. The answer is cached per lower-cased email
 in the kit's `legal_check_state` table (`email`, `checked_at`, `is_current`)
-for 5 minutes; a stale, invalid or future-dated row is a miss. It fails
-closed (returns `false`) for a missing secret, an unreachable merqo, a
-non-2xx or malformed response and a client error. Only the cache write fails
-open: if the upsert returns `{ error }` or throws, the error is logged and a
+for 5 minutes; a stale, invalid or future-dated row is a miss. Only a
+well-formed 200 from merqo is cached (current or not); a 500, 401, 400,
+invalid JSON or malformed body returns `false` without writing, so a transient
+failure never locks a vendor out for the TTL. The call retries once on a
+dropped connection or a 502/503/504, never on a timeout. It fails closed
+(returns `false`) for a missing secret, an unreachable merqo, a non-2xx or
+malformed response and a client error. Only the cache write fails open: if the upsert returns `{ error }` or throws, the error is logged and a
 vendor merqo reported as current is still `true`.
 
 ## Kit API helpers

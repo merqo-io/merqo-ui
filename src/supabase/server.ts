@@ -2,6 +2,7 @@ import { createServerClient, type CookieMethodsServer } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { authCookieOptions, type SchemaOf, type SupabaseConfig } from "./types";
+import { createRetryingFetch } from "./retry-fetch";
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
@@ -35,6 +36,7 @@ export async function createSupabaseServerClient<
     cookies: cookieMethods(cookieStore),
     ...(config.schema ? { db: { schema: config.schema as TSchema } } : {}),
     cookieOptions: authCookieOptions(config.cookieDomain),
+    global: { fetch: createRetryingFetch() },
   });
 }
 
@@ -63,6 +65,7 @@ export function createSupabaseServiceClient<
   return createServerClient<TDatabase, TSchema>(config.url, config.secretKey, {
     cookies: { getAll: () => [], setAll: () => {} },
     auth: { autoRefreshToken: false, persistSession: false },
+    global: { fetch: createRetryingFetch() },
     ...(config.schema ? { db: { schema: config.schema as TSchema } } : {}),
   });
 }

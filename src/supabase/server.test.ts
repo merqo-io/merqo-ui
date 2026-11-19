@@ -76,3 +76,15 @@ describe("createSupabaseServiceClient", () => {
     );
   });
 });
+
+describe("retrying fetch wiring", () => {
+  it("passes a retrying global fetch to both server factories", async () => {
+    createServerClient.mockClear();
+    await createSupabaseServerClient({ url: "u", publishableKey: "pk" });
+    createSupabaseServiceClient({ url: "u", secretKey: "sk" });
+    for (const call of createServerClient.mock.calls) {
+      const opts = call[2] as { global?: { fetch?: unknown } };
+      expect(typeof opts.global?.fetch).toBe("function");
+    }
+  });
+});

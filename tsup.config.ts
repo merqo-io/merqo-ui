@@ -93,6 +93,7 @@ const ENTRIES = {
   "brand-icon": "src/brand-icon.tsx",
   "kit-metadata": "src/kit-metadata.ts",
   providers: "src/providers.tsx",
+  "undo-toast": "src/undo-toast.ts",
   wordmark: "src/wordmark.tsx",
   "legal-page": "src/legal-page.tsx",
   "accept-terms": "src/accept-terms.tsx",

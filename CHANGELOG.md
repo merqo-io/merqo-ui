@@ -4,18 +4,26 @@
 
 ### Added
 
-- `usePolling(tick, {intervalMs, enabled})` hook, ported from qkit: ticks while the tab is visible, pauses when hidden and ticks again on return, never overlaps a pending async tick, and stops when `enabled` is false or on unmount. paykit (`pay-panel.tsx`) and printkit (`setup-step.tsx`) can replace their inline `setInterval` pollers with it; printkit would gain the hidden-tab pause.
+- `ConfirmDialog` `consequence` prop: what is permanently lost, shown after the description and announced with it. Optional; existing dialogs are unchanged.
+- `ConfirmDialog` `confirmPhrase` prop: a typed-confirmation field that keeps the confirm button disabled until the entry matches the phrase (trimmed, case-insensitive). Defaults `variant` to `destructive` when set.
+- README "Destructive actions" guidance: reversible actions use `undoToast()`, irreversible ones `ConfirmDialog` with `consequence`, high-stakes ones add `confirmPhrase`.
+- `undoToast({ message, onUndo, undoLabel?, duration?, onSettle? })`: shared Undo toast for reversible actions (8 second default; settles exactly once with `"undone"`, `"expired"` or `"dismissed"`). `ImageUploader` now uses it.
 - `LoginForm` and `MfaForm` give the fields a brief horizontal shake when an attempt fails, so the failure registers for a vendor looking at the keypad. It runs once per failed attempt (a repeated identical failure shakes again), never for a notice or on mount, and is skipped under `prefers-reduced-motion`, where the error text and red border remain.
 - `Input` `size` prop: `"default"` (unchanged) or `"lg"` (`h-11 rounded-xl text-base`). Kits can replace their `className="h-11 rounded-xl text-base"` overrides with `size="lg"`. The native numeric `size` attribute is no longer accepted on `Input`; no kit used it. `LoginForm`, `MfaForm`, `ResetPasswordForm` and `SocialLinksFields` use `size="lg"` with identical output.
+- `usePolling(tick, {intervalMs, enabled})` hook, ported from qkit: ticks while the tab is visible, pauses when hidden and ticks again on return, never overlaps a pending async tick, and stops when `enabled` is false or on unmount. paykit (`pay-panel.tsx`) and printkit (`setup-step.tsx`) can replace their inline `setInterval` pollers with it; printkit would gain the hidden-tab pause.
 
 ### Changed
 
+- `Toaster` gives toast action buttons a 44px touch target on coarse pointers; desktop size is unchanged.
 - `Faq` answers expand and collapse smoothly where the browser supports `::details-content` and `interpolate-size`; others toggle instantly as before; reduced motion turns it off.
 - `TooltipProvider` now defaults to `delayDuration={300}` and `skipDelayDuration={300}` (was an instant open), so moving across a toolbar no longer flashes every tooltip; neighbours open instantly while browsing. `Tooltip` reuses an outer `TooltipProvider` when one exists, so its settings and skip delay apply; it only wraps itself in a default provider otherwise. Keyboard focus still opens at once and `InfoTooltip` tap mode is unchanged. Kits whose tests hover and assert a tooltip synchronously may need `findBy` or fake timers when they move their pin.
 - `DeltaPill` up state now uses the semantic `bg-success/12 text-success` instead of fixed emerald, with no `dark:` variant. A kit must define `--success` and expose it as the `success` colour (as qkit and printkit do, via `--color-success: var(--success)` in `@theme inline`), otherwise the up pill renders with no tint. paykit, loopkit, stockkit and merqo must add it when they move their pin. The token should give at least 4.5:1 for `text-success` on the 12% tint over the card, in light and dark.
 - `ElevatedCard` uses `shadow-sm` instead of `shadow-md`: a quieter soft shadow on `AuthShell`, `StatusCard`, `StatTile` and `Section` (elevated). Border and `rounded-2xl` are unchanged.
 - Comments now explain the deliberate literals: the white QR frame in `VendorTelegramSection` and the `Dialog` overlay scrim.
 - `ImageUploader` removal now shows an "Image removed" toast with an "Undo" action (8 seconds) and moves focus to the upload trigger. Undo restores the removed value through `onChange`, including a deferred `blob:` preview, which is discarded only when the toast closes, a new image is picked or the component unmounts. The toast needs a sonner `Toaster` (the `Providers` export renders one); without one, removal still works with no undo. Undo is withdrawn if the `value` prop changes elsewhere while the toast is open.
+- `LegalDocument` Back button and the `LegalFooterLinks` links now have a 44px tall hit area, an `active:` colour for touch and a focus-visible ring. Text size and position are unchanged; inside `Footer` the links render as before.
+- `SegmentedControl` options, the `AccountMenu` trigger, every menu item, sub-menu trigger and Light/Dark/System option now show a pressed state on touch (`active:` colour or opacity, no movement), not only on hover or focus. Transitions are off under `prefers-reduced-motion`. `BackToTop` already had one.
+- `StatusBadge` reads as a label: tighter `px-2 py-0.5`, `font-medium`, not selectable, no shadow or hover state; the outline stays. `StatTile` captions sit at `mt-auto`, so captions line up at the bottom of cards in a grid row.
 
 ## [0.53.0] - 2026-11-18
 

@@ -213,6 +213,8 @@ export type { NotFoundProps } from "./not-found-page";
 export { brandIcon, ICON_SIZE, APPLE_ICON_SIZE } from "./brand-icon";
 export type { BrandIconOptions } from "./brand-icon";
 export { kitMetadata } from "./kit-metadata";
+export { undoToast } from "./undo-toast";
+export type { UndoToastOptions, UndoToastHandle, UndoSettleReason } from "./undo-toast";
 export { ThemeProvider, Toaster, Providers } from "./providers";
 export type { ProvidersProps } from "./providers";
 export { Wordmark } from "./wordmark";

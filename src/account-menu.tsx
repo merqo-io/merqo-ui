@@ -37,6 +37,9 @@ import {
 } from "./ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 
+// Radix highlights on pointer hover and keyboard focus only; a touch press needs its own state.
+const MENU_PRESS = "active:bg-accent active:text-accent-foreground";
+
 export type AccountMenuGetHelp =
   | { type: "mailto"; address: string }
   | { type: "drawer"; content: React.ReactNode }
@@ -126,14 +129,14 @@ function HelpMenuEntry({ getHelp, Link, openHelp }: {
   openHelp: () => void;
 }) {
   if (getHelp.type === "mailto") return (
-    <DropdownMenuItem asChild><a href={`mailto:${getHelp.address}`}><HelpCircle className="size-4" />Get help</a></DropdownMenuItem>
+    <DropdownMenuItem asChild className={MENU_PRESS}><a href={`mailto:${getHelp.address}`}><HelpCircle className="size-4" />Get help</a></DropdownMenuItem>
   );
   if (getHelp.type === "drawer" || getHelp.type === "form") return (
-    <DropdownMenuItem onSelect={openHelp}><HelpCircle className="size-4" />Get help</DropdownMenuItem>
+    <DropdownMenuItem className={MENU_PRESS} onSelect={openHelp}><HelpCircle className="size-4" />Get help</DropdownMenuItem>
   );
   return <DropdownMenuSub>
-    <DropdownMenuSubTrigger><span className="flex items-center gap-2"><HelpCircle className="size-4" />Get help</span></DropdownMenuSubTrigger>
-    <DropdownMenuSubContent>{getHelp.items.map(item => <DropdownMenuItem key={item.href} asChild><Link href={item.href}>{item.label}</Link></DropdownMenuItem>)}</DropdownMenuSubContent>
+    <DropdownMenuSubTrigger className={MENU_PRESS}><span className="flex items-center gap-2"><HelpCircle className="size-4" />Get help</span></DropdownMenuSubTrigger>
+    <DropdownMenuSubContent>{getHelp.items.map(item => <DropdownMenuItem key={item.href} asChild className={MENU_PRESS}><Link href={item.href}>{item.label}</Link></DropdownMenuItem>)}</DropdownMenuSubContent>
   </DropdownMenuSub>;
 }
 
@@ -161,7 +164,7 @@ function ExtraLinkItem({
 }) {
   const Icon = link.icon;
   return (
-    <DropdownMenuItem asChild>
+    <DropdownMenuItem asChild className={MENU_PRESS}>
       <Link href={link.href}>
         {Icon ? <Icon className="size-4" /> : null}
         {link.label}
@@ -215,7 +218,7 @@ export function AccountMenu({
             type="button"
             aria-label="Account menu"
             data-tour="nav-account"
-            className="focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-full outline-none focus-visible:ring-2"
+            className="focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-full outline-none transition-opacity focus-visible:ring-2 active:opacity-70 motion-reduce:transition-none"
           >
             <AvatarIdentity
               name={vendor.name}
@@ -238,7 +241,7 @@ export function AccountMenu({
 
           {switchKits && switchKits.length > 0 ? (
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger className={MENU_PRESS}>
                 <span className="flex items-center gap-2">
                   <LayoutGrid className="size-4" />
                   Switch products
@@ -246,7 +249,7 @@ export function AccountMenu({
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 {switchKits.map((kit) => (
-                  <DropdownMenuItem key={kit.href} asChild>
+                  <DropdownMenuItem key={kit.href} asChild className={MENU_PRESS}>
                     <a href={kit.href}>{kit.label}</a>
                   </DropdownMenuItem>
                 ))}
@@ -254,7 +257,7 @@ export function AccountMenu({
             </DropdownMenuSub>
           ) : null}
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className={MENU_PRESS}>
             <Link href="/dashboard/profile">
               <UserIcon className="size-4" />
               Profile
@@ -262,7 +265,7 @@ export function AccountMenu({
           </DropdownMenuItem>
 
           {kitLocalSettingsHref ? (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className={MENU_PRESS}>
               <Link href={kitLocalSettingsHref}>
                 <SettingsIcon className="size-4" />
                 Settings
@@ -271,7 +274,7 @@ export function AccountMenu({
           ) : null}
 
           {showPlanItem ? (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className={MENU_PRESS}>
               <Link href="/dashboard/plan">
                 <CreditCard className="size-4" />
                 {planItemLabel(vendor.tier)}
@@ -281,7 +284,7 @@ export function AccountMenu({
 
           <HelpMenuEntry getHelp={getHelp} Link={Link} openHelp={() => setHelpOpen(true)} />
 
-          <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
+          <DropdownMenuItem className={MENU_PRESS} onSelect={() => setFeedbackOpen(true)}>
             <MessageSquarePlus className="size-4" />
             Feedback
           </DropdownMenuItem>
@@ -291,7 +294,7 @@ export function AccountMenu({
           <DropdownMenuSeparator />
 
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger className={MENU_PRESS}>
               <span className="flex items-center gap-2">
                 <ThemeIcon className="size-4" />
                 Theme · {themeLabel}
@@ -299,15 +302,15 @@ export function AccountMenu({
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-                <DropdownMenuRadioItem value="light">
+                <DropdownMenuRadioItem value="light" className={MENU_PRESS}>
                   <Sun className="size-4" />
                   Light
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="dark">
+                <DropdownMenuRadioItem value="dark" className={MENU_PRESS}>
                   <Moon className="size-4" />
                   Dark
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="system">
+                <DropdownMenuRadioItem value="system" className={MENU_PRESS}>
                   <Monitor className="size-4" />
                   System
                 </DropdownMenuRadioItem>
@@ -319,6 +322,7 @@ export function AccountMenu({
 
           <DropdownMenuItem
             variant="destructive"
+            className="active:bg-destructive/20"
             disabled={signOut.pending}
             onSelect={(event) => {
               // Keep the menu open ourselves; close it only on success.

@@ -178,7 +178,7 @@ export function StatTile({
       {caption && (
         <p
           className={cn(
-            "truncate text-xs text-muted-foreground tabular-nums",
+            "mt-auto truncate text-xs text-muted-foreground tabular-nums",
             captionClassName,
           )}
         >

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-11-19
+
 ### Added
 
 - `ConfirmDialog` `consequence` prop: what is permanently lost, shown after the description and announced with it. Optional; existing dialogs are unchanged.

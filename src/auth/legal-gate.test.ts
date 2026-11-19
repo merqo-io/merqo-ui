@@ -12,8 +12,13 @@ function makeClient(cached: Cached, upsert: ReturnType<typeof vi.fn>) {
   return { client, eq };
 }
 
-function okFetch(body: unknown, ok = true) {
-  return vi.fn().mockResolvedValue({ ok, json: async () => body });
+function okFetch(body: unknown, ok = true, status = ok ? 200 : 500) {
+  return vi.fn().mockResolvedValue({ ok, status, json: async () => body });
+}
+
+function logged(): string {
+  const calls = [...vi.mocked(console.error).mock.calls, ...vi.mocked(console.warn).mock.calls];
+  return calls.map((args) => args.map((a) => String(a)).join(" ")).join("\n");
 }
 
 const CURRENT = { terms: LEGAL_VERSIONS.terms, privacy: LEGAL_VERSIONS.privacy };
@@ -36,6 +41,7 @@ describe("checkLegalAcceptance", () => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
     vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -153,7 +159,55 @@ describe("checkLegalAcceptance", () => {
 
   it("is false for a non-2xx response", async () => {
     const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
-    expect(await checkLegalAcceptance("a@b.co", options(client, okFetch(CURRENT, false)))).toBe(false);
+    expect(await checkLegalAcceptance("a@b.co", options(client, okFetch(CURRENT, false, 503)))).toBe(false);
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(logged()).toContain("HTTP 503");
+  });
+
+  it("logs once with the accepted and required versions when not current", async () => {
+    const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
+    const stale = okFetch({ terms: "2020-01-01", privacy: LEGAL_VERSIONS.privacy });
+    await checkLegalAcceptance("vendor@example.com", options(client, stale));
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(console.error).not.toHaveBeenCalled();
+    const msg = logged();
+    expect(msg).toContain("2020-01-01");
+    expect(msg).toContain(LEGAL_VERSIONS.terms);
+    expect(msg).not.toContain("vendor@example.com");
+    expect(msg).not.toContain("secret");
+  });
+
+  it("logs a malformed body once", async () => {
+    const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
+    await checkLegalAcceptance("a@b.co", options(client, okFetch({ terms: 5 })));
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(logged()).toContain("malformed");
+  });
+
+  it("logs a non-JSON body once", async () => {
+    const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new SyntaxError("Unexpected token <");
+      },
+    });
+    expect(await checkLegalAcceptance("a@b.co", options(client, fetchImpl))).toBe(false);
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(logged()).toContain("not valid JSON");
+  });
+
+  it("logs nothing on the true path or a cache hit", async () => {
+    const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
+    expect(await checkLegalAcceptance("a@b.co", options(client, okFetch(CURRENT)))).toBe(true);
+    const hit = makeClient(
+      { checked_at: new Date(NOW.getTime() - 1000).toISOString(), is_current: false },
+      vi.fn(),
+    );
+    await checkLegalAcceptance("a@b.co", options(hit.client, okFetch(CURRENT)));
+    expect(console.error).not.toHaveBeenCalled();
+    expect(console.warn).not.toHaveBeenCalled();
   });
 
   it("fails closed without a secret, without calling merqo", async () => {
@@ -163,14 +217,19 @@ describe("checkLegalAcceptance", () => {
       await checkLegalAcceptance("a@b.co", options(client, fetchImpl, { customerSecret: undefined })),
     ).toBe(false);
     expect(fetchImpl).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(logged()).toContain("MERQO_CUSTOMER_SECRET is not set");
   });
 
   it("fails closed when merqo is unreachable and does not cache it", async () => {
     const upsert = vi.fn();
     const { client } = makeClient(null, upsert);
     const fetchImpl = vi.fn().mockRejectedValue(new Error("offline"));
-    expect(await checkLegalAcceptance("a@b.co", options(client, fetchImpl))).toBe(false);
+    expect(await checkLegalAcceptance("vendor@example.com", options(client, fetchImpl))).toBe(false);
     expect(upsert).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(logged()).not.toContain("vendor@example.com");
+    expect(logged()).not.toContain("Bearer");
   });
 
   it("fails closed when the client cannot be created", async () => {
@@ -182,6 +241,8 @@ describe("checkLegalAcceptance", () => {
         customerSecret: "secret",
       }),
     ).toBe(false);
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(logged()).toContain("unexpected failure");
   });
 
   it("uses the global fetch and default base URL when none is injected", async () => {

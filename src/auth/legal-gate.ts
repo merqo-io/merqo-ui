@@ -36,10 +36,26 @@ export type LegalGateOptions = {
   fetchImpl?: typeof fetch;
 };
 
-function isCurrent(status: { terms?: unknown; privacy?: unknown }): boolean {
-  const { terms, privacy } = status;
-  if (typeof terms !== "string" || typeof privacy !== "string" || !terms || !privacy) return false;
-  return terms >= LEGAL_VERSIONS.terms && privacy >= LEGAL_VERSIONS.privacy;
+/**
+ * Judges merqo's answer and logs why when it is not current, so a vendor stuck
+ * on the accept page leaves a reason in the logs. Only version strings are
+ * logged, never the email or anything from the request.
+ */
+function isCurrent(status: unknown): boolean {
+  const { terms, privacy } = (status ?? {}) as { terms?: unknown; privacy?: unknown };
+  if (typeof terms !== "string" || typeof privacy !== "string" || !terms || !privacy) {
+    console.error(
+      `checkLegalAcceptance: legal-status body malformed (terms: ${typeof terms}, privacy: ${typeof privacy})`,
+    );
+    return false;
+  }
+  const current = terms >= LEGAL_VERSIONS.terms && privacy >= LEGAL_VERSIONS.privacy;
+  if (!current) {
+    console.warn(
+      `checkLegalAcceptance: acceptance not current (accepted terms ${terms}, privacy ${privacy}; required terms ${LEGAL_VERSIONS.terms}, privacy ${LEGAL_VERSIONS.privacy})`,
+    );
+  }
+  return current;
 }
 
 async function readLegalAcceptance(email: string, options: LegalGateOptions): Promise<boolean> {
@@ -62,7 +78,10 @@ async function readLegalAcceptance(email: string, options: LegalGateOptions): Pr
     if (age >= 0 && age < TTL_MS) return cached.is_current;
   }
 
-  if (!options.customerSecret) return false;
+  if (!options.customerSecret) {
+    console.error("checkLegalAcceptance: MERQO_CUSTOMER_SECRET is not set, failing closed");
+    return false;
+  }
 
   let current = false;
   try {
@@ -72,7 +91,17 @@ async function readLegalAcceptance(email: string, options: LegalGateOptions): Pr
       headers: { Authorization: `Bearer ${options.customerSecret}` },
       signal: AbortSignal.timeout(5000),
     });
-    if (res.ok) current = isCurrent((await res.json()) as { terms?: unknown; privacy?: unknown });
+    if (res.ok) {
+      let body: unknown;
+      try {
+        body = await res.json();
+      } catch {
+        console.error("checkLegalAcceptance: legal-status body was not valid JSON");
+      }
+      current = body === undefined ? false : isCurrent(body);
+    } else {
+      console.error(`checkLegalAcceptance: legal-status returned HTTP ${res.status}`);
+    }
   } catch (err) {
     console.error("checkLegalAcceptance: merqo legal-status call failed", err);
     return false;
@@ -112,7 +141,8 @@ export async function checkLegalAcceptance(
 ): Promise<boolean> {
   try {
     return await readLegalAcceptance(email, options);
-  } catch {
+  } catch (err) {
+    console.error("checkLegalAcceptance: unexpected failure", err);
     return false;
   }
 }

@@ -5,6 +5,7 @@ export type { PasswordRequirementsHintProps } from "./password-requirements-hint
 export { weakPasswordMessage, errorReasons } from "./weak-password-message";
 export type { WeakPasswordReason } from "./weak-password-message";
 export { useAsyncAction, navigatingAway } from "./use-async-action";
+export { usePolling } from "./use-polling";
 export { isRedirectError } from "./redirect-error";
 export { TwoColumnSections } from "./two-column-sections";
 export type { TwoColumnSectionsProps } from "./two-column-sections";
@@ -214,6 +215,8 @@ export type { NotFoundProps } from "./not-found-page";
 export { brandIcon, ICON_SIZE, APPLE_ICON_SIZE } from "./brand-icon";
 export type { BrandIconOptions } from "./brand-icon";
 export { kitMetadata } from "./kit-metadata";
+export { undoToast } from "./undo-toast";
+export type { UndoToastOptions, UndoToastHandle, UndoSettleReason } from "./undo-toast";
 export { ThemeProvider, Toaster, Providers } from "./providers";
 export type { ProvidersProps } from "./providers";
 export { Wordmark } from "./wordmark";

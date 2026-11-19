@@ -13,6 +13,19 @@ describe("LegalDocument", () => {
     backSpy.mockRestore();
   });
 
+  it("goes back on touch and keeps a 44px hit area with active and focus-visible states", async () => {
+    const backSpy = vi.spyOn(window.history, "back").mockImplementation(() => {});
+    const user = userEvent.setup();
+    render(<LegalDocument doc="terms" />);
+    const back = screen.getByRole("button", { name: /back/i });
+    expect(back).toHaveClass("inline-flex", "min-h-11", "items-center");
+    expect(back).toHaveClass("active:text-foreground");
+    expect(back).toHaveClass("focus-visible:ring-[3px]", "focus-visible:ring-ring/50");
+    await user.pointer({ keys: "[TouchA]", target: back });
+    expect(backSpy).toHaveBeenCalledOnce();
+    backSpy.mockRestore();
+  });
+
   it("renders the version/effective-date line, not a draft banner", () => {
     render(<LegalDocument doc="terms" />);
     expect(screen.getByText(/^Version \d{4}-\d{2}-\d{2}/)).toBeInTheDocument();

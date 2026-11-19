@@ -68,7 +68,7 @@ export function LegalDocument({ doc, kit, className }: LegalDocumentProps) {
       <button
         type="button"
         onClick={() => window.history.back()}
-        className="mb-4 text-xs text-muted-foreground hover:text-foreground"
+        className="-mt-3.5 -ml-2 mb-0.5 inline-flex min-h-11 items-center px-2 text-xs text-muted-foreground hover:text-foreground active:text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         ← Back
       </button>

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
-import { toast } from "sonner";
+import { undoToast, type UndoToastHandle } from "./undo-toast";
 
 import { cn } from "./lib/utils";
 import {
@@ -93,9 +93,6 @@ export interface ImageUploaderProps {
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 
 const DEFAULT_MAX_BYTES = 15 * 1024 * 1024;
-// Sonner's 4s default is too short to reach an Undo action by thumb after a
-// mis-tap on a phone.
-const UNDO_TOAST_MS = 8000;
 // Longest-side target per use: a wide banner vs a small square photo.
 const DEFAULT_MAX_DIM: Record<ImageUploaderVariant, number> = {
   banner: 1600,
@@ -248,7 +245,7 @@ function UploadTrigger({
  */
 interface RemovedImage {
   value: string;
-  toastId: string | number;
+  toast: UndoToastHandle | null;
   settled: boolean;
 }
 
@@ -264,7 +261,7 @@ function settleRemoved(
   if (entry.settled) return;
   entry.settled = true;
   if (slot.current === entry) slot.current = null;
-  if (dismiss) toast.dismiss(entry.toastId);
+  if (dismiss) entry.toast?.dismiss();
   discardPendingImage(entry.value);
 }
 
@@ -341,7 +338,7 @@ export function ImageUploader({
       if (value === entry.value) {
         entry.settled = true;
         removed.current = null;
-        toast.dismiss(entry.toastId);
+        entry.toast?.dismiss();
         if (isPendingImage(value)) owned.current.add(value);
       } else {
         settleOpenRemoval(removed);
@@ -354,7 +351,7 @@ export function ImageUploader({
 
   function removeImage(current: string) {
     settleOpenRemoval(removed);
-    const entry: RemovedImage = { value: current, toastId: "", settled: false };
+    const entry: RemovedImage = { value: current, toast: null, settled: false };
     removed.current = entry;
     // Keep a deferred preview alive; the owned-previews sweep would discard it.
     owned.current.delete(current);
@@ -371,18 +368,17 @@ export function ImageUploader({
       if (isPendingImage(current)) owned.current.add(current);
       throw error;
     }
-    entry.toastId = toast("Image removed", {
-      duration: UNDO_TOAST_MS,
-      action: { label: "Undo", onClick: () => undoRemove(entry) },
-      onDismiss: () => settleRemoved(entry, removed, false),
-      onAutoClose: () => settleRemoved(entry, removed, false),
+    entry.toast = undoToast({
+      message: "Image removed",
+      onUndo: () => undoRemove(entry),
+      onSettle: () => settleRemoved(entry, removed, false),
     });
   }
 
   function undoRemove(entry: RemovedImage) {
     if (entry.settled || !mounted.current) return;
     if (valueRef.current) {
-      settleRemoved(entry, removed, true);
+      settleRemoved(entry, removed, false);
       return;
     }
     entry.settled = true;

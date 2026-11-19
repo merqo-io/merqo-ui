@@ -22,4 +22,14 @@ describe("LegalFooterLinks", () => {
       "/en/legal/terms",
     );
   });
+
+  it("gives each link a 44px hit area with active and focus-visible states", () => {
+    render(<LegalFooterLinks />);
+    for (const name of ["Terms", "Privacy"]) {
+      const link = screen.getByRole("link", { name });
+      expect(link).toHaveClass("inline-flex", "min-h-11", "items-center");
+      expect(link).toHaveClass("active:text-foreground");
+      expect(link).toHaveClass("focus-visible:ring-[3px]", "focus-visible:ring-ring/50");
+    }
+  });
 });

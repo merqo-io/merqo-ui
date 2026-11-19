@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { buttonVariants } from "./ui/button";
+import { Input } from "./ui/input";
 import { cn } from "./lib/utils";
 
 export interface ConfirmDialogProps {
@@ -26,7 +27,20 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   /** Confirm button text while `onConfirm` runs. Defaults to `confirmLabel`. */
   pendingLabel?: string;
-  /** `destructive` paints the confirm button red. */
+  /**
+   * What is permanently lost, e.g. "All 42 orders for this booth." Shown
+   * after the description in full-strength text and announced with it.
+   */
+  consequence?: React.ReactNode;
+  /**
+   * High-stakes gate: renders a text field and keeps the confirm button
+   * disabled until the trimmed entry equals this phrase, ignoring case.
+   */
+  confirmPhrase?: string;
+  /**
+   * `destructive` paints the confirm button red. Defaults to `destructive`
+   * when `confirmPhrase` is set, otherwise `default`.
+   */
   variant?: "default" | "destructive";
   /**
    * Runs when the user confirms. The dialog stays open and busy until it
@@ -38,6 +52,75 @@ export interface ConfirmDialogProps {
   errorMessage?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+}
+
+// A blank phrase would gate nothing, so it counts as no phrase.
+function usablePhrase(phrase: string | undefined): string | undefined {
+  return phrase?.trim() ? phrase : undefined;
+}
+
+// Case-insensitive because mobile keyboards auto-capitalise.
+function phraseMatches(typed: string, phrase: string | undefined): boolean {
+  if (phrase === undefined) return true;
+  return typed.trim().toLowerCase() === phrase.trim().toLowerCase();
+}
+
+function ConfirmDescription({
+  consequence,
+  children,
+}: {
+  consequence?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  if (!consequence) {
+    return <AlertDialogDescription>{children}</AlertDialogDescription>;
+  }
+  // One described-by node holds both, so a screen reader reads the loss too.
+  return (
+    <AlertDialogDescription asChild>
+      <div className="space-y-2">
+        <div>{children}</div>
+        <p className="text-sm text-foreground">{consequence}</p>
+      </div>
+    </AlertDialogDescription>
+  );
+}
+
+function PhraseField({
+  phrase,
+  value,
+  onChange,
+  disabled,
+  onSubmit,
+}: {
+  phrase: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  onSubmit: () => void;
+}) {
+  const id = React.useId();
+  return (
+    <div className="space-y-2">
+      <label htmlFor={id} className="text-sm">
+        Type <span className="font-medium">{phrase}</span> to confirm
+      </label>
+      <Input
+        id={id}
+        size="lg"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.nativeEvent.isComposing) onSubmit();
+        }}
+        disabled={disabled}
+        autoComplete="off"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+      />
+    </div>
+  );
 }
 
 /**
@@ -55,7 +138,9 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel = "Cancel",
   pendingLabel,
-  variant = "default",
+  variant,
+  consequence,
+  confirmPhrase: confirmPhraseProp,
   onConfirm,
   errorMessage = "Could not complete that action. Try again.",
   open: openProp,
@@ -67,7 +152,20 @@ export function ConfirmDialog({
   // A ref, not state: a second click can land before the pending render.
   const inFlight = React.useRef(false);
 
+  const [typed, setTyped] = React.useState("");
+
   const open = openProp ?? openState;
+  const confirmPhrase = usablePhrase(confirmPhraseProp);
+  const resolvedVariant = variant ?? (confirmPhrase !== undefined ? "destructive" : "default");
+  const matched = phraseMatches(typed, confirmPhrase);
+
+  // Reset during render, not in an effect, so a controlled parent that opens
+  // the dialog never flashes the previous entry.
+  const [wasOpen, setWasOpen] = React.useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setTyped("");
+  }
 
   function setOpen(next: boolean) {
     if (inFlight.current) return;
@@ -76,7 +174,7 @@ export function ConfirmDialog({
     onOpenChange?.(next);
   }
 
-  async function confirm(event: React.MouseEvent) {
+  async function confirm(event: { preventDefault: () => void }) {
     // Radix closes an alert dialog on Action click; hold it open until the
     // work settles.
     event.preventDefault();
@@ -110,8 +208,21 @@ export function ConfirmDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <ConfirmDescription consequence={consequence}>
+            {description}
+          </ConfirmDescription>
         </AlertDialogHeader>
+        {confirmPhrase !== undefined && (
+          <PhraseField
+            phrase={confirmPhrase}
+            value={typed}
+            onChange={setTyped}
+            disabled={pending}
+            onSubmit={() => {
+              if (matched && !pending) void confirm({ preventDefault() {} });
+            }}
+          />
+        )}
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
@@ -121,9 +232,9 @@ export function ConfirmDialog({
           <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={confirm}
-            disabled={pending}
+            disabled={pending || !matched}
             className={cn(
-              variant === "destructive" &&
+              resolvedVariant === "destructive" &&
                 buttonVariants({ variant: "destructive" }),
             )}
           >

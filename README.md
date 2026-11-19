@@ -166,6 +166,24 @@ works locally.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the
   route transition instead of the button re-enabling mid-navigation.
+- `usePolling(tick, {intervalMs, enabled})`: run `tick` (sync or async) every
+  `intervalMs` while `enabled`. It ticks once at once, then on each interval,
+  pauses while the tab is hidden (a pocketed phone stops hitting the server) and
+  ticks again the moment the tab is visible. A tick that is still pending is not
+  overlapped, and a rejected or throwing tick is retried on the next interval.
+  `tick` is read through a ref, so a new closure each render does not restart the
+  timer; only `intervalMs` and `enabled` do. To stop on a condition, flip
+  `enabled` to false when it is met; cleanup also runs on unmount.
+  ```tsx
+  const [done, setDone] = useState(false);
+  usePolling(
+    async () => {
+      const s = await getStatus(id);
+      if (s !== "pending") setDone(true);
+    },
+    { intervalMs: 3000, enabled: !done },
+  );
+  ```
   An action that throws a Next.js `redirect()` is treated the same way:
   `pending` stays true, `error` stays null and `run()` still rejects with
   the redirect, so a server action that ends in `redirect("/login")` never
@@ -409,13 +427,16 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   for the text). Without it the up pill renders with no tint. paykit,
   loopkit, stockkit and merqo have no `--success` yet and must add it when
   they move their pin. The token should give at least 4.5:1 for
-  `text-success` on the 12% tint over the card, in light and dark.
+  `text-success` on the 12% tint over the card, in light and dark. The
+  caption sits at `mt-auto`, so in a grid of stretched cards the captions
+  line up at the bottom.
 - `StatusBadge<T>({status, config})` — the dot + bordered-pill status chip
-  shared across kits. `config: Record<T,
+  shared across kits; it is a label, so it has no shadow or hover state and
+  is never a button. `config: Record<T,
 {label, className}>` is caller-supplied (same "caller supplies the map"
   contract `AuditLogTable`'s `formatAction` established), so each kit keeps
   its own status set and colors — only the rendering shape (dot, border,
-  tint) is shared; the label is `text-xs` semibold, not uppercase. Extracted
+  tint) is shared; the label is `text-xs` medium, not uppercase. Extracted
   from qkit's original implementation over printkit's/paykit's plain shadcn
   `Badge` uses, since qkit's was the one built on real semantic status
   tokens rather than raw Tailwind literals mixed in ad hoc.
@@ -470,12 +491,34 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   Adds `icon` (label-row icon, ignored when `delta`/`deltaSlot` is set),
   `featured` (tinted card, primary value) and `className` for the card.
 - `ConfirmDialog({trigger?, title, description, confirmLabel, cancelLabel?,
-  pendingLabel?, variant?, onConfirm, errorMessage?, open?, onOpenChange?})`
+  pendingLabel?, variant?, consequence?, confirmPhrase?, onConfirm, errorMessage?, open?, onOpenChange?})`
   — confirm/cancel alert dialog. `onConfirm` may be async: the dialog stays
   open and busy until it settles, closes on success, and on a throw stays
   open with the message inline (retry allowed). A Next.js redirect error is
   treated as navigation. Callers fire their own success toast inside
   `onConfirm`.
+  `consequence` is what is permanently lost: shown after the description in
+  full-strength text and announced with it. `confirmPhrase` adds a "Type
+  <phrase> to confirm" field and keeps the confirm button disabled until the
+  trimmed entry matches, ignoring case; Enter confirms once it matches. With
+  a phrase set and no `variant`, the button is destructive.
+
+### Destructive actions
+
+Pick the lightest tier that fits, and prefer undo over confirm whenever a
+restore exists. A dialog is for permanent actions only, never for routine
+reversible ones.
+
+1. Reversible: act immediately, then offer `undoToast()` (see its entry below).
+2. Irreversible (hard delete, refund, revoke): `ConfirmDialog` with
+   `variant="destructive"` and a `consequence` that says what is lost and
+   whether it can be recovered. The confirm label is the specific verb, such
+   as "Delete booth", never "Yes" or "OK". Focus starts on Cancel.
+3. High-stakes (wide blast radius, irreversible: cascading deletes, money
+   leaving the vendor): add `confirmPhrase` so the vendor types the name of
+   the thing first. The visible instruction beside the field explains why
+   Confirm is disabled.
+
 - `EmptyState({icon?, title, description?, children?, actions?, className, size?, role?})`
   — dashed "nothing here yet" card with up to two actions. `size="compact"`
   is for a one-line message inside a list or card ("No vendors yet."): the
@@ -1076,8 +1119,27 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
 - `ThemeProvider`, `Toaster` and `Providers({children, theme?, toaster?})` -
   `ThemeProvider` is next-themes preloaded with `themeProps` from
   `@merqo/ui/next`; `Toaster` is sonner (top-right, `richColors`) that follows
-  the resolved theme. `Providers` is both together. Needs the `next-themes`
-  and `sonner` peers; replaces stockkit's local `theme-provider`.
+  the resolved theme and gives toast action buttons a 44px touch target on
+  coarse pointers (desktop size unchanged). `Providers` is both together. Needs
+  the `next-themes` and `sonner` peers; replaces stockkit's local
+  `theme-provider`.
+- `undoToast({message, onUndo, undoLabel?, duration?, onSettle?})` - the Undo
+  toast for a reversible action that has already happened. Returns
+  `{id, dismiss()}`. `message` is past tense and reuses the verb of the control
+  that triggered it ("Item removed" after "Remove"); `undoLabel` defaults to
+  "Undo"; `duration` defaults to 8000 ms because sonner's 4 s is too short to
+  reach by thumb. `onUndo` runs at most once and the toast then closes.
+  `onSettle(reason)` fires exactly once with `"undone"`, `"expired"` or
+  `"dismissed"` (swipe, close or `handle.dismiss()`), so a caller can defer a
+  hard delete until the window closes. `dismiss()` withdraws Undo and is safe
+  to repeat. It does no focus management; move focus yourself. Needs a
+  `Toaster` (`Providers` renders one). Use it only when the action is truly
+  reversible (a deferred commit or a soft delete); irreversible ones use
+  `ConfirmDialog`. The message names the object and the outcome ("Photo
+  removed"); the button verb is Undo. Keyboard users reach toasts with Alt+T,
+  sonner's default hotkey. Sonner pauses the timer on hover, swipe and a hidden
+  tab but not on keyboard focus, so when the toast is the only way back, pass a
+  longer `duration` (or `Infinity`) to meet WCAG 2.2.1.
 - `Wordmark({children, size?, href?, label?, LinkComponent?, className?})` -
   the frame only: display font, weight, tracking, a `size` of `sm`
   (`text-lg`), `md` (default, `text-xl`), `lg` or `xl` (`text-3xl`), and an

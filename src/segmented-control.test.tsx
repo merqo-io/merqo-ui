@@ -253,3 +253,26 @@ describe("SegmentedControl coarse pointer height", () => {
     }
   });
 });
+
+describe("SegmentedControl pressed feedback", () => {
+  it.each(["track", "pill"] as const)("%s options show a pressed state on touch, guarded for reduced motion", async (variant) => {
+    const user = userEvent.setup();
+    render(
+      <SegmentedControl
+        ariaLabel="x"
+        variant={variant}
+        value="a"
+        onChange={() => {}}
+        options={[{ value: "a", label: "A" }, { value: "b", label: "B" }]}
+      />,
+    );
+    const [selected, other] = screen.getAllByRole("radio");
+    for (const radio of [selected, other]) {
+      expect(radio.className).toMatch(/(^|\s)active:bg-/);
+      expect(radio).toHaveClass("motion-reduce:transition-none");
+      expect(radio.className).not.toMatch(/scale|translate/);
+    }
+    await user.pointer({ keys: "[TouchA]", target: other });
+    expect(other).toHaveClass("active:bg-primary/10");
+  });
+});

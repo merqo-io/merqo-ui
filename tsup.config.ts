@@ -38,6 +38,7 @@ const ENTRIES = {
   faq: "src/faq.tsx",
   journey: "src/journey.tsx",
   "phone-frame": "src/phone-frame.tsx",
+  "tablet-frame": "src/tablet-frame.tsx",
   "press-button": "src/press-button.tsx",
   "faq-rows": "src/faq-rows.tsx",
   "faq-page": "src/faq-page.tsx",

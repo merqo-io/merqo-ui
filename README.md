@@ -280,7 +280,9 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (since v0.38.0, default `"sm"`) sets the breakpoint below which links
   collapse into the burger menu.
 - `LandingNav` — public-page nav shell: sticky header, shared shape
-  (`z-20`, `bg-background/85`, padding on the header not the inner `<nav>`),
+  (`z-20`, `bg-background/85`), horizontal padding on the inner `<nav>`
+  (`mx-auto max-w-6xl px-5`, so it shares an edge with content in the same
+  container),
   `max-w-6xl` centered row. Takes only two slots — `wordmark: ReactNode`
   and `end: ReactNode` — so each kit keeps full control of its own
   wordmark markup and right-side links/CTAs (copy and hrefs are legitimate
@@ -583,6 +585,15 @@ reversible ones.
   `PhoneFrame({label, size?, className?, children})` is a labelled
   (`role="group"`) phone-shaped frame for those objects, `size` `"large"`
   (default) or `"small"`, `rounded-3xl` unless `className` overrides it.
+  `realistic` adds device hardware (bezel, camera island, side keys, status
+  bar with `statusTime`, default `"9:41"`); `browserBar={{url}}` adds a
+  Safari-style bottom bar with the URL as visible text and implies
+  `realistic`. The hardware is `aria-hidden`; both props are plain data, so
+  Server Components can render it: `<PhoneFrame label="Order" browserBar={{
+  url: "qkit.merqo.io" }}>...</PhoneFrame>`.
+  `TabletFrame({label, title?, topBarEnd?, className?, children})` is the
+  matching bezelled tablet for a vendor board: labelled `role="group"`,
+  optional top bar, `aria-hidden` camera dot, size it with `className`.
   `ClosingCall({heading, line, action, aside})` is the closing row under the
   steps. `PressButton` is a full-width 44px button with a hover darken, a
   colour-only pressed state that fires by touch, and `type="button"` by
@@ -699,7 +710,9 @@ onCommit)` — a controlled dollar-amount `<Input>`. Reformats to the
   Unrelated to `react-qr-code` (qkit's booth-QR-poster, paykit's booking-QR
   view) — a heavier React-component wrapper for a different use case
   (rendering a full poster page vs. embedding inline SVG), not yet unified.
-- `Footer({wordmark, tagline, kitName})` — the public-page footer shell:
+- `Footer({wordmark, tagline, kitName, layout?})` — the public-page footer shell
+  (`layout="compact"` makes it one ~64px row that wraps to two short rows on
+  a phone, links still 44px; it drops the `pb-20` BackToTop clearance):
   wordmark slot, tagline, "© 2026 {kitName} · a Merqo kit", About link,
   `LegalFooterLinks`, vendor sign-in link, in that fixed order. `wordmark`
   is an already-linked element (own href/anchor behavior — e.g. a

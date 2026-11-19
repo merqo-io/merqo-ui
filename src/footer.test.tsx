@@ -207,4 +207,35 @@ describe("Footer", () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
     Object.defineProperty(window, "scrollY", { value: 0, configurable: true });
   });
+
+  it("compact layout keeps every link at 44px and folds the links to their own row on a phone", () => {
+    const { container } = render(
+      <Footer
+        wordmark={<a href="/">Kit</a>}
+        tagline="t"
+        kitName="kit"
+        faqHref="/faq"
+        layout="compact"
+      />,
+    );
+    for (const name of ["About", "FAQ", /vendor sign in/i]) {
+      expect(screen.getByRole("link", { name })).toHaveClass("min-h-11");
+    }
+    const nav = screen.getByRole("link", { name: "Terms" }).closest("nav")!;
+    expect(nav).toHaveClass("[&_a]:min-h-11");
+    expect(nav.parentElement).toHaveClass("basis-full", "sm:basis-auto");
+    const wrap = container.querySelector("footer > div")!;
+    expect(wrap).toHaveClass("min-h-16", "flex-wrap");
+    expect(wrap.className).not.toMatch(/pb-20/);
+  });
+
+  it("default layout is unchanged", () => {
+    const { container } = render(
+      <Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />,
+    );
+    expect(container.querySelector("footer > div")).toHaveClass(
+      "pb-20",
+      "sm:flex-row",
+    );
+  });
 });

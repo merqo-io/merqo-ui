@@ -30,6 +30,11 @@ export interface FooterProps {
    * inside dashboards. Kits with a `/faq` page pass `"/faq"`.
    */
   faqHref?: string;
+  /**
+   * `"compact"` is a single ~64px row (brand, links, copyright) that wraps to
+   * two short rows under sm. Opt-in; the default keeps the original layout.
+   */
+  layout?: "compact";
 }
 
 // Under sm the footer collapses to three centred rows (brand, links, copyright)
@@ -58,19 +63,35 @@ export function Footer({
   showSignIn = true,
   signInLabel = "Vendor sign in →",
   faqHref,
+  layout,
 }: FooterProps): React.ReactElement {
+  const compact = layout === "compact";
+  // Compact keeps the wrapper groups at every width and lets flex-wrap do the
+  // phone fold: brand and copyright share row one, the links take row two.
+  const wrapClass = compact
+    ? "mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-5 gap-y-1 px-5 py-2 text-sm text-muted-foreground"
+    : "mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 pt-5 pb-20 text-sm text-muted-foreground sm:flex-row sm:gap-3 sm:pt-6";
+  const brandClass = compact
+    ? "order-1 flex flex-wrap items-center gap-x-2"
+    : "order-1 flex flex-wrap items-center justify-center gap-x-2 sm:contents";
+  const copyClass = compact
+    ? "order-2 text-xs sm:order-3"
+    : "order-3 text-xs sm:order-none";
+  const linksClass = compact
+    ? "order-3 flex basis-full flex-wrap items-center gap-x-0 sm:order-2 sm:basis-auto"
+    : "order-2 flex flex-wrap items-center justify-center gap-x-0 sm:contents";
   return (
     <footer className="border-t border-border">
       {/* pb-20 lifts the links above the fixed 48px BackToTop button (24px from the viewport edge), so the last link is tappable at the end of the page at any width. */}
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 pt-5 pb-20 text-sm text-muted-foreground sm:flex-row sm:gap-3 sm:pt-6">
-        <div className="order-1 flex flex-wrap items-center justify-center gap-x-2 sm:contents">
+      <div className={wrapClass}>
+        <div className={brandClass}>
           {wordmark}
           <span>{tagline}</span>
         </div>
-        <span className="order-3 text-xs sm:order-none">
+        <span className={copyClass}>
           {copyright ?? `© 2026 ${kitName} · a Merqo kit`}
         </span>
-        <div className="order-2 flex flex-wrap items-center justify-center gap-x-0 sm:contents">
+        <div className={linksClass}>
           <a
             href="/about"
             className={`${LINK_TAP} text-xs hover:text-foreground sm:text-sm`}

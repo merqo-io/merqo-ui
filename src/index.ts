@@ -178,6 +178,11 @@ export {
 } from "./storage-remove";
 export { AsyncSubmitButton } from "./async-submit-button";
 export type { AsyncSubmitButtonProps } from "./async-submit-button";
+export { CopyButton } from "./copy-button";
+export type { CopyButtonProps } from "./copy-button";
+export { downloadBlob } from "./download";
+export { DownloadButton } from "./download-button";
+export type { DownloadButtonProps } from "./download-button";
 export { Avatar, AvatarIdentity, initials } from "./avatar";
 export type { AvatarProps, AvatarIdentityProps } from "./avatar";
 export { FORM_ERROR_CLASS, FORM_LABEL_CLASS, FormError } from "./form-field";

@@ -16,6 +16,11 @@ function okFetch(body: unknown, ok = true, status = ok ? 200 : 500) {
   return vi.fn().mockResolvedValue({ ok, status, json: async () => body });
 }
 
+async function settle<T>(promise: Promise<T>): Promise<T> {
+  await vi.advanceTimersByTimeAsync(100);
+  return promise;
+}
+
 function logged(): string {
   const calls = [...vi.mocked(console.error).mock.calls, ...vi.mocked(console.warn).mock.calls];
   return calls.map((args) => args.map((a) => String(a)).join(" ")).join("\n");
@@ -159,7 +164,7 @@ describe("checkLegalAcceptance", () => {
 
   it("is false for a non-2xx response", async () => {
     const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
-    expect(await checkLegalAcceptance("a@b.co", options(client, okFetch(CURRENT, false, 503)))).toBe(false);
+    expect(await settle(checkLegalAcceptance("a@b.co", options(client, okFetch(CURRENT, false, 503))))).toBe(false);
     expect(console.error).toHaveBeenCalledTimes(1);
     expect(logged()).toContain("HTTP 503");
   });
@@ -198,6 +203,94 @@ describe("checkLegalAcceptance", () => {
     expect(logged()).toContain("not valid JSON");
   });
 
+  it.each([500, 401, 400])("does not cache an HTTP %i answer", async (status) => {
+    const upsert = vi.fn();
+    const { client } = makeClient(null, upsert);
+    const fetchImpl = okFetch({ error: "x" }, false, status);
+    expect(await checkLegalAcceptance("a@b.co", options(client, fetchImpl))).toBe(false);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not cache a non-JSON or malformed body", async () => {
+    const upsert = vi.fn();
+    const { client } = makeClient(null, upsert);
+    const badJson = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new SyntaxError("Unexpected token <");
+      },
+    });
+    expect(await checkLegalAcceptance("a@b.co", options(client, badJson))).toBe(false);
+    for (const body of [{ terms: 5 }, { terms: "", privacy: "" }, null]) {
+      expect(await checkLegalAcceptance("a@b.co", options(client, okFetch(body)))).toBe(false);
+    }
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("caches a well-formed not-current answer", async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const { client } = makeClient(null, upsert);
+    const stale = okFetch({ terms: "2020-01-01", privacy: "2020-01-01" });
+    expect(await checkLegalAcceptance("a@b.co", options(client, stale))).toBe(false);
+    expect(upsert).toHaveBeenCalledTimes(1);
+    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ is_current: false }));
+  });
+
+  it("retries once when the connection drops, then succeeds and caches", async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: null });
+    const { client } = makeClient(null, upsert);
+    const fetchImpl = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("fetch failed"))
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => CURRENT });
+    expect(await settle(checkLegalAcceptance("a@b.co", options(client, fetchImpl)))).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ is_current: true }));
+  });
+
+  it.each([502, 503, 504])("retries once on HTTP %i", async (status) => {
+    const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
+    const cancel = vi.fn().mockResolvedValue(undefined);
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status, body: { cancel }, json: async () => ({}) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => CURRENT });
+    expect(await settle(checkLegalAcceptance("a@b.co", options(client, fetchImpl)))).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("still retries when cancelling the discarded body throws", async () => {
+    const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        body: { cancel: () => Promise.reject(new Error("locked")) },
+      })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => CURRENT });
+    expect(await settle(checkLegalAcceptance("a@b.co", options(client, fetchImpl)))).toBe(true);
+  });
+
+  it("gives up after one retry without caching", async () => {
+    const upsert = vi.fn();
+    const { client } = makeClient(null, upsert);
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError("fetch failed"));
+    expect(await settle(checkLegalAcceptance("a@b.co", options(client, fetchImpl)))).toBe(false);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("does not retry a timeout", async () => {
+    const { client } = makeClient(null, vi.fn());
+    const fetchImpl = vi.fn().mockRejectedValue(new DOMException("timed out", "TimeoutError"));
+    expect(await checkLegalAcceptance("a@b.co", options(client, fetchImpl))).toBe(false);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
   it("logs nothing on the true path or a cache hit", async () => {
     const { client } = makeClient(null, vi.fn().mockResolvedValue({ error: null }));
     expect(await checkLegalAcceptance("a@b.co", options(client, okFetch(CURRENT)))).toBe(true);
@@ -225,7 +318,7 @@ describe("checkLegalAcceptance", () => {
     const upsert = vi.fn();
     const { client } = makeClient(null, upsert);
     const fetchImpl = vi.fn().mockRejectedValue(new Error("offline"));
-    expect(await checkLegalAcceptance("vendor@example.com", options(client, fetchImpl))).toBe(false);
+    expect(await settle(checkLegalAcceptance("vendor@example.com", options(client, fetchImpl)))).toBe(false);
     expect(upsert).not.toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledTimes(1);
     expect(logged()).not.toContain("vendor@example.com");

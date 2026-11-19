@@ -8,6 +8,8 @@
 
 ### Fixed
 
+- `checkLegalAcceptance` caches only a definitive answer from merqo: a 500, 401, 400, invalid JSON or malformed body now returns `false` without writing `legal_check_state`, so a transient failure no longer locks vendors on `/legal/accept` for 5 minutes. Its merqo call retries once (after 100ms) on a dropped connection or a 502/503/504, never on a timeout.
+- `createSupabaseServerClient`, `createSupabaseServiceClient` and `updateSupabaseSession` retry a GET or HEAD once when the connection drops, after 100ms (undici `UND_ERR_SOCKET` and similar). Writes, aborts, timeouts and HTTP error responses are not retried.
 - `checkLegalAcceptance` now logs a short reason on every fail-closed path: missing `MERQO_CUSTOMER_SECRET`, non-2xx legal-status (with the status code), non-JSON or malformed body, an outdated acceptance (accepted vs required versions, as a warning) and any unexpected error. Return values are unchanged; the email and secret are never logged.
 
 ## [0.54.0] - 2026-11-19

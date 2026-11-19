@@ -36,19 +36,51 @@ export type LegalGateOptions = {
   fetchImpl?: typeof fetch;
 };
 
+const RETRYABLE_STATUS = new Set([502, 503, 504]);
+const RETRY_DELAY_MS = 100;
+
 /**
- * Judges merqo's answer and logs why when it is not current, so a vendor stuck
- * on the accept page leaves a reason in the logs. Only version strings are
- * logged, never the email or anything from the request.
+ * One retry, after a short pause so it is less likely to reuse the same dead
+ * pooled connection, for a dropped connection or a gateway error. A timeout is not
+ * retried: it already spent the full budget and a second wait would stall the
+ * render twice as long.
  */
-function isCurrent(status: unknown): boolean {
-  const { terms, privacy } = (status ?? {}) as { terms?: unknown; privacy?: unknown };
-  if (typeof terms !== "string" || typeof privacy !== "string" || !terms || !privacy) {
-    console.error(
-      `checkLegalAcceptance: legal-status body malformed (terms: ${typeof terms}, privacy: ${typeof privacy})`,
-    );
-    return false;
+async function fetchWithRetry(
+  fetchImpl: typeof fetch,
+  url: URL,
+  secret: string,
+): Promise<Response> {
+  const attempt = () =>
+    fetchImpl(url, {
+      headers: { Authorization: `Bearer ${secret}` },
+      signal: AbortSignal.timeout(5000),
+    });
+  let res: Response;
+  try {
+    res = await attempt();
+  } catch (err) {
+    const name = (err as { name?: unknown } | null)?.name;
+    if (name === "TimeoutError" || name === "AbortError") throw err;
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+    return attempt();
   }
+  if (!RETRYABLE_STATUS.has(res.status)) return res;
+  // The discarded body would otherwise hold its socket until garbage collected.
+  try {
+    await res.body?.cancel();
+  } catch {
+    // The retry matters more than releasing the old body.
+  }
+  await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+  return attempt();
+}
+
+/**
+ * Compares merqo's accepted versions with the required ones and logs why when
+ * they are behind, so a vendor stuck on the accept page leaves a reason in the
+ * logs. Only version strings are logged, never the email or the request.
+ */
+function isCurrent(terms: string, privacy: string): boolean {
   const current = terms >= LEGAL_VERSIONS.terms && privacy >= LEGAL_VERSIONS.privacy;
   if (!current) {
     console.warn(
@@ -56,6 +88,40 @@ function isCurrent(status: unknown): boolean {
     );
   }
   return current;
+}
+
+/**
+ * Asks merqo and returns its accepted versions, or null (after logging why)
+ * when the answer is not definitive. Only a well-formed 200 is worth caching:
+ * a 500, 401 or garbled body is a failed check, and caching it would lock a
+ * vendor out of the dashboard for the whole TTL.
+ */
+async function askMerqo(
+  email: string,
+  options: LegalGateOptions,
+): Promise<{ terms: string; privacy: string } | null> {
+  const url = new URL("/api/merqo/legal-status", options.merqoBaseUrl ?? DEFAULT_MERQO_BASE_URL);
+  url.searchParams.set("email", email);
+  const res = await fetchWithRetry(options.fetchImpl ?? fetch, url, options.customerSecret ?? "");
+  if (!res.ok) {
+    console.error(`checkLegalAcceptance: legal-status returned HTTP ${res.status}`);
+    return null;
+  }
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    console.error("checkLegalAcceptance: legal-status body was not valid JSON");
+    return null;
+  }
+  const { terms, privacy } = (body ?? {}) as { terms?: unknown; privacy?: unknown };
+  if (typeof terms !== "string" || typeof privacy !== "string" || !terms || !privacy) {
+    console.error(
+      `checkLegalAcceptance: legal-status body malformed (terms: ${typeof terms}, privacy: ${typeof privacy})`,
+    );
+    return null;
+  }
+  return { terms, privacy };
 }
 
 async function readLegalAcceptance(email: string, options: LegalGateOptions): Promise<boolean> {
@@ -83,25 +149,11 @@ async function readLegalAcceptance(email: string, options: LegalGateOptions): Pr
     return false;
   }
 
-  let current = false;
+  let current: boolean;
   try {
-    const url = new URL("/api/merqo/legal-status", options.merqoBaseUrl ?? DEFAULT_MERQO_BASE_URL);
-    url.searchParams.set("email", normalized);
-    const res = await (options.fetchImpl ?? fetch)(url, {
-      headers: { Authorization: `Bearer ${options.customerSecret}` },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (res.ok) {
-      let body: unknown;
-      try {
-        body = await res.json();
-      } catch {
-        console.error("checkLegalAcceptance: legal-status body was not valid JSON");
-      }
-      current = body === undefined ? false : isCurrent(body);
-    } else {
-      console.error(`checkLegalAcceptance: legal-status returned HTTP ${res.status}`);
-    }
+    const answer = await askMerqo(normalized, options);
+    if (!answer) return false;
+    current = isCurrent(answer.terms, answer.privacy);
   } catch (err) {
     console.error("checkLegalAcceptance: merqo legal-status call failed", err);
     return false;
@@ -128,8 +180,9 @@ async function readLegalAcceptance(email: string, options: LegalGateOptions): Pr
  *
  * The kit does not own the acceptance record; merqo does, so the check is an
  * HTTP call to merqo's `/api/merqo/legal-status`. It runs on every gated
- * dashboard render, so the answer is cached per email in the kit's
- * `legal_check_state` table for 5 minutes.
+ * dashboard render, so merqo's answer is cached per email in the kit's
+ * `legal_check_state` table for 5 minutes. Only a well-formed 200 is cached;
+ * failed checks are never stored.
  *
  * Fails closed: a missing secret, an unreachable merqo, a non-2xx response, a
  * malformed body or a client error all resolve to `false`, which sends the

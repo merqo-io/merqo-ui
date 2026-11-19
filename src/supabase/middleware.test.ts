@@ -151,3 +151,12 @@ describe("updateSupabaseSession", () => {
     expect(state.captured?.cookies.getAll()).toEqual([{ name: "a", value: "1" }]);
   });
 });
+
+describe("updateSupabaseSession fetch", () => {
+  it("passes a retrying global fetch to the SSR client", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    await updateSupabaseSession(req("/"), base);
+    const opts = state.captured as unknown as { global?: { fetch?: unknown } };
+    expect(typeof opts.global?.fetch).toBe("function");
+  });
+});

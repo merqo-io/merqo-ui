@@ -95,6 +95,8 @@ export { AboutMerqo } from "./about-merqo";
 export type { AboutMerqoProps } from "./about-merqo";
 export { BackButton } from "./back-button";
 export type { BackButtonProps } from "./back-button";
+export { SearchField } from "./search-field";
+export type { SearchFieldProps } from "./search-field";
 export { PageHeader } from "./page-header";
 export type { PageHeaderProps } from "./page-header";
 export { SegmentedControl } from "./segmented-control";

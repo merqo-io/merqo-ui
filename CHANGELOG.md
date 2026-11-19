@@ -11,6 +11,7 @@
 - `LoginForm` and `MfaForm` give the fields a brief horizontal shake when an attempt fails, so the failure registers for a vendor looking at the keypad. It runs once per failed attempt (a repeated identical failure shakes again), never for a notice or on mount, and is skipped under `prefers-reduced-motion`, where the error text and red border remain.
 - `Input` `size` prop: `"default"` (unchanged) or `"lg"` (`h-11 rounded-xl text-base`). Kits can replace their `className="h-11 rounded-xl text-base"` overrides with `size="lg"`. The native numeric `size` attribute is no longer accepted on `Input`; no kit used it. `LoginForm`, `MfaForm`, `ResetPasswordForm` and `SocialLinksFields` use `size="lg"` with identical output.
 - `usePolling(tick, {intervalMs, enabled})` hook, ported from qkit: ticks while the tab is visible, pauses when hidden and ticks again on return, never overlaps a pending async tick, and stops when `enabled` is false or on unmount. paykit (`pay-panel.tsx`) and printkit (`setup-step.tsx`) can replace their inline `setInterval` pollers with it; printkit would gain the hidden-tab pause.
+- `SearchField`: a `type="search"` `Input` with a leading search icon and a "Clear search" button (44px hit area, shown only when there is text, returns focus to the input; Escape clears too). Controlled or uncontrolled, forwards its ref, hides the native WebKit cancel button. Replaces the hand-rolled search inputs in qkit, loopkit and stockkit.
 
 ### Changed
 

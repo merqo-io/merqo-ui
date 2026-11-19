@@ -226,6 +226,7 @@ describe("Footer", () => {
     expect(nav.parentElement).toHaveClass("basis-full", "sm:basis-auto");
     const wrap = container.querySelector("footer > div")!;
     expect(wrap).toHaveClass("min-h-16", "flex-wrap");
+    expect(wrap).toHaveClass("sm:pr-20", "max-sm:pb-14");
     expect(wrap.className).not.toMatch(/pb-20/);
   });
 

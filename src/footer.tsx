@@ -69,7 +69,7 @@ export function Footer({
   // Compact keeps the wrapper groups at every width and lets flex-wrap do the
   // phone fold: brand and copyright share row one, the links take row two.
   const wrapClass = compact
-    ? "mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-5 gap-y-1 px-5 py-2 text-sm text-muted-foreground"
+    ? "mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-5 gap-y-1 px-5 py-2 max-sm:pb-14 sm:pr-20 text-sm text-muted-foreground"
     : "mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 pt-5 pb-20 text-sm text-muted-foreground sm:flex-row sm:gap-3 sm:pt-6";
   const brandClass = compact
     ? "order-1 flex flex-wrap items-center gap-x-2"
@@ -82,7 +82,7 @@ export function Footer({
     : "order-2 flex flex-wrap items-center justify-center gap-x-0 sm:contents";
   return (
     <footer className="border-t border-border">
-      {/* pb-20 lifts the links above the fixed 48px BackToTop button (24px from the viewport edge), so the last link is tappable at the end of the page at any width. */}
+      {/* Default keeps pb-20 to lift the links above the fixed 48px BackToTop button (24px from the viewport edge). Compact stays ~64px tall, so it reserves the button column with sm:pr-20 and, on a phone where that column would starve the link row, lifts with max-sm:pb-14 instead. */}
       <div className={wrapClass}>
         <div className={brandClass}>
           {wordmark}

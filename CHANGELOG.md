@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `checkLegalAcceptance` now logs a short reason on every fail-closed path: missing `MERQO_CUSTOMER_SECRET`, non-2xx legal-status (with the status code), non-JSON or malformed body, an outdated acceptance (accepted vs required versions, as a warning) and any unexpected error. Return values are unchanged; the email and secret are never logged.
+
 ## [0.54.0] - 2026-11-19
 
 ### Added

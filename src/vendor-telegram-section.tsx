@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 
+import { ConfirmDialog } from "./confirm-dialog";
 import { Section } from "./section";
 import { isTelegramLink } from "./telegram-link";
 import { isRedirectError } from "./redirect-error";
@@ -38,27 +39,34 @@ function DisconnectButton({
   onDisconnect: () => Promise<void>;
   onError?: (error: unknown) => void;
 }) {
-  const disconnectAction = useAsyncAction(onDisconnect);
   return (
-    <button
-      type="button"
-      disabled={disconnectAction.pending}
-      aria-busy={disconnectAction.pending}
-      onClick={() => {
-        disconnectAction.run().catch((err) => {
+    <ConfirmDialog
+      variant="destructive"
+      title="Disconnect Telegram?"
+      description="This removes the Telegram connection for your shop."
+      consequence="Customers stop getting order updates on Telegram. You can connect again later."
+      confirmLabel="Disconnect"
+      pendingLabel="Disconnecting…"
+      onConfirm={async () => {
+        try {
+          await onDisconnect();
+        } catch (err) {
           if (!isRedirectError(err)) onError?.(err);
-        });
+          throw err;
+        }
       }}
-      className={cn(
-        "inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-md border px-4 text-sm font-medium",
-        "hover:bg-accent disabled:pointer-events-none disabled:opacity-50",
-      )}
-    >
-      {disconnectAction.pending ? (
-        <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
-      ) : null}
-      {disconnectAction.pending ? "Disconnecting…" : "Disconnect"}
-    </button>
+      trigger={
+        <button
+          type="button"
+          className={cn(
+            "inline-flex h-9 w-fit items-center justify-center gap-1.5 rounded-md border px-4 text-sm font-medium",
+            "hover:bg-accent",
+          )}
+        >
+          Disconnect
+        </button>
+      }
+    />
   );
 }
 

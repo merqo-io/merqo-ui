@@ -37,9 +37,11 @@ export type LegalGateOptions = {
 };
 
 const RETRYABLE_STATUS = new Set([502, 503, 504]);
+const RETRY_DELAY_MS = 100;
 
 /**
- * One retry for a dropped connection or a gateway error. A timeout is not
+ * One retry, after a short pause so it is less likely to reuse the same dead
+ * pooled connection, for a dropped connection or a gateway error. A timeout is not
  * retried: it already spent the full budget and a second wait would stall the
  * render twice as long.
  */
@@ -59,9 +61,18 @@ async function fetchWithRetry(
   } catch (err) {
     const name = (err as { name?: unknown } | null)?.name;
     if (name === "TimeoutError" || name === "AbortError") throw err;
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
     return attempt();
   }
-  return RETRYABLE_STATUS.has(res.status) ? attempt() : res;
+  if (!RETRYABLE_STATUS.has(res.status)) return res;
+  // The discarded body would otherwise hold its socket until garbage collected.
+  try {
+    await res.body?.cancel();
+  } catch {
+    // The retry matters more than releasing the old body.
+  }
+  await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+  return attempt();
 }
 
 /**

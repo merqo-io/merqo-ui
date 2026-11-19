@@ -1,3 +1,4 @@
+const RETRY_DELAY_MS = 100;
 const IDEMPOTENT_METHODS = new Set(["GET", "HEAD"]);
 
 function requestOf(input: Parameters<typeof fetch>[0]): Request | undefined {
@@ -14,7 +15,8 @@ function isAbort(err: unknown): boolean {
 }
 
 /**
- * Wraps `fetch` so a GET or HEAD retries once when the connection itself fails.
+ * Wraps `fetch` so a GET or HEAD retries once, after a 100ms pause so it is less likely
+ * to reuse the same dead pooled connection, when the connection itself fails.
  * Vercel to Supabase sockets occasionally drop mid-flight (undici
  * UND_ERR_SOCKET, ECONNRESET); fetch reports every such failure as a
  * TypeError. Only idempotent methods are replayed, and never after an abort,
@@ -33,6 +35,7 @@ export function createRetryingFetch(baseFetch: typeof fetch = fetch): typeof fet
         !callerSignal?.aborted &&
         IDEMPOTENT_METHODS.has(methodOf(input, init));
       if (!retryable) throw err;
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       return baseFetch(input, init);
     }
   };

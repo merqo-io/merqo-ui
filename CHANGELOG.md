@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `VendorTelegramSection`: Disconnect now asks for confirmation in a destructive `ConfirmDialog` before calling `onDisconnect`. The prop contract is unchanged; a failed disconnect keeps the dialog open and still reaches `onError`.
+
 ## [0.54.0] - 2026-11-19
 
 ### Added

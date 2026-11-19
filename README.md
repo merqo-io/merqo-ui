@@ -341,8 +341,10 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   data URI, never injected markup). `deepLink` must be an `https://t.me/...`
   URL without userinfo or a port; any other value is reported through
   `onError` and no link or QR is shown. `connected: true` shows a
-  connected status and a "Disconnect" action calling the injected
-  `onDisconnect`. Optional `onError?: (error: unknown) => void` and
+  connected status and a "Disconnect" action that opens a destructive
+  `ConfirmDialog` ("Customers stop getting order updates on Telegram. You can
+  connect again later.") and calls the injected `onDisconnect` only on
+  confirm; if it throws, the dialog stays open showing the error. Optional `onError?: (error: unknown) => void` and
   `sectionWrapper?` (forwarded to its internal `Section`) match the rest of
   the package's own conventions. Named apart from any kit's own
   customer-facing Telegram-connect component — this one is vendor-scoped

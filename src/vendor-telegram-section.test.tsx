@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VendorTelegramSection } from "./vendor-telegram-section";
+
+async function confirmDisconnect() {
+  const dialog = await screen.findByRole("alertdialog");
+  fireEvent.click(within(dialog).getByRole("button", { name: /^disconnect$/i }));
+}
 
 describe("VendorTelegramSection", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -69,10 +74,81 @@ describe("VendorTelegramSection", () => {
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
+    await confirmDisconnect();
 
     await waitFor(() => {
       expect(onDisconnect).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it("connected: a touch tap on Disconnect asks first and does not disconnect", async () => {
+    const user = userEvent.setup();
+    const onDisconnect = vi.fn().mockResolvedValue(undefined);
+    render(<VendorTelegramSection connected={true} onDisconnect={onDisconnect} />);
+
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: /disconnect/i }),
+    });
+
+    expect(await screen.findByRole("alertdialog")).toHaveTextContent(
+      /customers stop getting order updates on telegram/i,
+    );
+    expect(onDisconnect).not.toHaveBeenCalled();
+  });
+
+  it("connected: confirming in the dialog disconnects exactly once", async () => {
+    const user = userEvent.setup();
+    const onDisconnect = vi.fn().mockResolvedValue(undefined);
+    render(<VendorTelegramSection connected={true} onDisconnect={onDisconnect} />);
+
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: /disconnect/i }),
+    });
+    const dialog = await screen.findByRole("alertdialog");
+    await user.pointer({
+      keys: "[TouchA]",
+      target: within(dialog).getByRole("button", { name: /^disconnect$/i }),
+    });
+
+    await waitFor(() => expect(onDisconnect).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
+  });
+
+  it("connected: cancelling the dialog does not disconnect", async () => {
+    const user = userEvent.setup();
+    const onDisconnect = vi.fn().mockResolvedValue(undefined);
+    render(<VendorTelegramSection connected={true} onDisconnect={onDisconnect} />);
+
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: /disconnect/i }),
+    });
+    const dialog = await screen.findByRole("alertdialog");
+    await user.pointer({
+      keys: "[TouchA]",
+      target: within(dialog).getByRole("button", { name: /cancel/i }),
+    });
+
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
+    expect(onDisconnect).not.toHaveBeenCalled();
+  });
+
+  it("connected: a failed disconnect keeps the dialog open", async () => {
+    const onDisconnect = vi.fn().mockRejectedValue(new Error("boom"));
+    render(<VendorTelegramSection connected={true} onDisconnect={onDisconnect} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
+    await confirmDisconnect();
+
+    await waitFor(() => expect(onDisconnect).toHaveBeenCalled());
+    expect(await screen.findByText("boom")).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
   });
 
   it("does not call onError when connect or disconnect ends in a Next.js redirect", async () => {
@@ -93,6 +169,7 @@ describe("VendorTelegramSection", () => {
       <VendorTelegramSection connected={true} onDisconnect={onDisconnect} onError={onError} />,
     );
     fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
+    await confirmDisconnect();
     await waitFor(() => expect(onDisconnect).toHaveBeenCalled());
 
     await new Promise((r) => setTimeout(r, 20));
@@ -111,6 +188,7 @@ describe("VendorTelegramSection", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
+    await confirmDisconnect();
 
     await waitFor(() => {
       expect(onError).toHaveBeenCalled();
@@ -190,16 +268,6 @@ describe("VendorTelegramSection reduced motion", () => {
     render(<VendorTelegramSection connected={false} onConnect={onConnect} />);
     fireEvent.click(screen.getByRole("button", { name: /connect telegram/i }));
     const button = await screen.findByRole("button", { name: /connecting/i });
-    const tokens = button.querySelector("svg")!.getAttribute("class")!.split(" ");
-    expect(tokens).toContain("motion-safe:animate-spin");
-    expect(tokens).not.toContain("animate-spin");
-  });
-
-  it("spins the disconnect icon only when motion is allowed", async () => {
-    const onDisconnect = vi.fn(() => new Promise<never>(() => {}));
-    render(<VendorTelegramSection connected={true} onDisconnect={onDisconnect} />);
-    fireEvent.click(screen.getByRole("button", { name: /disconnect/i }));
-    const button = await screen.findByRole("button", { name: /disconnecting/i });
     const tokens = button.querySelector("svg")!.getAttribute("class")!.split(" ");
     expect(tokens).toContain("motion-safe:animate-spin");
     expect(tokens).not.toContain("animate-spin");

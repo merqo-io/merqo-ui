@@ -64,4 +64,10 @@ describe("BackToTop motion", () => {
     expect(cls).not.toMatch(/transition-all|translate|scale/);
     expect(cls).toContain("active:");
   });
+
+  it("shows a pressed state on touch and drops its transition under reduced motion", () => {
+    render(<BackToTop />);
+    const button = screen.getByRole("button", { name: "Back to top" });
+    expect(button).toHaveClass("active:bg-accent", "motion-reduce:transition-none");
+  });
 });

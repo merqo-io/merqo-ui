@@ -30,6 +30,14 @@ describe("toNavUser", () => {
     ).toBe("Disp");
   });
 
+  it("drops a blank email", () => {
+    expect(toNavUser({ email: "   " })).toEqual({
+      name: "Account",
+      email: undefined,
+      avatarUrl: undefined,
+    });
+  });
+
   it("uses the email local part, then Account", () => {
     expect(
       toNavUser({ email: "jane@x.co", user_metadata: { display_name: 7 } })?.name,

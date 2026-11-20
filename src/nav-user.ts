@@ -45,7 +45,7 @@ export function toNavUser(
     "Account";
   return {
     name,
-    email: authUser.email ?? undefined,
+    email,
     avatarUrl: httpsUrl(meta.avatar_url),
   };
 }

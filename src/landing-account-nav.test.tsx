@@ -114,6 +114,31 @@ describe("LandingAccountNav", () => {
     );
   });
 
+  it("narrows an unknown present support category to other", async () => {
+    vi.resetModules();
+    let onSubmit: ((d: { category?: string; message: string }) => Promise<void>) | undefined;
+    vi.doMock("./account-menu", () => ({
+      AccountMenu: (p: { getHelp: { onSubmit: typeof onSubmit } }) => {
+        onSubmit = p.getHelp.onSubmit;
+        return null;
+      },
+    }));
+    const { LandingAccountNav: Isolated } = await import("./landing-account-nav");
+    render(
+      <Isolated
+        kit="qkit"
+        dashboardHref="/dashboard"
+        user={{ name: "Manfred" }}
+        signOutAction={signOutAction}
+        supportCategories={CATEGORIES}
+        actions={{ submitSupport, submitFeedback }}
+      />,
+    );
+    await onSubmit?.({ category: "bogus", message: "help" });
+    expect(submitSupport).toHaveBeenCalledWith({ category: "other", message: "help" });
+    vi.doUnmock("./account-menu");
+  });
+
   it("toasts a failed support action by default", async () => {
     submitSupport.mockResolvedValue({ success: false, error: "No luck" });
     const user = setup();

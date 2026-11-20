@@ -59,6 +59,8 @@ const ENTRIES = {
   "info-tooltip": "src/info-tooltip.tsx",
   "kit-family": "src/kit-family.ts",
   "landing-nav": "src/landing-nav.tsx",
+  "landing-account-nav": "src/landing-account-nav.tsx",
+  "nav-user": "src/nav-user.ts",
   "legal-acceptance-checkbox": "src/legal-acceptance-checkbox.tsx",
   "legal-document": "src/legal-document.tsx",
   "legal-footer-links": "src/legal-footer-links.tsx",

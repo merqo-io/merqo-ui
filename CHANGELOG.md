@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- README: `LandingAccountNav` documents that `LinkComponent` can only be passed from a Client Component. `next/link` passed from a Server Component returns a 500; omit the prop or use a `"use client"` wrapper.
+
 ### Fixed
 
 - README import paths: `LandingNav`, `LandingAccountNav` and `toNavUser` are imported from `@merqo/ui` (the `landing-nav`, `landing-account-nav` and `nav-user` subpaths are not in `exports`), and `downloadBlob` no longer cites a `@merqo/ui/download` subpath.

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ContextAppLink } from "./app-link-provider";
 import { toast } from "sonner";
 
 import { AccountMenu, type AccountMenuLinkProps } from "./account-menu";
@@ -57,7 +58,7 @@ export function LandingAccountNav<C extends string = string>({
   onError = defaultOnError,
   LinkComponent,
 }: LandingAccountNavProps<C>) {
-  const Link = LinkComponent ?? "a";
+  const Link = LinkComponent ?? ContextAppLink;
   const categories = React.useMemo(
     () =>
       Object.entries<string>(supportCategories).map(([value, label]) => ({

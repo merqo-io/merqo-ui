@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `AppLinkProvider` and `useAppLink` (`@merqo/ui/app-link-provider`). A kit sets its router `Link` once in a client providers file; `AccountMenu`, `DashboardNav`, `LandingAccountNav`, `LoginForm` and `ResetPasswordForm` use it when no `LinkComponent` prop is given, so Server Components no longer pass a function prop across the client boundary. The prop still wins; without a provider behaviour is unchanged.
+
 ## [0.56.1] - 2026-11-20
 
 ### Changed

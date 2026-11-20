@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ContextAppLink } from "./app-link-provider";
 import { AUTH_ERROR_FALLBACKS } from "./auth-error-message";
 import { rawErrorText, runOnce } from "./auth-form-utils";
 import { isRedirectError } from "./redirect-error";
@@ -65,10 +66,6 @@ type FieldError = { field: "password" | "confirm"; message: string };
 
 const LINK_CLASS =
   "inline-flex min-h-11 items-center justify-center text-sm font-semibold text-primary underline-offset-4 hover:underline";
-
-function DefaultLink(props: LoginFormLinkProps) {
-  return <a {...props} />;
-}
 
 function PanelHeading({ children }: { children: React.ReactNode }) {
   const ref = React.useRef<HTMLHeadingElement>(null);
@@ -152,7 +149,7 @@ function FormHeader({ title, subtitle }: { title?: string; subtitle?: string }) 
 
 function SignInLink({ props, className }: { props: ResetPasswordFormProps; className?: string }) {
   const { signInHref, signInLabel = "Back to sign in", LinkComponent } = props;
-  const Link = LinkComponent ?? DefaultLink;
+  const Link = LinkComponent ?? ContextAppLink;
   if (!signInHref) return null;
   const link = (
     <Link href={signInHref} className={LINK_CLASS}>

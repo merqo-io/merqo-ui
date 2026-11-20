@@ -12,6 +12,7 @@ const mdLoader = (options: { loader?: Record<string, string> }) => {
 const ENTRIES = {
   "about-merqo": "src/about-merqo.tsx",
   "account-menu": "src/account-menu.tsx",
+  "app-link-provider": "src/app-link-provider.tsx",
   "async-submit-button": "src/async-submit-button.tsx",
   "copy-button": "src/copy-button.tsx",
   download: "src/download.ts",

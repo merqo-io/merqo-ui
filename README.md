@@ -300,11 +300,32 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   category is sent as `"other"`; feedback is sent as
   `{ source: "vendor", nps, message }` with a trimmed, possibly empty-to-undefined message.
   `LinkComponent` is a component, so it can only be passed from a Client
-  Component. Passing `next/link` from a Server Component fails: on the server
-  `next/link` resolves to its react-server build, which can't be serialized
-  across the client boundary, so the page returns a 500. From a Server
-  Component, omit the prop (links render as plain `<a>`) or render the nav
-  from a small `"use client"` wrapper that passes `Link`.
+  Component; passing `next/link` from a Server Component returns a 500.
+  Mount `<AppLinkProvider component={Link}>` once in the kit's client
+  providers file instead (see `AppLinkProvider`); the nav then picks the link
+  up from context and the prop stays available as an override.
+- `AppLinkProvider({component, children})` and `useAppLink()` (`"use client"`,
+  `@merqo/ui/app-link-provider`) - set the router link once for every client
+  export that takes `LinkComponent` (`AccountMenu`, `DashboardNav`,
+  `LandingAccountNav`, `LoginForm`, `ResetPasswordForm`). Each resolves its
+  link as the explicit `LinkComponent` prop, then the provided component,
+  then a plain `<a>`, so nothing changes without a provider. A function cannot
+  cross the Server to Client boundary as a prop, so this is the way to use
+  `next/link` when a Server Component renders these exports. `useAppLink()`
+  returns the provided component or `undefined`.
+
+  ```tsx
+  // app/providers.tsx
+  "use client";
+  import Link from "next/link";
+  import { AppLinkProvider } from "@merqo/ui";
+
+  export function Providers({ children }: { children: React.ReactNode }) {
+    return <AppLinkProvider component={Link}>{children}</AppLinkProvider>;
+  }
+  ```
+
+  Render `<Providers>` in the root layout around `{children}`.
 - `toNavUser(authUser, vendorName?)` (server-safe, no `"use client"`) — maps
   `{ email, user_metadata }` to `NavUser` (`{ name, email?, avatarUrl? }`),
   or `null` for no user. Name: `vendorName`, `full_name`, `display_name`,

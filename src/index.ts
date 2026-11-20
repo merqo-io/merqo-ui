@@ -220,6 +220,7 @@ export {
   isTelegramLink,
 } from "./telegram-link";
 export type { AppLinkComponent, AppLinkProps } from "./app-link";
+export { AppLinkProvider, useAppLink } from "./app-link-provider";
 export { ErrorPage, GlobalError } from "./error-page";
 export type { ErrorPageProps, GlobalErrorProps, GlobalErrorColors } from "./error-page";
 export { NotFound } from "./not-found-page";

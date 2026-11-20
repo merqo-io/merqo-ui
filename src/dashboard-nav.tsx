@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ContextAppLink } from "./app-link-provider";
 import { Menu } from "lucide-react";
 
 import { AccountMenu, type AccountMenuProps } from "./account-menu";
@@ -42,10 +43,6 @@ const COLLAPSE_CLASSES = {
 
 const MOBILE_PANEL_ID = "dashboard-nav-mobile-panel";
 
-function DefaultLink({ href, ...rest }: DashboardNavLinkProps) {
-  return <a href={href} {...rest} />;
-}
-
 export function DashboardNav({
   wordmark,
   navLinks,
@@ -57,7 +54,7 @@ export function DashboardNav({
 }: DashboardNavProps) {
   const collapse = COLLAPSE_CLASSES[collapseBelow];
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const Link = LinkComponent ?? DefaultLink;
+  const Link = LinkComponent ?? ContextAppLink;
 
   // I7: Escape closes the mobile panel, matching the tap-away scrim below.
   React.useEffect(() => {

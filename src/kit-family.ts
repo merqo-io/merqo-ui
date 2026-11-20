@@ -20,6 +20,7 @@ export const KIT_FAMILY: KitFamilyMember[] = [
   { slug: "loopkit", name: "loopkit", url: "https://loopkit.merqo.io" },
   { slug: "paykit", name: "paykit", url: "https://paykit.merqo.io" },
   { slug: "stockkit", name: "stockkit", url: "https://stockkit.merqo.io" },
+  { slug: "printkit", name: "printkit", url: "https://printkit.merqo.io" },
 ];
 
 /**

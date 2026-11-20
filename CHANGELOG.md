@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- `LandingAccountNav`: the Dashboard link plus `AccountMenu` that every kit's landing page wired by hand (Switch products, Get help form, NPS feedback, Sign out), for `LandingNav`'s `end` slot. Failed support or feedback actions surface through `onError`, defaulting to a sonner error toast.
+- `toNavUser(authUser, vendorName?)`: server-safe helper that maps an auth user to the `NavUser` `LandingAccountNav` takes (name chain, https-only avatar).
+
+### Changed
+
+- `KIT_FAMILY` now includes printkit, so printkit also appears in every dashboard's Switch products menu.
+
 ## [0.55.0] - 2026-11-20
 
 ### Added

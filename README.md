@@ -287,6 +287,47 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   and `end: ReactNode` — so each kit keeps full control of its own
   wordmark markup and right-side links/CTAs (copy and hrefs are legitimate
   per-kit content, not something this package should standardize).
+- `LandingAccountNav` (client) — the signed-in end of a landing nav: a
+  "Dashboard" ghost link (44px tall below `sm`) followed by `AccountMenu`
+  with Switch products (always on, from `getSwitchKits(kit)`), a Get help
+  form, NPS feedback and Sign out. Props: `kit`, `dashboardHref` (required),
+  `user: NavUser`, `signOutAction`, `actions: { submitSupport, submitFeedback }`
+  (generic over the category union, so a kit action with a narrower union
+  type-checks), `supportCategories` (value to label), optional `onError`
+  (default: sonner `toast.error` with the error message) and `LinkComponent`.
+  The `{ success: false, error }` result of an action is thrown as an
+  `Error`, so the sheet shows it and `onError` runs. An unknown support
+  category is sent as `"other"`; feedback is sent as
+  `{ source: "vendor", nps, message }` with a trimmed, possibly empty-to-undefined message.
+- `toNavUser(authUser, vendorName?)` (server-safe, no `"use client"`) — maps
+  `{ email, user_metadata }` to `NavUser` (`{ name, email?, avatarUrl? }`),
+  or `null` for no user. Name: `vendorName`, `full_name`, `display_name`,
+  email local part, then `"Account"`; blank and non-string values are
+  skipped. `avatarUrl` is kept only when it is an `https:` URL.
+
+  ```tsx
+  // app/page.tsx (Server Component)
+  import { LandingNav } from "@merqo/ui/landing-nav";
+  import { LandingAccountNav } from "@merqo/ui/landing-account-nav";
+  import { toNavUser } from "@merqo/ui/nav-user";
+
+  const navUser = toNavUser(user, vendor?.name);
+  <LandingNav
+    wordmark={<Wordmark />}
+    end={
+      navUser && (
+        <LandingAccountNav
+          kit="qkit"
+          dashboardHref="/dashboard"
+          user={navUser}
+          signOutAction={signOut}
+          actions={{ submitSupport, submitFeedback }}
+          supportCategories={{ bug: "Bug", other: "Other" }}
+        />
+      )
+    }
+  />;
+  ```
 - `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
   with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays

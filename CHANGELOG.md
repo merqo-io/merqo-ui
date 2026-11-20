@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.55.0] - 2026-11-20
+
 ### Added
 
 - `PhoneFrame` opt-ins `realistic`, `browserBar={{url}}` and `statusTime`: bezel, camera island, side keys, status bar and a Safari-style URL bar. Default rendering is unchanged.

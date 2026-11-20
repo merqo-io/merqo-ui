@@ -25,6 +25,26 @@ function httpsUrl(value: unknown): string | undefined {
 }
 
 /**
+ * The single label chain for an account: vendor name, `full_name`,
+ * `display_name`, email local part, then "Account". Plain module (no
+ * "use client") so a Server Component layout can compute it and hand the
+ * string to a client nav; every kit shows the same label that way.
+ */
+export function accountLabel(
+  authUser: NavAuthUser | null | undefined,
+  vendorName?: string | null,
+): string {
+  const meta = authUser?.user_metadata ?? {};
+  return (
+    text(vendorName) ??
+    text(meta.full_name) ??
+    text(meta.display_name) ??
+    text(text(authUser?.email)?.split("@")[0]) ??
+    "Account"
+  );
+}
+
+/**
  * Maps a Supabase-style auth user to the shape `LandingAccountNav` takes.
  * Plain module (no "use client") so a Server Component page can call it
  * before handing the result to the client nav. Avatar URLs are limited to
@@ -35,17 +55,9 @@ export function toNavUser(
   vendorName?: string | null,
 ): NavUser | null {
   if (!authUser) return null;
-  const meta = authUser.user_metadata ?? {};
-  const email = text(authUser.email);
-  const name =
-    text(vendorName) ??
-    text(meta.full_name) ??
-    text(meta.display_name) ??
-    text(email?.split("@")[0]) ??
-    "Account";
   return {
-    name,
-    email,
-    avatarUrl: httpsUrl(meta.avatar_url),
+    name: accountLabel(authUser, vendorName),
+    email: text(authUser.email),
+    avatarUrl: httpsUrl(authUser.user_metadata?.avatar_url),
   };
 }

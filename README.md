@@ -331,6 +331,13 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   or `null` for no user. Name: `vendorName`, `full_name`, `display_name`,
   email local part, then `"Account"`; blank and non-string values are
   skipped. `avatarUrl` is kept only when it is an `https:` URL.
+  `LandingAccountNav` shows `user.name` (the stall name when `vendorName` is
+  given) as the trigger label, not the email.
+- `accountLabel(authUser, vendorName?)` (server-safe, no `"use client"`) —
+  returns the same name chain as a string, `"Account"` at worst, and works
+  with no auth user. Call it in a Server Component dashboard layout and pass
+  the result as both `vendor.name` and `vendor.subtitle` so every kit shows
+  the stall name: `const label = accountLabel(user, vendor.name)`.
 
   ```tsx
   // app/page.tsx (Server Component)

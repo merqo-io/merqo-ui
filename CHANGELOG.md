@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `accountLabel(authUser, vendorName?)`: the shared account label chain (vendor name, `full_name`, `display_name`, email local part, "Account"). `toNavUser` now uses it.
+
+### Changed
+
+- `LandingAccountNav` trigger shows the stall name (`user.name`) instead of the email.
+
 ## [0.57.0] - 2026-11-21
 
 ### Added

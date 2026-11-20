@@ -55,6 +55,13 @@ describe("LandingAccountNav", () => {
     expect(link.className).toContain("min-h-11");
   });
 
+  it("labels the trigger with the stall name, not the email", () => {
+    setup();
+    const trigger = screen.getByRole("button", { name: /account menu/i });
+    expect(trigger).toHaveTextContent("Manfred");
+    expect(trigger).not.toHaveTextContent("m@x.co");
+  });
+
   it("uses LinkComponent for the Dashboard link", () => {
     const Custom = ({
       href,

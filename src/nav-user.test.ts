@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toNavUser } from "./nav-user";
+import { accountLabel, toNavUser } from "./nav-user";
 
 describe("toNavUser", () => {
   it("returns null without a user", () => {
@@ -57,5 +57,38 @@ describe("toNavUser", () => {
     expect(av("/a.png")).toBeUndefined();
     expect(av(12)).toBeUndefined();
     expect(av("javascript:alert(1)")).toBeUndefined();
+  });
+});
+
+describe("accountLabel", () => {
+  const auth = {
+    email: "jo@b.co",
+    user_metadata: { full_name: "Full", display_name: "Disp" },
+  };
+
+  it("prefers the trimmed vendor name", () => {
+    expect(accountLabel(auth, "  Shop  ")).toBe("Shop");
+  });
+
+  it("falls through a whitespace-only vendor name", () => {
+    expect(accountLabel(auth, "   ")).toBe("Full");
+  });
+
+  it("uses full_name, then display_name, then the email local part", () => {
+    expect(accountLabel(auth)).toBe("Full");
+    expect(accountLabel({ email: "jo@b.co", user_metadata: { display_name: "Disp" } })).toBe(
+      "Disp",
+    );
+    expect(accountLabel({ email: "jo@b.co", user_metadata: {} })).toBe("jo");
+  });
+
+  it("falls back to Account", () => {
+    expect(accountLabel({ email: null, user_metadata: null })).toBe("Account");
+  });
+
+  it("works without an auth user", () => {
+    expect(accountLabel(null, " Shop ")).toBe("Shop");
+    expect(accountLabel(undefined, "  ")).toBe("Account");
+    expect(accountLabel(null)).toBe("Account");
   });
 });

@@ -419,6 +419,13 @@ describe("AccountMenu", () => {
     expect(trigger).not.toHaveTextContent("manfred@example.com");
   });
 
+  it("grows the trigger to a 44px touch target below sm without changing its sm+ footprint", () => {
+    render(<AccountMenu {...baseProps} />);
+    const trigger = screen.getByRole("button", { name: /account menu/i });
+    expect(trigger).toHaveClass("min-h-11", "min-w-11", "-m-1.5");
+    expect(trigger).toHaveClass("sm:min-h-0", "sm:min-w-0", "sm:m-0");
+  });
+
   it("renders vendor.subtitle in the trigger button when provided", async () => {
     render(<AccountMenu {...baseProps} vendor={{ name: "Manfred", subtitle: "manfred@example.com" }} />);
     const trigger = screen.getByRole("button", { name: /account menu/i });

@@ -218,7 +218,7 @@ export function AccountMenu({
             type="button"
             aria-label="Account menu"
             data-tour="nav-account"
-            className="focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-full outline-none transition-opacity focus-visible:ring-2 active:opacity-70 motion-reduce:transition-none"
+            className="focus-visible:ring-ring/50 -m-1.5 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full outline-none transition-opacity focus-visible:ring-2 active:opacity-70 motion-reduce:transition-none sm:m-0 sm:min-h-0 sm:min-w-0"
           >
             <AvatarIdentity
               name={vendor.name}

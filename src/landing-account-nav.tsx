@@ -74,7 +74,7 @@ export function LandingAccountNav<C extends string = string>({
         <Link href={dashboardHref}>Dashboard</Link>
       </Button>
       <AccountMenu
-        vendor={{ name: user.name, avatarUrl: user.avatarUrl, subtitle: user.email }}
+        vendor={{ name: user.name, avatarUrl: user.avatarUrl, subtitle: user.name }}
         signOutAction={signOutAction}
         switchKits={getSwitchKits(kit)}
         feedbackSource="vendor"

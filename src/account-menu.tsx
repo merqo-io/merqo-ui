@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ContextAppLink } from "./app-link-provider";
 import {
   CreditCard,
   HelpCircle,
@@ -113,10 +114,6 @@ function TierSlot({ tier, tierBadge }: { tier?: string; tierBadge?: React.ReactN
   return tier ? <TierChip tier={tier} /> : null;
 }
 
-function DefaultLink({ href, ...rest }: AccountMenuLinkProps) {
-  return <a href={href} {...rest} />;
-}
-
 function themePresentation(theme: string | undefined) {
   if (theme === "light") return { label: "Light", Icon: Sun };
   if (theme === "dark") return { label: "Dark", Icon: Moon };
@@ -193,7 +190,7 @@ export function AccountMenu({
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
-  const Link = LinkComponent ?? DefaultLink;
+  const Link = LinkComponent ?? ContextAppLink;
 
   // Keep failures visible until sign-out succeeds or the menu closes.
   const signOut = useAsyncAction(signOutAction);

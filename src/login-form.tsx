@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ContextAppLink } from "./app-link-provider";
 import { GoogleMark } from "./google-mark";
 import { rawErrorText, runOnce } from "./auth-form-utils";
 import { Button } from "./ui/button";
@@ -102,10 +103,6 @@ export type LoginFormLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
 };
 
 const ERROR_ID = "login-form-error";
-
-function DefaultLink(props: LoginFormLinkProps) {
-  return <a {...props} />;
-}
 
 type Job = { context: LoginErrorContext; run: () => Promise<CallbackResult> };
 
@@ -419,7 +416,7 @@ export function LoginForm({
   // carried here to refill the field on return.
   const [emailValue, setEmailValue] = React.useState(defaultEmail);
 
-  const Link = LinkComponent ?? DefaultLink;
+  const Link = LinkComponent ?? ContextAppLink;
   const inflight = React.useRef(false);
   const formRef = React.useRef<HTMLFormElement>(null);
   const emailRef = React.useRef<HTMLInputElement>(null);

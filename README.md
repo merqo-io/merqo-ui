@@ -299,6 +299,12 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   `Error`, so the sheet shows it and `onError` runs. An unknown support
   category is sent as `"other"`; feedback is sent as
   `{ source: "vendor", nps, message }` with a trimmed, possibly empty-to-undefined message.
+  `LinkComponent` is a component, so it can only be passed from a Client
+  Component. Passing `next/link` from a Server Component fails: on the server
+  `next/link` resolves to its react-server build, which can't be serialized
+  across the client boundary, so the page returns a 500. From a Server
+  Component, omit the prop (links render as plain `<a>`) or render the nav
+  from a small `"use client"` wrapper that passes `Link`.
 - `toNavUser(authUser, vendorName?)` (server-safe, no `"use client"`) — maps
   `{ email, user_metadata }` to `NavUser` (`{ name, email?, avatarUrl? }`),
   or `null` for no user. Name: `vendorName`, `full_name`, `display_name`,

@@ -29,7 +29,7 @@ export type { LandingAccountNavProps } from "./landing-account-nav";
 export { toNavUser, accountLabel } from "./nav-user";
 export type { NavUser, NavAuthUser } from "./nav-user";
 export { LandingNav } from "./landing-nav";
-export type { LandingNavProps } from "./landing-nav";
+export type { LandingNavProps, LandingNavLink } from "./landing-nav";
 export { ImageUploader } from "./image-uploader";
 export type {
   ImageUploaderProps,

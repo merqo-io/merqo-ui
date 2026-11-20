@@ -283,10 +283,24 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (`z-20`, `bg-background/85`), horizontal padding on the inner `<nav>`
   (`mx-auto max-w-6xl px-5`, so it shares an edge with content in the same
   container),
-  `max-w-6xl` centered row. Takes only two slots — `wordmark: ReactNode`
-  and `end: ReactNode` — so each kit keeps full control of its own
-  wordmark markup and right-side links/CTAs (copy and hrefs are legitimate
-  per-kit content, not something this package should standardize).
+  `max-w-6xl` centered row. Slots `wordmark: ReactNode` and
+  `end: ReactNode` keep each kit in control of its own wordmark markup and
+  auth CTAs. Optional `links?: { label: string; href: string }[]` (plain
+  data, rendered as `<a>`) are the secondary links (FAQ, About): inline from
+  `sm` up, and below `sm` collapsed into a 44px burger button beside `end`
+  that opens a full-width panel (Escape, a link click or a tap outside
+  closes it). Without `links` the output is unchanged.
+
+  ```tsx
+  <LandingNav
+    wordmark={<Wordmark />}
+    links={[
+      { label: "FAQ", href: "/#faq" },
+      { label: "About", href: "/about" },
+    ]}
+    end={<a href="/login">Sign in</a>}
+  />
+  ```
 - `LandingAccountNav` (client) — the signed-in end of a landing nav: a
   "Dashboard" ghost link (44px tall below `sm`) followed by `AccountMenu`
   with Switch products (always on, from `getSwitchKits(kit)`), a Get help

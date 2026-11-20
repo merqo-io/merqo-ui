@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.58.0] - 2026-11-21
+
 ### Added
 
 - `accountLabel(authUser, vendorName?)`: the shared account label chain (vendor name, `full_name`, `display_name`, email local part, "Account"). `toNavUser` now uses it.

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.56.0] - 2026-11-20
+
 ### Added
 
 - `LandingAccountNav`: the Dashboard link plus `AccountMenu` that every kit's landing page wired by hand (Switch products, Get help form, NPS feedback, Sign out), for `LandingNav`'s `end` slot. Failed support or feedback actions surface through `onError`, defaulting to a sonner error toast.

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `PhoneFrame` opt-ins `realistic`, `browserBar={{url}}` and `statusTime`: bezel, camera island, side keys, status bar and a Safari-style URL bar. Default rendering is unchanged.
+- `TabletFrame`: bezelled tablet frame with an optional top bar.
+- `Footer` `layout="compact"`: one ~64px row that wraps to two short rows on a phone.
+
+### Changed
+
+- `LandingNav`: horizontal padding moved from the header to the inner `max-w-6xl` box, so the nav edge matches content in a `mx-auto max-w-6xl px-5` container. Under 1152px wide nothing shifts; wider, the nav background still spans full width.
+
 ## [0.54.1] - 2026-11-20
 
 ### Changed

@@ -14,4 +14,10 @@ describe("LandingNav", () => {
     const header = container.querySelector("header");
     expect(header).toHaveClass("sticky", "top-0", "z-20", "bg-background/85");
   });
+
+  it("puts the edge padding on the inner max-w-6xl box, not the header", () => {
+    const { container } = render(<LandingNav wordmark={<span>Kit</span>} end={<span>End</span>} />);
+    expect(container.querySelector("header")).not.toHaveClass("px-5");
+    expect(container.querySelector("nav")).toHaveClass("mx-auto", "max-w-6xl", "px-5");
+  });
 });

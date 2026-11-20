@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.56.1] - 2026-11-20
+
 ### Changed
 
 - README: `LandingAccountNav` documents that `LinkComponent` can only be passed from a Client Component. `next/link` passed from a Server Component returns a 500; omit the prop or use a `"use client"` wrapper.

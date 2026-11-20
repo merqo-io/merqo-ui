@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- README import paths: `LandingNav`, `LandingAccountNav` and `toNavUser` are imported from `@merqo/ui` (the `landing-nav`, `landing-account-nav` and `nav-user` subpaths are not in `exports`), and `downloadBlob` no longer cites a `@merqo/ui/download` subpath.
+
 ## [0.56.0] - 2026-11-20
 
 ### Added

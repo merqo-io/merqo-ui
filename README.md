@@ -307,9 +307,7 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
 
   ```tsx
   // app/page.tsx (Server Component)
-  import { LandingNav } from "@merqo/ui/landing-nav";
-  import { LandingAccountNav } from "@merqo/ui/landing-account-nav";
-  import { toNavUser } from "@merqo/ui/nav-user";
+  import { LandingAccountNav, LandingNav, toNavUser } from "@merqo/ui";
 
   const navUser = toNavUser(user, vendor?.name);
   <LandingNav
@@ -708,7 +706,7 @@ reversible ones.
   announces it through a polite live region. On failure (or no clipboard) it calls `onError` and shows no copied state.
   It never toasts; the caller decides. Built on `Button`, so it keeps the 44px touch target on coarse pointers.
 - `downloadBlob(blob, filename)` — plain helper (no `"use client"`, browser only): creates an object URL, clicks a
-  temporary anchor and revokes the URL after 1s. Also at `@merqo/ui/download`. Kits keep building their own CSV text.
+  temporary anchor and revokes the URL after 1s. Import it from `@merqo/ui`; there is no `@merqo/ui/download` subpath. Kits keep building their own CSV text.
 - `DownloadButton({label?="Download", pendingLabel?, onDownload, onError?, variant?="outline", size?="sm", ...buttonProps})` —
   runs `onDownload` (sync or async), stays disabled with `aria-busy` and a spinner until it settles, and passes a
   rejection to `onError`.

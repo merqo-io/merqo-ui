@@ -83,6 +83,17 @@ describe("DashboardNav", () => {
     expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
   });
 
+  it("keeps the scrim out of any backdrop-filter containing block", async () => {
+    const user = userEvent.setup();
+    render(<DashboardNav {...baseProps} />);
+    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
+    const scrim = screen.getByRole("button", { name: "Close navigation menu" });
+    expect(scrim).toHaveClass("fixed", "inset-0");
+    for (let el: Element | null = scrim; el; el = el.parentElement) {
+      expect(el.className).not.toMatch(/(^|\s)backdrop-/);
+    }
+  });
+
   it("I7: renders a tap-away scrim button that closes the panel when clicked", async () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);

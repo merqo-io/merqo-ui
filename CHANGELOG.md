@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.59.0] - 2026-11-21
+
 ### Added
 
 - `LandingNav` optional `links` prop (plain `{ label, href }` data): secondary links render inline from `sm` up and collapse into a burger menu beside `end` below `sm`. Without `links` the output is unchanged.

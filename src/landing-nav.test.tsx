@@ -13,7 +13,8 @@ describe("LandingNav", () => {
   it("wraps both slots in a header with the shared sticky/shape classes", () => {
     const { container } = render(<LandingNav wordmark={<span>Kit</span>} end={<span>End</span>} />);
     const header = container.querySelector("header");
-    expect(header).toHaveClass("sticky", "top-0", "z-20", "bg-background/85");
+    expect(header).toHaveClass("sticky", "top-0", "z-20", "before:bg-background/85", "before:backdrop-blur-md");
+    expect(header).not.toHaveClass("backdrop-blur-md");
   });
 
   it("puts the edge padding on the inner max-w-6xl box, not the header", () => {
@@ -81,6 +82,17 @@ describe("LandingNav links", () => {
     await user.click(burger);
     await user.click(screen.getByRole("button", { name: "Close menu", hidden: true }));
     expect(burger).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("keeps the scrim out of any backdrop-filter containing block", async () => {
+    const user = userEvent.setup();
+    setup();
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    const scrim = screen.getByRole("button", { name: "Close menu", hidden: true });
+    expect(scrim).toHaveClass("fixed", "inset-0");
+    for (let el: Element | null = scrim; el; el = el.parentElement) {
+      expect(el.className).not.toMatch(/(^|\s)backdrop-/);
+    }
   });
 
   it("renders no burger when links is absent or empty", () => {

@@ -73,7 +73,7 @@ export function DashboardNav({
     // per-surface difference, not drift: this nav's row is denser (it also
     // carries the account menu) and its max-width matches the dashboard
     // content area's own `max-w-7xl` cap (see this component's README entry).
-    <header className="border-border bg-background/85 sticky top-0 z-20 border-b px-5 py-3.5 backdrop-blur-md">
+    <header className="border-border sticky top-0 z-20 border-b px-5 py-3.5 before:absolute before:inset-0 before:-z-10 before:bg-background/85 before:backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-4">
           <button

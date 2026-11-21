@@ -280,7 +280,7 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (since v0.38.0, default `"sm"`) sets the breakpoint below which links
   collapse into the burger menu.
 - `LandingNav` — public-page nav shell: sticky header, shared shape
-  (`z-20`, `bg-background/85`), horizontal padding on the inner `<nav>`
+  (`z-20`; the translucent `bg-background/85` and `backdrop-blur-md` sit on a `before:` pseudo-element so the header is not a containing block for the fixed tap-away scrim), horizontal padding on the inner `<nav>`
   (`mx-auto max-w-6xl px-5`, so it shares an edge with content in the same
   container),
   `max-w-6xl` centered row. Slots `wordmark: ReactNode` and

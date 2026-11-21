@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `LandingNav` and `DashboardNav`: the burger tap-away scrim now covers the full viewport. The header's `backdrop-blur` made it the containing block for the `fixed` scrim, so it measured only the header and taps on page content left the menu open. The blur and translucent background now live on a `before:` pseudo-element, so the header no longer traps fixed descendants.
+
 ## [0.59.0] - 2026-11-21
 
 ### Added

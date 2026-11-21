@@ -46,7 +46,7 @@ export function LandingNav({ wordmark, end, links }: LandingNavProps) {
     // Same sticky-header shape as DashboardNav (border/bg/blur/z-index), but
     // `py-4` (vs `py-3.5`) and `max-w-6xl` (vs `max-w-7xl`) are a deliberate
     // per-surface difference: public pages have narrower content columns.
-    <header className="border-border bg-background/85 sticky top-0 z-20 border-b py-4 backdrop-blur-md">
+    <header className="border-border sticky top-0 z-20 border-b py-4 before:absolute before:inset-0 before:-z-10 before:bg-background/85 before:backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5">
         {wordmark}
         <div className="flex items-center gap-2 sm:gap-4">

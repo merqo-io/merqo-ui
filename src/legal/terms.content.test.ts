@@ -3,10 +3,11 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const source = readFileSync(
+const raw = readFileSync(
   path.resolve(path.dirname(fileURLToPath(import.meta.url)), "./terms.md"),
   "utf-8",
 );
+const source = raw.replace(/\s+/g, " ");
 
 const REQUIRED_HEADINGS = [
   "## Who we are",
@@ -46,9 +47,29 @@ describe("terms.md", () => {
     expect(source).toContain("Merqo is free during the pilot and no fees are charged.");
   });
 
-  it("states the founding merchant price lock", () => {
+  it("bills by plan, not per Kit", () => {
+    expect(source).toContain("billed by plan, not per Kit");
+    expect(source).not.toMatch(/per Kit,|rate per Kit/);
+  });
+
+  it("holds the price while subscribed and drops the 12-month launch price", () => {
+    expect(source).toContain("holds for as long as you stay subscribed");
+    expect(source).not.toContain("12 months from your first");
+    expect(source).not.toContain("launch price");
+  });
+
+  it("absorbs GST for existing subscribers", () => {
+    expect(source).toContain("Merqo absorbs the GST");
+    expect(source).not.toContain("GST will be added");
+  });
+
+  it("keeps founding merchant terms conditional and novation-safe", () => {
     expect(source).toContain("founding merchant offer");
-    expect(source).toContain("12 months from your first paid billing cycle");
+    expect(source).toContain("assigned or novated");
+  });
+
+  it("states no prices", () => {
+    expect(source).not.toContain("S$");
   });
 
   it("contains no em dash", () => {

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.60.0] - 2026-11-23
+
+### Changed
+
+- Terms of Service (version 2026-11-23): "Fees and billing" and "Refunds and cancellation" now describe plan-based billing, trial, billing date, upgrades, grace period, pause, price lock and GST, all conditional on paid plans being introduced. Merging requires vendors to re-accept; kits pick it up when they move their pin.
+
 ## [0.59.1] - 2026-11-21
 
 ### Fixed

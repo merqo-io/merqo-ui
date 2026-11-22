@@ -1,5 +1,8 @@
 # merqo-ui/src/legal/CHANGELOG.md
 
+## 2026-11-23
+terms.md Fees and billing and Refunds and cancellation rewritten for plan-based billing (still conditional on paid plans being introduced): trial, billing date, upgrades and downgrades, grace period, pause, price lock, GST absorbed, founding merchant terms and per-event pass. Terms bumped to 2026-11-23.
+
 ## 2026-11-10
 Wording made accurate for a free pilot with no decided business structure.
 terms.md, privacy.md, pilot-agreement.md and about-merqo.tsx now describe

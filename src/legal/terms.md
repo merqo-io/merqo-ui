@@ -65,27 +65,50 @@ Merqo is free during the pilot and no fees are charged. If paid plans are
 introduced, vendors will get at least 30 days' notice first, and the rest
 of this section applies only from then.
 
-If paid plans are introduced, each paid Kit is billed at a flat monthly
-rate per Kit, as quoted to you beforehand or shown in your dashboard.
-Quoted fees would be shown as "GST not applicable (Merqo is not
-GST-registered)"; if Merqo registers for GST, GST will be added to fees
-billed from the date registration takes effect and this document will be
-updated accordingly.
+If paid plans are introduced, you would be billed by plan, not per Kit. A
+plan includes a set of Kits, as quoted to you beforehand or shown in your
+dashboard. Plans may include a free plan, monthly or annual subscriptions,
+and a prepaid per-event pass. Payment is in advance. Until a payment
+provider is added, payment is collected by PayNow and recorded by Merqo by
+hand. Nothing is charged before Merqo is registered as a business.
 
-Your billing cycle would run monthly from the date you first activate a
-paid Kit. We do not increase your fees mid-term: a price change only takes
-effect from your next billing cycle after the notice period described in
-Changes to these terms, and never during a period you have already paid
-for. You may cancel a Kit at any time from your account settings, or by
-emailing legal@merqo.io; cancellation takes effect at the end of your
-current billing cycle, and you retain access until then.
+If paid plans are introduced, each business gets one free trial month of
+the top plan. The trial lasts 30 days and starts at the business's first
+order, not at sign-up. We may refuse a trial where the same email address,
+or the same PayNow number or UEN, has already had one. Founding merchants
+do not get the trial.
 
-If paid plans are introduced and you were accepted under a
-founding merchant offer, you keep the launch price quoted to you for
-12 months from your first paid billing cycle. This carries over if this
-agreement is assigned or novated to a Merqo company, if one is ever
-incorporated. After those 12 months, the price change notice described
-above applies as normal.
+Your billing date would be the day your trial ends, or the day you first
+subscribe if you have no trial. After that, you are billed on the same
+date each period. If you upgrade, the new plan applies at once and we
+charge the difference for the days left in the current period, pro rata.
+If you downgrade, the change applies at the end of the current period.
+
+If payment is not made by your billing date, you have 7 days' grace. After
+that, your account moves to the free plan. Your data is kept. You may
+pause a paid plan for up to 3 months in any 12 months. While paused, your
+data is kept and your price lock is kept.
+
+The price you join at holds for as long as you stay subscribed, including
+while paused. If you cancel and later return, the list price at that time
+applies.
+
+Merqo is not GST-registered, so no GST is charged. If Merqo registers for
+GST, the prices of existing subscribers do not change, because Merqo
+absorbs the GST. New prices would be shown GST-inclusive.
+
+If paid plans are introduced and you were accepted under a founding
+merchant offer, your terms are as quoted to you, which would be prepaid
+annual billing on the top plan. The price lock above applies. This carries
+over if this agreement is assigned or novated to a Merqo company, if one
+is ever incorporated.
+
+A per-event pass is prepaid. Any top-up is settled within 3 days of the
+event.
+
+You may cancel at any time from your account settings, or by emailing
+legal@merqo.io. Cancellation takes effect at the end of your current
+billing cycle, and you keep access until then.
 
 ## Refunds and cancellation
 
@@ -94,14 +117,12 @@ This section applies only if you are on a paid plan.
 Fees already paid are not refunded on a pro-rata basis if you cancel
 partway through a billing cycle. You keep access for the remainder of
 the cycle you have paid for, but we do not refund the unused portion.
+This does not affect the pro-rata charge for an upgrade, or the pause
+described in Fees and billing.
 
-If a payment fails or is not made when due, we will notify you and
-attempt to collect payment for 7 days. If payment remains outstanding
-after that period, we may suspend your access to the affected Kit until
-payment is made. If payment remains outstanding for 30 days from the due
-date, we may terminate the affected Kit's subscription and, subject to
-the retention schedule in our Privacy Policy, delete the data associated
-with it.
+If payment is not made when due, we will notify you. The grace period and
+the move to the free plan are described in Fees and billing. Subject to
+the retention schedule in our Privacy Policy, your data is kept.
 
 ## Our intellectual property
 

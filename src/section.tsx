@@ -94,8 +94,7 @@ export function Section({
   return (
     <section
       className={cn(
-        surface === "default" &&
-          SURFACE, "flex flex-col gap-4 p-6",
+        surface === "default" && cn(SURFACE, "flex flex-col gap-4 p-6"),
         surface === "none" && "flex flex-col gap-4",
         className,
       )}

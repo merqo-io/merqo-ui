@@ -1,4 +1,6 @@
 import * as React from "react";
+import { cn } from "./lib/utils";
+import { GROUP } from "./recipes";
 
 export interface AuditLogEntry {
   id: string;
@@ -37,14 +39,14 @@ function formatTimestamp(value: string | Date, dateFormatter?: (date: Date) => s
 export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter }: AuditLogTableProps) {
   if (entries.length === 0) {
     return (
-      <div className="rounded-xl border border-border px-5 py-8 text-center text-sm text-muted-foreground">
+      <div className={cn(GROUP, "border-border px-5 py-8 text-center text-sm text-muted-foreground")}>
         {emptyState ?? "No activity recorded yet."}
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border">
+    <div className={cn(GROUP, "overflow-hidden border-border")}>
       <div
         className={`grid ${GRID_COLS} gap-x-4 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground`}
       >

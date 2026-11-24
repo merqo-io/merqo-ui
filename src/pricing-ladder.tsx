@@ -61,7 +61,7 @@ export function PricingLadder({
       {showPilotNotice ? (
         <p
           role="note"
-          className="rounded-xl border border-border bg-muted p-4 text-sm text-foreground"
+          className={cn(GROUP, "border-border bg-muted p-4 text-sm text-foreground")}
         >
           {PILOT_PRICING_NOTICE}
         </p>
@@ -126,7 +126,7 @@ export function PricingLadder({
       {showEventPass ? (
         <section
           aria-labelledby={headingId}
-          className="rounded-xl border border-border bg-muted p-5 text-foreground"
+          className={cn(GROUP, "border-border bg-muted p-5 text-foreground")}
         >
           <h3 id={headingId} className="text-lg font-semibold">
             Event Pass

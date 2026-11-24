@@ -273,6 +273,18 @@ describe("Section surface", () => {
   });
 });
 
+describe("Section surface none", () => {
+  it("carries no padding or default-surface classes", () => {
+    const { container } = render(
+      <Section icon={<Info />} title="t" surface="none">
+        <div />
+      </Section>,
+    );
+    const shell = container.querySelector("section") as HTMLElement;
+    expect(shell.className).toBe("flex flex-col gap-4");
+  });
+});
+
 describe("Section type", () => {
   it("uses the eyebrow and section title recipes", () => {
     render(

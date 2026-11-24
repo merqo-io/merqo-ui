@@ -12,6 +12,7 @@
 - `FeedbackSheet`: the 0-10 score row wraps to two rows of six so each target is tappable on a phone, and has a visible question. New optional `npsLabel` prop; `AccountMenu` forwards it as `feedbackNpsLabel`.
 - `AuditLogTable`: without `formatAction`, the action renders as a humanised label ("Set vendor plan") instead of the raw code. A missing target renders an empty cell with screen-reader text "No target" instead of an em dash.
 - `PricingLadder`: plan prices use `tabular-nums` so digits align across cards.
+- `FeedbackSheet` and `HelpSheet`: the Send button is at least 44px tall on coarse pointers (it was 36px). The local render check now opens each sheet at 360px and asserts fit, tap targets, validation and sent states.
 
 ## [0.60.0] - 2026-11-23
 

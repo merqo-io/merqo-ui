@@ -180,3 +180,147 @@ test("sheets open by pointer without console errors", async ({ page }, testInfo)
   }
   expect(errors).toEqual([]);
 });
+
+const MIN_TAP_WIDTH = 32;
+
+type Dialog = ReturnType<Page["getByRole"]>;
+
+async function openSheet(page: Page, opener: string, touch: boolean) {
+  const button = page.getByRole("button", { name: opener, exact: true });
+  await button.scrollIntoViewIfNeeded();
+  if (touch) await button.tap();
+  else await button.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  return dialog;
+}
+
+async function press(target: Dialog, touch: boolean) {
+  if (touch) await target.tap();
+  else await target.click();
+}
+
+async function expectSheetFits(dialog: Dialog, state: string) {
+  const result = await dialog.evaluate((el) => {
+    const bounds = el.getBoundingClientRect();
+    const clipped: string[] = [];
+    for (const child of el.querySelectorAll<HTMLElement>("*")) {
+      const box = child.getBoundingClientRect();
+      if (box.width === 0 || box.height === 0) continue;
+      if (box.right > bounds.right + 0.5 || box.left < bounds.left - 0.5) {
+        clipped.push(`${child.tagName.toLowerCase()}:${(child.textContent ?? "").trim().slice(0, 20)}`);
+      }
+    }
+    return { scroll: el.scrollWidth, client: el.clientWidth, clipped };
+  });
+  expect(result.scroll, `${state}: sheet scrolls horizontally`).toBeLessThanOrEqual(result.client);
+  expect(result.clipped, `${state}: elements outside the sheet`).toEqual([]);
+}
+
+// Sizes are enforced on the touch project only: the 44px rule is a coarse-pointer
+// class (pointer-coarse:min-h-11), so the desktop run has nothing to assert.
+async function expectTapTargets(dialog: Dialog, state: string, touch: boolean) {
+  const small = await dialog.evaluate(
+    (el, { minH, minW }) => {
+      const out: string[] = [];
+      for (const node of el.querySelectorAll<HTMLElement>("button, input, textarea, [role=radio]")) {
+        const box = node.getBoundingClientRect();
+        if (box.width === 0 || box.height === 0) continue;
+        if (node.textContent?.trim() === "Close") continue;
+        if (box.height < minH || box.width < minW) {
+          const name = node.getAttribute("aria-label") ?? (node.textContent?.trim() || node.tagName);
+          out.push(`${name} ${Math.round(box.width)}x${Math.round(box.height)}`);
+        }
+      }
+      return out;
+    },
+    { minH: touch ? MIN_TOUCH_HEIGHT : 0, minW: touch ? MIN_TAP_WIDTH : 0 },
+  );
+  expect(small, `${state}: small tap targets`).toEqual([]);
+}
+
+async function shoot(page: Page, testInfo: { project: { name: string } }, name: string) {
+  await page.screenshot({ path: `${SHOTS}${viewportName(testInfo)}-sheet-${name}.png` });
+}
+
+async function finishSend(
+  page: Page,
+  dialog: Dialog,
+  testInfo: { project: { name: string } },
+  expected: { touch: boolean; heading: string; shot: string },
+) {
+  const { touch, heading, shot } = expected;
+  await expect(dialog.getByText(heading)).toBeVisible();
+  const done = dialog.getByRole("button", { name: "Done", exact: true });
+  await expect(done).toBeInViewport();
+  await expectSheetFits(dialog, `${shot} sent`);
+  await expectTapTargets(dialog, `${shot} sent`, touch);
+  await shoot(page, testInfo, `${shot}-sent`);
+  await press(done, touch);
+  await expect(dialog).toBeHidden();
+}
+
+test("feedback sheet with NPS: fit, targets, validation and sent states", async ({ page }, testInfo) => {
+  const touch = Boolean(testInfo.project.use.hasTouch);
+  const errors = watchConsole(page);
+  const dialog = await openSheet(page, "Open feedback with NPS", touch);
+
+  await expect(dialog.getByText("How likely are you to recommend us?").first()).toBeVisible();
+  await expect(dialog.getByRole("radio")).toHaveCount(11);
+  await expectSheetFits(dialog, "nps open");
+  await expectTapTargets(dialog, "nps open", touch);
+  await shoot(page, testInfo, "nps-open");
+
+  const send = dialog.getByRole("button", { name: "Send", exact: true });
+  await press(send, touch);
+  await expect(dialog.getByText("Pick a score first")).toBeVisible();
+  await expectSheetFits(dialog, "nps score error");
+  await shoot(page, testInfo, "nps-score-error");
+
+  const pill = dialog.getByRole("radio", { name: "9", exact: true });
+  await press(pill, touch);
+  await expect(pill).toBeChecked();
+  await press(send, touch);
+  await finishSend(page, dialog, testInfo, { touch, heading: "Feedback sent", shot: "nps" });
+  expect(errors).toEqual([]);
+});
+
+test("feedback sheet: empty submit error and sent state", async ({ page }, testInfo) => {
+  const touch = Boolean(testInfo.project.use.hasTouch);
+  const errors = watchConsole(page);
+  const dialog = await openSheet(page, "Open feedback", touch);
+  await expectSheetFits(dialog, "feedback open");
+  await expectTapTargets(dialog, "feedback open", touch);
+
+  const send = dialog.getByRole("button", { name: "Send", exact: true });
+  await press(send, touch);
+  await expect(dialog.getByText("Write a message first")).toBeVisible();
+  await expectSheetFits(dialog, "feedback error");
+  await shoot(page, testInfo, "feedback-error");
+
+  await dialog.getByRole("textbox").fill("Looks good on a phone");
+  await press(send, touch);
+  await finishSend(page, dialog, testInfo, { touch, heading: "Feedback sent", shot: "feedback" });
+  expect(errors).toEqual([]);
+});
+
+test("help sheet: fit, empty submit error and sent state", async ({ page }, testInfo) => {
+  const touch = Boolean(testInfo.project.use.hasTouch);
+  const errors = watchConsole(page);
+  const dialog = await openSheet(page, "Open help", touch);
+  await expectSheetFits(dialog, "help open");
+  await expectTapTargets(dialog, "help open", touch);
+  await shoot(page, testInfo, "help-open");
+
+  const send = dialog.getByRole("button", { name: "Send", exact: true });
+  await press(send, touch);
+  await expect(dialog.getByText("Write a message first")).toBeVisible();
+  await expectSheetFits(dialog, "help error");
+  await shoot(page, testInfo, "help-error");
+
+  await dialog.getByRole("textbox").fill("I need a hand with billing");
+  await press(send, touch);
+  await finishSend(page, dialog, testInfo, { touch, heading: "Message sent", shot: "help" });
+  expect(errors).toEqual([]);
+});

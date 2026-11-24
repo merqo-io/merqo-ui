@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `FeedbackSheet` and `HelpSheet`: a blank required message now shows "Write a message first" under the textarea instead of doing nothing. A successful send keeps the sheet open on a "Feedback sent" / "Message sent" confirmation with a Done button, instead of closing silently. Kits that relied on the sheet closing right after `onSubmit` resolves now see it close on Done.
+- `FeedbackSheet`: the 0-10 score row wraps to two rows of six so each target is tappable on a phone, and has a visible question. New optional `npsLabel` prop; `AccountMenu` forwards it as `feedbackNpsLabel`.
+
 ## [0.60.0] - 2026-11-23
 
 ### Changed

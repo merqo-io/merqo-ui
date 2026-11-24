@@ -375,7 +375,16 @@ describe("AccountMenu", () => {
     await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
 
     expect(
-      await screen.findByRole("radiogroup", { name: /recommend score, 0 to 10/i }),
+      await screen.findByRole("radiogroup", { name: "How likely are you to recommend us?" }),
+    ).toBeInTheDocument();
+  });
+
+  it("forwards feedbackNpsLabel to the internal FeedbackSheet as the score question", async () => {
+    const user = await openMenu({ showNps: true, feedbackNpsLabel: "Would you tell a friend?" });
+    await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
+
+    expect(
+      await screen.findByRole("radiogroup", { name: "Would you tell a friend?" }),
     ).toBeInTheDocument();
   });
 

@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { SegmentedControl } from "./segmented-control";
 import { isRedirectError } from "./redirect-error";
-import { SheetMessageForm, SheetShell, toErrorMessage } from "./sheet-shell";
+import { SheetConfirmation, SheetMessageForm, SheetShell, toErrorMessage } from "./sheet-shell";
 import { useAsyncAction } from "./use-async-action";
 
 export interface SupportRequest {
@@ -80,17 +80,26 @@ function HelpForm({
   const [message, setMessage] = React.useState("");
   const [category, setCategory] = React.useState<string | undefined>(categories?.[0]?.value);
 
+  const [sent, setSent] = React.useState(false);
+
   const { pending, error, run } = useAsyncAction(async () => {
-    if (!message.trim()) return;
     const payload: SupportRequest = { message };
     if (categories && category) {
       payload.category = category;
     }
     await onSubmit(payload);
-    setMessage("");
-    setCategory(categories?.[0]?.value);
-    onOpenChange(false);
+    setSent(true);
   });
+
+  if (sent) {
+    return (
+      <SheetConfirmation
+        title="Message sent"
+        body="Thanks for getting in touch."
+        onDone={() => onOpenChange(false)}
+      />
+    );
+  }
 
   return (
     <SheetMessageForm

@@ -17,13 +17,13 @@ describe("SheetShell", () => {
 });
 
 describe("SheetMessageForm", () => {
-  it("wires the textarea, error and touch submit", async () => {
+  it("wires the textarea, error and touch submit when the message is filled", async () => {
     const onSubmit = vi.fn();
     const onMessageChange = vi.fn();
     render(
       <SheetMessageForm
         messageId="m"
-        message=""
+        message="hi"
         onMessageChange={onMessageChange}
         onSubmit={onSubmit}
         pending={false}
@@ -36,11 +36,32 @@ describe("SheetMessageForm", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Nope");
     const user = userEvent.setup();
     await user.type(screen.getByLabelText("Message"), "a");
-    expect(onMessageChange).toHaveBeenCalledWith("a");
+    expect(onMessageChange).toHaveBeenCalledWith("hia");
     await user.pointer({
       keys: "[TouchA]",
       target: screen.getByRole("button", { name: "Send" }),
     });
     expect(onSubmit).toHaveBeenCalled();
+  });
+
+  it("submits a blank message when messageRequired is false", async () => {
+    const onSubmit = vi.fn();
+    render(
+      <SheetMessageForm
+        messageId="m"
+        message=""
+        onMessageChange={() => {}}
+        onSubmit={onSubmit}
+        pending={false}
+        messageRequired={false}
+      />,
+    );
+    const user = userEvent.setup();
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Send" }),
+    });
+    expect(onSubmit).toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

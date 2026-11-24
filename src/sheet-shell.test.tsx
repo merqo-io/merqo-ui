@@ -65,3 +65,19 @@ describe("SheetMessageForm", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });
+
+describe("SheetMessageForm touch target", () => {
+  it("keeps the Send button at least 44px tall on coarse pointers", () => {
+    render(
+      <SheetMessageForm
+        messageId="m"
+        message=""
+        onMessageChange={() => {}}
+        onSubmit={() => {}}
+        pending={false}
+        errorMessage={null}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Send" })).toHaveClass("pointer-coarse:min-h-11");
+  });
+});

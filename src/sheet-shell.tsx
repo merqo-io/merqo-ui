@@ -102,7 +102,7 @@ export function SheetMessageForm({
         ) : null}
       </div>
       <SheetFooter className="px-0 pb-4">
-        <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2">
+        <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2 pointer-coarse:min-h-11">
           Send
         </AsyncSubmitButton>
       </SheetFooter>

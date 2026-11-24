@@ -1,4 +1,6 @@
 import * as React from "react";
+import { cn } from "./lib/utils";
+import { GROUP } from "./recipes";
 import { formatCatalogPrice } from "./plan-catalog";
 import type { CatalogPlan, PlanCatalog } from "./plan-catalog";
 
@@ -59,7 +61,7 @@ export function PricingLadder({
       {showPilotNotice ? (
         <p
           role="note"
-          className="rounded-lg border border-border bg-muted p-4 text-sm text-foreground"
+          className={cn(GROUP, "border-border bg-muted p-4 text-sm text-foreground")}
         >
           {PILOT_PRICING_NOTICE}
         </p>
@@ -75,11 +77,13 @@ export function PricingLadder({
             <li
               key={plan.slug}
               aria-current={isHighlighted ? "true" : undefined}
-              className={
+              className={cn(
+                GROUP,
+                "flex flex-col gap-3 p-5",
                 isHighlighted
-                  ? "flex flex-col gap-3 rounded-lg border-2 border-primary bg-card p-5 text-card-foreground"
-                  : "flex flex-col gap-3 rounded-lg border border-border bg-card p-5 text-card-foreground"
-              }
+                  ? "border-2 border-primary"
+                  : "border-border",
+              )}
             >
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-lg font-semibold">{plan.name}</h3>
@@ -122,7 +126,7 @@ export function PricingLadder({
       {showEventPass ? (
         <section
           aria-labelledby={headingId}
-          className="rounded-lg border border-border bg-muted p-5 text-foreground"
+          className={cn(GROUP, "border-border bg-muted p-5 text-foreground")}
         >
           <h3 id={headingId} className="text-lg font-semibold">
             Event Pass

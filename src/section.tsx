@@ -5,6 +5,7 @@ import * as React from "react";
 import { ElevatedCard } from "./elevated-card";
 import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
+import { EYEBROW, SECTION_TITLE, SURFACE } from "./recipes";
 
 export interface SectionProps {
   icon: React.ReactNode;
@@ -55,12 +56,12 @@ export function Section({
           </span>
           <div className="flex flex-col">
             {eyebrow ? (
-              <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              <span className={EYEBROW}>
                 {eyebrow}
               </span>
             ) : null}
             <div className="flex items-center gap-1.5">
-              <h3 className="text-base font-semibold">{title}</h3>
+              <h3 className={SECTION_TITLE}>{title}</h3>
               {tooltip ? (
                 <InfoTooltip content={tooltip} ariaLabel={`More about ${title}`} />
               ) : null}
@@ -93,8 +94,7 @@ export function Section({
   return (
     <section
       className={cn(
-        surface === "default" &&
-          "bg-card text-card-foreground flex flex-col gap-4 rounded-lg border p-6 shadow-sm",
+        surface === "default" && cn(SURFACE, "flex flex-col gap-4 p-6"),
         surface === "none" && "flex flex-col gap-4",
         className,
       )}

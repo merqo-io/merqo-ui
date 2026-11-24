@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ElevatedCard } from "./elevated-card";
 import { cn } from "./lib/utils";
+import { PAGE_TITLE } from "./recipes";
 
 export type AuthShellProps = {
   /** Kit wordmark, usually wrapped in a link home by the kit. */
@@ -42,7 +43,7 @@ export function AuthShell({
           </div>
         ) : null}
         <ElevatedCard className="px-7 pt-9 pb-8">
-          <h1 className={cn("font-display text-3xl font-bold tracking-tight", centred)}>{title}</h1>
+          <h1 className={cn(PAGE_TITLE, centred)}>{title}</h1>
           {subtitle ? (
             <p className={cn("mt-1.5 text-sm text-muted-foreground", centred)}>{subtitle}</p>
           ) : null}

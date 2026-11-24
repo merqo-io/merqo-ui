@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "./lib/utils";
+import { SURFACE } from "./recipes";
 
 export interface ElevatedCardProps
   extends React.HTMLAttributes<HTMLElement> {
@@ -20,10 +21,7 @@ export function ElevatedCard({
 }: ElevatedCardProps): React.ReactElement {
   return (
     <As
-      className={cn(
-        "rounded-2xl border bg-card shadow-sm",
-        className,
-      )}
+      className={cn(SURFACE, className)}
       {...props}
     >
       {children}

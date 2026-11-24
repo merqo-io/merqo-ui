@@ -5,6 +5,7 @@ import { EmptyState } from "./empty-state";
 import { PageHeader } from "./page-header";
 import { StatCard } from "./stat-card";
 import { TierChip } from "./tier-chip";
+import { EYEBROW, PAGE_TITLE } from "./recipes";
 
 describe("PageHeader", () => {
   it("renders eyebrow, one h1, description and action", () => {
@@ -41,9 +42,23 @@ describe("PageHeader", () => {
     expect(document.querySelector("p")).toBeNull();
   });
 
-  it("sizes the title down on a phone when responsive", () => {
+  it("uses the page title recipe when responsive", () => {
     render(<PageHeader title="T" responsive />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-3xl", "sm:text-4xl");
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1).toHaveClass(...PAGE_TITLE.split(" "));
+    expect(h1).not.toHaveClass("sm:text-4xl");
+  });
+
+  it("uses the page title recipe when not responsive", () => {
+    render(<PageHeader title="T" />);
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1).toHaveClass(...PAGE_TITLE.split(" "));
+    expect(h1).not.toHaveClass("text-4xl");
+  });
+
+  it("uses the eyebrow recipe", () => {
+    render(<PageHeader title="T" eyebrow="Section" />);
+    expect(screen.getByText("Section")).toHaveClass(...EYEBROW.split(" "));
   });
 });
 

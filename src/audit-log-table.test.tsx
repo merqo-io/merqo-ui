@@ -1,6 +1,24 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { AuditLogTable, type AuditLogEntry } from "./audit-log-table";
+import { GROUP } from "./recipes";
+
+describe("AuditLogTable frame", () => {
+  it("is an in-page group, with no shadow, filled or empty", () => {
+    const { container, rerender } = render(<AuditLogTable entries={[]} />);
+    const empty = container.firstElementChild as HTMLElement;
+    expect(empty).toHaveClass("rounded-xl", "border");
+    expect(empty.className).not.toMatch(/rounded-2xl|shadow/);
+    rerender(
+      <AuditLogTable
+        entries={[{ id: "1", actor: "a", action: "x", target: null, detail: null, createdAt: "2026-08-19T10:00:00.000Z" }]}
+      />,
+    );
+    const frame = container.firstElementChild as HTMLElement;
+    expect(frame).toHaveClass(GROUP.split(" ")[0]);
+    expect(frame.className).not.toMatch(/rounded-2xl|shadow/);
+  });
+});
 
 describe("AuditLogTable", () => {
   const entries: AuditLogEntry[] = [

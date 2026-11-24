@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Faq } from "./faq";
+import { EYEBROW, PAGE_TITLE } from "./recipes";
 
 const ITEMS = [
   { question: "Is it free?", answer: "Yes." },
@@ -41,12 +42,22 @@ describe("Faq", () => {
   });
 });
 
+describe("Faq type", () => {
+  it("uses the eyebrow and page title recipes, centred", () => {
+    render(<Faq items={ITEMS} eyebrow="Questions" title="Answers" />);
+    const eyebrow = screen.getByText("Questions");
+    expect(eyebrow).toHaveClass(...EYEBROW.split(" "), "text-center");
+    const title = screen.getByRole("heading", { name: "Answers" });
+    expect(title).toHaveClass(...PAGE_TITLE.split(" "), "text-center", "mt-3");
+  });
+});
+
 describe("Faq shape", () => {
   it("takes its corners from the kit radius token", () => {
     render(<Faq items={ITEMS} />);
     const item = document.querySelector("details") as HTMLElement;
-    expect(item).toHaveClass("rounded-lg");
-    expect(item.className).not.toMatch(/rounded-(\[|xl|2xl)/);
+    expect(item).toHaveClass("rounded-xl");
+    expect(item.className).not.toMatch(/rounded-(\[|lg|2xl)|shadow/);
   });
 });
 

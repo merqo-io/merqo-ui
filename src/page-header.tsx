@@ -3,6 +3,7 @@ import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 
 import { cn } from "./lib/utils";
+import { EYEBROW, PAGE_TITLE } from "./recipes";
 
 function isBackLink(
   back: PageHeaderProps["back"],
@@ -30,7 +31,7 @@ export interface PageHeaderProps
   actions?: React.ReactNode;
   /** Slot above the header: a node such as `BackButton`, or `{href, label}` for a plain back link. */
   back?: React.ReactNode | { href: string; label: string };
-  /** One size down on a phone, for a page whose title shares its row with a button. */
+  /** Kept for existing callers. The title is the same size either way, so it has no effect. */
   responsive?: boolean;
 }
 
@@ -47,7 +48,7 @@ export function PageHeader({
   action,
   actions,
   back,
-  responsive = false,
+  responsive: _responsive,
   className,
   ...rest
 }: PageHeaderProps): React.ReactElement {
@@ -73,18 +74,11 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           {eyebrow && (
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className={cn("mb-1.5", EYEBROW)}>
               {eyebrow}
             </p>
           )}
-          <h1
-            className={cn(
-              "font-display font-semibold leading-none break-words",
-              responsive ? "text-3xl sm:text-4xl" : "text-4xl",
-            )}
-          >
-            {title}
-          </h1>
+          <h1 className={PAGE_TITLE}>{title}</h1>
           {line && (
             <div className="mt-2 text-sm text-muted-foreground">{line}</div>
           )}

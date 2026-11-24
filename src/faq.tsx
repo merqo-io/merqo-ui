@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "./lib/utils";
+import { EYEBROW, GROUP, PAGE_TITLE } from "./recipes";
 
 export interface FaqItem {
   question: React.ReactNode;
@@ -28,12 +29,12 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
     <section id={id} className={cn("border-t", className)}>
       <div className="mx-auto max-w-3xl px-5 py-16">
         {eyebrow && (
-          <p className="text-center font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          <p className={cn("text-center", EYEBROW)}>
             {eyebrow}
           </p>
         )}
         {title && (
-          <h2 className="mt-3 text-balance text-center font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className={cn("mt-3 text-center", PAGE_TITLE)}>
             {title}
           </h2>
         )}
@@ -42,7 +43,7 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
             <details
               key={i}
               className={cn(
-                "group overflow-hidden rounded-lg border border-border bg-card open:border-primary/50",
+                GROUP, "group overflow-hidden border-border open:border-primary/50",
                 // The height animation needs ::details-content and interpolate-size; without them the toggle stays instant.
                 "[interpolate-size:allow-keywords] details-content:h-0 details-content:overflow-clip",
                 "details-content:transition-[height,content-visibility] details-content:duration-180 details-content:ease-[cubic-bezier(0.16,1,0.3,1)] details-content:[transition-behavior:allow-discrete]",

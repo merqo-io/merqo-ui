@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Info } from "lucide-react";
 import { Section } from "./section";
+import { EYEBROW, SECTION_TITLE, SURFACE } from "./recipes";
 
 describe("Section", () => {
   it("renders eyebrow, title, and children", () => {
@@ -168,7 +169,7 @@ describe("Section", () => {
     );
     expect(container.firstChild).toHaveClass("custom-class");
     // still carries the base neutral card classes
-    expect(container.firstChild).toHaveClass("rounded-lg", "border", "bg-card");
+    expect(container.firstChild).toHaveClass("rounded-2xl", "border", "bg-card");
   });
 
   it("never uses a literal color, font, or radius value", () => {
@@ -272,6 +273,18 @@ describe("Section surface", () => {
   });
 });
 
+describe("Section type", () => {
+  it("uses the eyebrow and section title recipes", () => {
+    render(
+      <Section icon={<Info />} eyebrow="Eyebrow" title="Title">
+        <div />
+      </Section>,
+    );
+    expect(screen.getByText("Eyebrow")).toHaveClass(...EYEBROW.split(" "));
+    expect(screen.getByText("Title")).toHaveClass(...SECTION_TITLE.split(" "));
+  });
+});
+
 describe("Section shape", () => {
   it("takes its corners from the kit radius token", () => {
     const { container } = render(
@@ -280,7 +293,7 @@ describe("Section shape", () => {
       </Section>,
     );
     const shell = container.querySelector("section") as HTMLElement;
-    expect(shell).toHaveClass("rounded-lg");
-    expect(shell.className).not.toMatch(/rounded-(\[|xl|2xl)/);
+    expect(shell).toHaveClass(...SURFACE.split(" "));
+    expect(shell.className).not.toMatch(/rounded-(\[|lg|xl)/);
   });
 });

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ElevatedCard } from "./elevated-card";
 import { cn } from "./lib/utils";
+import { CARD_TITLE, EYEBROW } from "./recipes";
 
 export interface StatusCardProps {
   wordmark?: React.ReactNode;
@@ -28,12 +29,12 @@ export function StatusCard({
         {wordmark ? <div className="mb-8 text-center">{wordmark}</div> : null}
         <ElevatedCard className="px-7 py-10 text-center">
           {eyebrow ? (
-            <p className="mb-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            <p className={cn("mb-2", EYEBROW)}>
               {eyebrow}
             </p>
           ) : null}
           {code ? <p className="mb-1 font-mono text-5xl font-bold text-primary">{code}</p> : null}
-          <h1 className="font-display text-2xl font-bold tracking-tight">{title}</h1>
+          <h1 className={CARD_TITLE}>{title}</h1>
           {description ? (
             <p className="mt-3 text-sm text-muted-foreground">{description}</p>
           ) : null}

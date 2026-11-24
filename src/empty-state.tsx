@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "./lib/utils";
+import { CARD_TITLE } from "./recipes";
 
 export interface EmptyStateProps {
   /** Decorative icon shown above the headline. */
@@ -76,7 +77,7 @@ export function EmptyState({
       {compact ? (
         <p className="text-sm text-muted-foreground">{title}</p>
       ) : (
-        <h2 className="font-display text-2xl font-semibold tracking-tight">
+        <h2 className={CARD_TITLE}>
           {title}
         </h2>
       )}

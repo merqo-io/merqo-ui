@@ -3,6 +3,7 @@ import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 
 import { cn } from "./lib/utils";
+import { EYEBROW, PAGE_TITLE } from "./recipes";
 
 function isBackLink(
   back: PageHeaderProps["back"],
@@ -73,15 +74,12 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           {eyebrow && (
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className={cn("mb-1.5", EYEBROW)}>
               {eyebrow}
             </p>
           )}
           <h1
-            className={cn(
-              "font-display font-semibold leading-none break-words",
-              responsive ? "text-3xl sm:text-4xl" : "text-4xl",
-            )}
+            className={cn(PAGE_TITLE, !responsive && "text-4xl")}
           >
             {title}
           </h1>

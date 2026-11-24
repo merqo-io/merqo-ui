@@ -1977,6 +1977,33 @@ injected dependency, and none throws to the caller except `callMerqoRpc`.
 - `ActionResult<T>` and `isActionError(result)`: the Server Action result
   shape, `{success: true} & T` or `{success: false, error}`.
 
+## Card and heading recipe
+
+Shared components draw cards and headings from one recipe (`src/recipes.ts`,
+private), all from semantic classes so each kit's own tokens drive the look.
+
+- **Standalone surface** (`rounded-2xl border bg-card shadow-sm`): a card that
+  stands alone on the page. `ElevatedCard`, the default `Section` card,
+  `StatusCard`.
+- **In-page group** (`rounded-xl border bg-card`, no shadow): a box inside a
+  page or inside a surface, usually repeated. `PricingLadder` tiers and note
+  boxes, `Faq` items, the `AuditLogTable` frame.
+- **Eyebrow** (`text-xs font-semibold uppercase tracking-wider`): `Section`,
+  `PageHeader`, `StatusCard`, `Faq`.
+- **Page title** (`font-display text-3xl font-bold tracking-tight text-balance
+  break-words`): `PageHeader` (when `responsive`), `AuthShell`, `Faq`. A
+  `PageHeader` without `responsive` keeps `text-4xl`.
+- **Card title** (`font-display text-2xl font-bold tracking-tight`):
+  `StatusCard`, `EmptyState`.
+- **Section title** (`text-base font-semibold`): `Section`.
+
+Visual changes against earlier releases: `Section` card is `rounded-2xl`
+(was `rounded-lg`); `PricingLadder` tiers and `Faq` items are `rounded-xl` (was
+`rounded-lg`); `AuditLogTable` frame is `rounded-xl` (was `rounded-2xl`);
+`EmptyState` title is bold; `PageHeader` title no longer steps to `text-4xl` on
+wide screens when `responsive`; the `Faq` eyebrow is no longer monospace; every
+eyebrow shares one tracking. `className` still overrides.
+
 ## Z-index scale
 
 This package has no shared z-index token or constant — each component picks

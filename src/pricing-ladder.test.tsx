@@ -231,15 +231,15 @@ describe("PricingLadder options", () => {
 });
 
 describe("PricingLadder shape", () => {
-  it("uses one token-derived radius on every surface", () => {
+  it("uses the in-page group radius with no shadow on every surface", () => {
     const { container } = render(<PricingLadder catalog={CATALOG} />);
     const surfaces = container.querySelectorAll(
       "li[class*='rounded'], section, [role='note']",
     );
     expect(surfaces.length).toBeGreaterThan(0);
     surfaces.forEach((el) => {
-      expect(el).toHaveClass("rounded-lg");
-      expect(el.className).not.toMatch(/rounded-(\[|xl|2xl)/);
+      expect(el).toHaveClass("rounded-xl");
+      expect(el.className).not.toMatch(/rounded-(\[|lg|2xl)|shadow/);
     });
   });
 });

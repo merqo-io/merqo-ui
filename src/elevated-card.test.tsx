@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ElevatedCard } from "./elevated-card";
+import { SURFACE } from "./recipes";
 
 describe("ElevatedCard", () => {
   it("renders children inside a div by default", () => {
@@ -23,6 +24,11 @@ describe("ElevatedCard", () => {
 });
 
 describe("ElevatedCard shape", () => {
+  it("uses the standalone surface recipe", () => {
+    render(<ElevatedCard>content</ElevatedCard>);
+    expect(screen.getByText("content")).toHaveClass(...SURFACE.split(" "));
+  });
+
   it("uses standard radius and shadow utilities, no arbitrary values", () => {
     render(<ElevatedCard>content</ElevatedCard>);
     const el = screen.getByText("content");

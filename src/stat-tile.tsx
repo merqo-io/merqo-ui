@@ -124,7 +124,7 @@ export function StatTile({
     <div className="flex items-baseline gap-2">
       <p
         className={cn(
-          "truncate text-2xl font-bold leading-none tabular-nums",
+          "min-w-0 break-words text-2xl font-bold leading-none tabular-nums",
           valueClassName,
         )}
       >
@@ -135,7 +135,7 @@ export function StatTile({
   ) : (
     <p
       className={cn(
-        "truncate text-2xl font-bold leading-none tabular-nums",
+        "min-w-0 break-words text-2xl font-bold leading-none tabular-nums",
         valueClassName,
       )}
     >
@@ -178,7 +178,7 @@ export function StatTile({
       {caption && (
         <p
           className={cn(
-            "mt-auto truncate text-xs text-muted-foreground tabular-nums",
+            "mt-auto break-words text-xs text-muted-foreground tabular-nums",
             captionClassName,
           )}
         >

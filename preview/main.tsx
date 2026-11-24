@@ -143,7 +143,7 @@ function Preview() {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatTile card label="Orders today" value="128" delta={12} caption="vs yesterday" />
           <StatTile card label="Revenue" value="S$1,284.50" delta={-8} primary />
-          <StatTile card label={LONG_STALL} value="S$12,345,678.90" caption={LONG_STALL} delta={null} />
+          <StatTile card label={LONG_STALL} value="S$12,345,678,901,234.90" caption={LONG_STALL} delta={null} />
         </div>
       </Group>
 

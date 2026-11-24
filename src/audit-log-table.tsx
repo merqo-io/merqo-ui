@@ -25,7 +25,7 @@ function humaniseAction(action: string) {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-const GRID_COLS = "grid-cols-[1fr_1fr_1fr_auto]";
+const GRID_COLS = "sm:grid-cols-[1fr_1fr_1fr_auto]";
 
 function formatTimestamp(value: string | Date, dateFormatter?: (date: Date) => string) {
   const date = typeof value === "string" ? new Date(value) : value;
@@ -48,7 +48,7 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
   return (
     <div className={cn(GROUP, "overflow-hidden border-border")}>
       <div
-        className={`grid ${GRID_COLS} gap-x-4 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground`}
+        className={`hidden ${GRID_COLS} sm:gap-x-4 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:grid`}
       >
         <span>Action</span>
         <span>Actor</span>
@@ -58,17 +58,29 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
       {entries.map((entry) => (
         <div
           key={entry.id}
-          className={`grid ${GRID_COLS} items-baseline gap-x-4 border-t border-border px-5 py-3 text-sm`}
+          className={`flex flex-col gap-1 border-t border-border px-5 py-3 text-sm sm:grid ${GRID_COLS} sm:items-baseline sm:gap-x-4`}
         >
-          <span>
+          <span className="min-w-0 break-words">
             {formatAction ? formatAction(entry.action) : humaniseAction(entry.action)}
             {entry.detail ? (
               <span className="block text-xs text-muted-foreground">{entry.detail}</span>
             ) : null}
           </span>
-          <span className="text-muted-foreground">{entry.actor}</span>
-          <span className="text-muted-foreground">{entry.target ? entry.target : <span className="sr-only">No target</span>}</span>
-          <span className="whitespace-nowrap text-right text-xs text-muted-foreground">
+          <span className="min-w-0 break-words text-muted-foreground">
+            <span className="mr-1 text-xs uppercase tracking-wider sm:hidden">Actor</span>
+            {entry.actor}
+          </span>
+          <span className="min-w-0 break-words text-muted-foreground">
+            {entry.target ? (
+              <>
+                <span className="mr-1 text-xs uppercase tracking-wider sm:hidden">Target</span>
+                {entry.target}
+              </>
+            ) : (
+              <span className="sr-only">No target</span>
+            )}
+          </span>
+          <span className="text-xs text-muted-foreground sm:whitespace-nowrap sm:text-right">
             {formatTimestamp(entry.createdAt, dateFormatter)}
           </span>
         </div>

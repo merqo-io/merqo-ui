@@ -101,3 +101,31 @@ describe("AuditLogTable", () => {
     expect(screen.getByText("just now")).toBeInTheDocument();
   });
 });
+
+describe("AuditLogTable small screens", () => {
+  const entry: AuditLogEntry = {
+    id: "1",
+    actor: "someone.with.a.very.long.address@example.com",
+    action: "set_plan",
+    target: "Stall",
+    detail: null,
+    createdAt: "2026-08-19T10:00:00.000Z",
+  };
+
+  it("stacks each row below sm and only uses the column grid from sm up", () => {
+    const { container } = render(<AuditLogTable entries={[entry]} />);
+    const row = screen.getByText("someone.with.a.very.long.address@example.com").parentElement as HTMLElement;
+    expect(row).toHaveClass("flex", "flex-col", "sm:grid");
+    expect(container.innerHTML).not.toMatch(/(^|[ "])grid-cols-\[/);
+    expect(row.className).toContain("sm:grid-cols-");
+  });
+
+  it("hides the column header row below sm and labels the stacked values instead", () => {
+    render(<AuditLogTable entries={[entry]} />);
+    const header = screen.getAllByText("Actor")[0].parentElement as HTMLElement;
+    expect(header).toHaveClass("hidden", "sm:grid");
+    const actor = screen.getByText("someone.with.a.very.long.address@example.com");
+    expect(actor).toHaveClass("break-words");
+    expect(actor.querySelector("span")).toHaveClass("sm:hidden");
+  });
+});

@@ -44,13 +44,14 @@ test("no horizontal overflow", async ({ page }) => {
   const overflow = await page.evaluate(() => {
     const doc = document.documentElement;
     const offenders: string[] = [];
-    if (doc.scrollWidth > doc.clientWidth) {
+    if (Math.max(doc.scrollWidth, document.body.scrollWidth) > doc.clientWidth) {
       for (const group of document.querySelectorAll<HTMLElement>("[data-group]")) {
         if (group.scrollWidth > group.clientWidth) offenders.push(group.dataset.group ?? "?");
       }
       if (offenders.length === 0) offenders.push("(page chrome)");
     }
-    return { scrollWidth: doc.scrollWidth, clientWidth: doc.clientWidth, offenders };
+    const scrollWidth = Math.max(doc.scrollWidth, document.body.scrollWidth);
+    return { scrollWidth, clientWidth: doc.clientWidth, offenders };
   });
   expect(
     overflow.scrollWidth,
@@ -75,15 +76,34 @@ function findSmallTargets(page: Page): Promise<SmallTarget[]> {
         const box = el.getBoundingClientRect();
         return style.visibility !== "hidden" && style.display !== "none" && box.width > 0 && box.height > 0;
       };
+      // A pseudo-element hit area (the tooltip trigger's after:size-11) makes a
+      // control tappable beyond its painted box, but only when it sits over
+      // the control and is at least `min` in both dimensions.
+      const effectiveHeight = (el: HTMLElement, box: DOMRect, min: number) => {
+        const after = getComputedStyle(el, "::after");
+        if (after.position !== "absolute" || after.display === "none") return box.height;
+        const style = getComputedStyle(el);
+        const width = Number.parseFloat(after.width);
+        const height = Number.parseFloat(after.height);
+        const top = Number.parseFloat(after.top);
+        const left = Number.parseFloat(after.left);
+        if ([width, height, top, left].some(Number.isNaN)) return box.height;
+        const [tx = "0px", ty = tx] = after.translate === "none" ? [] : after.translate.split(" ");
+        const shift = (token: string, size: number) =>
+          token.endsWith("%") ? (Number.parseFloat(token) / 100) * size : Number.parseFloat(token);
+        const originX = box.left + Number.parseFloat(style.borderLeftWidth);
+        const originY = box.top + Number.parseFloat(style.borderTopWidth);
+        const x = originX + left + shift(tx, width);
+        const y = originY + top + shift(ty, height);
+        const covers =
+          x <= box.left && y <= box.top && x + width >= box.right && y + height >= box.bottom;
+        return covers && width >= min && height >= min ? height : box.height;
+      };
       for (const el of document.querySelectorAll<HTMLElement>(`#preview-root ${selector}`)) {
         if (el.matches(inline)) continue;
         if (!isVisible(el)) continue;
         const box = el.getBoundingClientRect();
-        // A pseudo-element hit area (the tooltip trigger's after:size-11)
-        // makes the control tappable beyond its painted box.
-        const after = getComputedStyle(el, "::after");
-        const hitHeight = after.position === "absolute" ? Number.parseFloat(after.height) || 0 : 0;
-        if (Math.max(box.height, hitHeight) >= min) continue;
+        if (effectiveHeight(el, box, min) >= min) continue;
         const label =
           el.getAttribute("aria-label") ??
           (el.textContent?.trim() || el.getAttribute("placeholder") || el.tagName.toLowerCase());

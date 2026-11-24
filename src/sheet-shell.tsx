@@ -47,6 +47,7 @@ export function SheetMessageForm({
   onSubmit,
   pending,
   errorMessage,
+  messageRequired = true,
   children,
 }: {
   messageId: string;
@@ -55,13 +56,21 @@ export function SheetMessageForm({
   onSubmit: () => void;
   pending: boolean;
   errorMessage?: string | null;
+  /** When true, a blank message shows an inline error instead of calling `onSubmit`. */
+  messageRequired?: boolean;
   children?: React.ReactNode;
 }) {
+  const [blankError, setBlankError] = React.useState(false);
+  const blankErrorId = `${messageId}-error`;
   return (
     <form
       className="flex flex-1 flex-col gap-4 px-4"
       onSubmit={(event) => {
         event.preventDefault();
+        if (messageRequired && !message.trim()) {
+          setBlankError(true);
+          return;
+        }
         onSubmit();
       }}
     >
@@ -73,9 +82,19 @@ export function SheetMessageForm({
         <textarea
           id={messageId}
           value={message}
-          onChange={(event) => onMessageChange(event.target.value)}
+          onChange={(event) => {
+            setBlankError(false);
+            onMessageChange(event.target.value);
+          }}
+          aria-invalid={blankError || undefined}
+          aria-describedby={blankError ? blankErrorId : undefined}
           className="border-input bg-background flex-1 min-h-24 resize-none rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         />
+        {blankError ? (
+          <p id={blankErrorId} className="text-destructive text-sm" role="alert">
+            Write a message first
+          </p>
+        ) : null}
         {errorMessage ? (
           <p className="text-destructive text-sm" role="alert">
             {errorMessage}
@@ -88,6 +107,43 @@ export function SheetMessageForm({
         </AsyncSubmitButton>
       </SheetFooter>
     </form>
+  );
+}
+
+/** Private: replaces the form inside the open sheet once a send succeeds. */
+export function SheetConfirmation({
+  title,
+  body,
+  onDone,
+}: {
+  title: string;
+  body: string;
+  onDone: () => void;
+}) {
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+  React.useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
+  return (
+    <div className="flex flex-1 flex-col gap-4 px-4 pb-4">
+      <div role="status" className="flex flex-1 flex-col gap-1">
+        <h3
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-base font-medium outline-none"
+        >
+          {title}
+        </h3>
+        <p className="text-muted-foreground text-sm">{body}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onDone}
+        className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex min-h-11 w-full items-center justify-center rounded-md px-4 text-sm font-medium"
+      >
+        Done
+      </button>
+    </div>
   );
 }
 

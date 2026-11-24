@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FeedbackSheet } from "./feedback-sheet";
 
@@ -52,7 +52,7 @@ describe("FeedbackSheet", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("calls onOpenChange(false) after a successful submit", async () => {
+  it("keeps the sheet open on a confirmation after a successful submit, and closes only on Done", async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
@@ -63,7 +63,101 @@ describe("FeedbackSheet", () => {
     await user.type(screen.getByLabelText(/message/i), "hi");
     await user.click(screen.getByRole("button", { name: /send/i }));
 
+    const status = await screen.findByRole("status");
+    expect(within(status).getByText("Feedback sent")).toBeInTheDocument();
+    expect(screen.queryByLabelText(/message/i)).not.toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(within(status).getByText("Feedback sent")).toHaveFocus();
+    expect(document.activeElement).toBe(within(status).getByText("Feedback sent"));
+
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Done" }),
+    });
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("keeps the draft message when closed without sending and reopened", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const { rerender } = render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/message/i), "draft text");
+
+    rerender(<FeedbackSheet open={false} onOpenChange={() => {}} onSubmit={onSubmit} />);
+    rerender(<FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />);
+
+    expect(screen.getByLabelText(/message/i)).toHaveValue("draft text");
+  });
+
+  it("showNps: keeps a picked score when closed without sending and reopened", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const { rerender } = render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} showNps />,
+    );
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("radio", { name: "8" }) });
+
+    rerender(<FeedbackSheet open={false} onOpenChange={() => {}} onSubmit={onSubmit} showNps />);
+    rerender(<FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} showNps />);
+
+    expect(screen.getByRole("radio", { name: "8" })).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("reopens on an empty form, not the confirmation, after a send and a non-Done close", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const { rerender } = render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/message/i), "hi");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+    await screen.findByRole("status");
+
+    rerender(<FeedbackSheet open={false} onOpenChange={() => {}} onSubmit={onSubmit} />);
+    rerender(<FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />);
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/message/i)).toHaveValue("");
+  });
+
+  it("a send that resolves after the sheet was closed leaves an empty form on the next open", async () => {
+    const user = userEvent.setup();
+    let resolve!: () => void;
+    const onSubmit = vi.fn(() => new Promise<void>((r) => { resolve = r; }));
+    const { rerender } = render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/message/i), "hi");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+    rerender(<FeedbackSheet open={false} onOpenChange={() => {}} onSubmit={onSubmit} />);
+    await act(async () => {
+      resolve();
+    });
+    rerender(<FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />);
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/message/i)).toHaveValue("");
+  });
+
+  it("shows 'Write a message first' for a blank message, wires aria, and clears it on typing", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} />);
+
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Write a message first");
+    const textarea = screen.getByLabelText(/message/i);
+    expect(textarea).toHaveAttribute("aria-invalid", "true");
+    expect(textarea).toHaveAttribute("aria-describedby", alert.id);
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    await user.type(textarea, "a");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(textarea).not.toHaveAttribute("aria-invalid", "true");
   });
 
   it("C3: shows an inline error and calls onError when onSubmit rejects, and does not close the sheet", async () => {
@@ -119,12 +213,42 @@ describe("FeedbackSheet", () => {
       <FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} showNps />,
     );
     const group = screen.getByRole("radiogroup", {
-      name: /recommend score, 0 to 10/i,
+      name: "How likely are you to recommend us?",
     });
+    expect(screen.getByText("How likely are you to recommend us?")).toBeVisible();
+    expect(
+      screen.getByText("0 is not likely, 10 is very likely"),
+    ).toBeVisible();
+    expect(group).toHaveClass("grid-cols-6");
     const buttons = within(group).getAllByRole("radio");
     expect(buttons).toHaveLength(11);
     expect(screen.getByRole("radio", { name: "0" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "10" })).toBeInTheDocument();
+  });
+
+  it("showNps: npsLabel replaces the visible question and the group's accessible name", () => {
+    render(
+      <FeedbackSheet
+        open
+        onOpenChange={() => {}}
+        onSubmit={vi.fn()}
+        showNps
+        npsLabel="Would you tell a friend?"
+      />,
+    );
+    expect(
+      screen.getByRole("radiogroup", { name: "Would you tell a friend?" }),
+    ).toBeInTheDocument();
+  });
+
+  it("showNps: a touch pointer selects a score", async () => {
+    const user = userEvent.setup();
+    render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} showNps />,
+    );
+    const seven = screen.getByRole("radio", { name: "7" });
+    await user.pointer({ keys: "[TouchA]", target: seven });
+    expect(seven).toHaveAttribute("aria-checked", "true");
   });
 
   it("showNps: blocks submit and shows inline validation when no score is picked", async () => {
@@ -164,7 +288,8 @@ describe("FeedbackSheet", () => {
       metric: undefined,
       nps: 9,
     });
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it("showNps: includes the picked score in the onSubmit payload", async () => {

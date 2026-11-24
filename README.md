@@ -212,7 +212,15 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
   optional `showNps?: boolean` to add a 0-10 recommend-score grid above the
-  message field (score becomes required, message becomes optional).
+  message field (score becomes required, message becomes optional). The grid
+  is two rows of six at every width, under a visible question
+  (`npsLabel?: string`, default "How likely are you to recommend us?") that
+  is also the group's accessible name. Where a message is required, a blank
+  Send shows "Write a message first" under the textarea and does not call
+  `onSubmit`. After `onSubmit` resolves the sheet stays open on a
+  "Feedback sent" (`HelpSheet`: "Message sent") confirmation with a Done
+  button that closes it. A draft (message, score, category) is kept when the sheet is closed without sending and reset after a successful send. A rejected
+  `onSubmit` is unchanged: inline error and `onError`.
   `HelpSheet`'s form mode takes an optional
   `categories?: {value, label}[]` to add a category radiogroup above the
   message field (an empty array behaves like no categories at all). Both
@@ -235,7 +243,7 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   avatar (image when `avatarUrl` is set, otherwise a 2-letter initials
   fallback) — no per-kit override needed. Takes an optional
   `extraLink?: {href, label}` for a kit-specific menu
-  item, and forwards `showNps` to its internal `FeedbackSheet` and
+  item, and forwards `showNps` (and `feedbackNpsLabel` as `npsLabel`) to its internal `FeedbackSheet` and
   `getHelp.categories` (when `getHelp.type === "form"`) to its internal
   `HelpSheet`. `vendor.subtitle?: string` (e.g. the signed-in email) shows
   next to the trigger avatar and as a header line above Profile — omit it

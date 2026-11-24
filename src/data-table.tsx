@@ -24,6 +24,8 @@ export interface DataTableProps<T> {
   emptyState?: React.ReactNode;
   /** Shows one page of `rows` with previous / next controls. Omit to show every row. */
   pagination?: DataTablePagination;
+  /** Accessible name for the table. Read by screen readers only, never drawn. */
+  caption?: string;
 }
 
 /**
@@ -36,7 +38,7 @@ export interface DataTableProps<T> {
  * "caller supplies the shape" contract as `AuditLogTable`/`StatusBadge`) —
  * this component owns only the table shell, never the domain columns.
  */
-export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination }: DataTableProps<T>) {
+export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination, caption }: DataTableProps<T>) {
   if (rows.length === 0) {
     return <div className="text-sm text-muted-foreground">{emptyState ?? "No data yet."}</div>;
   }
@@ -54,12 +56,13 @@ export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination 
     <div>
       <div className="relative w-full overflow-x-auto">
         <table className="w-full caption-bottom text-sm">
+          {caption ? <caption className="sr-only">{caption}</caption> : null}
           <thead className="[&_tr]:border-b">
             <tr className="border-b transition-colors hover:bg-muted/50">
               {columns.map((col) => (
                 <th
                   key={col.header}
-                  className={cn("h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground", col.className)}
+                  className={cn("h-10 px-2 text-left align-middle font-medium break-words text-foreground", col.className)}
                 >
                   {col.header}
                 </th>
@@ -70,7 +73,7 @@ export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination 
             {visible.map((row) => (
               <tr key={getRowKey(row)} className="border-b transition-colors hover:bg-muted/50">
                 {columns.map((col) => (
-                  <td key={col.header} className={cn("p-2 align-middle whitespace-nowrap", col.className)}>
+                  <td key={col.header} className={cn("p-2 align-middle break-words", col.className)}>
                     {col.cell(row)}
                   </td>
                 ))}

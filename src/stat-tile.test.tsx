@@ -180,3 +180,20 @@ describe("StatTile bottom anchoring", () => {
     expect(screen.getByText("Orders").parentElement).toHaveClass("items-start");
   });
 });
+
+describe("StatTile long values", () => {
+  it("wraps the value and caption instead of truncating them", () => {
+    render(<StatTile label="Revenue" value="S$12,345,678.90" caption="a very long caption" />);
+    for (const el of [screen.getByText("S$12,345,678.90"), screen.getByText("a very long caption")]) {
+      expect(el).not.toHaveClass("truncate");
+      expect(el).toHaveClass("break-words");
+    }
+  });
+
+  it("wraps the value beside a trailing node too", () => {
+    render(<StatTile label="Revenue" value="S$12,345,678.90" valueTrailing={<span>x</span>} />);
+    const value = screen.getByText("S$12,345,678.90");
+    expect(value).not.toHaveClass("truncate");
+    expect(value).toHaveClass("min-w-0", "break-words");
+  });
+});

@@ -59,6 +59,27 @@ test("no horizontal overflow", async ({ page }) => {
   ).toBeLessThanOrEqual(overflow.clientWidth);
 });
 
+const DATA_GROUPS = ["StatTile", "PricingLadder", "AuditLogTable", "DataTable and DataTablePager"];
+
+// Clipped content leaves no page-level scroll, so the page check alone cannot
+// see it. Any element inside these groups whose content is wider than its box
+// is hiding data (a truncated value or a scrolling table).
+test("data components show every value without clipping or inner scroll", async ({ page }) => {
+  const clipped = await page.evaluate((names) => {
+    const out: string[] = [];
+    for (const group of document.querySelectorAll<HTMLElement>("[data-group]")) {
+      if (!names.includes(group.dataset.group ?? "")) continue;
+      for (const el of group.querySelectorAll<HTMLElement>("*")) {
+        if (el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0 && !(el instanceof SVGElement) && !el.matches(".sr-only")) {
+          out.push(`${group.dataset.group}: <${el.tagName.toLowerCase()}> ${(el.textContent ?? "").slice(0, 40)}`);
+        }
+      }
+    }
+    return out;
+  }, DATA_GROUPS);
+  expect(clipped).toEqual([]);
+});
+
 interface SmallTarget {
   group: string;
   label: string;

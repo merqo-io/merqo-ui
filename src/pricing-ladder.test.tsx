@@ -243,3 +243,17 @@ describe("PricingLadder shape", () => {
     });
   });
 });
+
+describe("PricingLadder long names", () => {
+  it("lets the plan name wrap and the badge drop below it", () => {
+    const catalog: PlanCatalog = {
+      plans: [plan("all_access", "An exceedingly long bundle plan name that will not fit", 4900, 49000)],
+      event_pass: EVENT_PASS,
+    };
+    render(<PricingLadder catalog={catalog} highlight="all_access" renderAction={() => null} />);
+    const name = screen.getByRole("heading", { name: /exceedingly long/ });
+    expect(name).toHaveClass("min-w-0", "break-words");
+    expect(name.parentElement).toHaveClass("flex-wrap");
+    expect(screen.getByText("Recommended")).toHaveClass("shrink-0");
+  });
+});

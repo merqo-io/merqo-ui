@@ -625,6 +625,11 @@ reversible ones.
   is for a one-line message inside a list or card ("No vendors yet."): the
   title is a muted `<p>` instead of the `<h2>`, with a smaller radius and
   padding. `role` is passed to the root, for example `role="status"`.
+- `DataTable` also takes `caption?: string`, an accessible name for the
+  table that screen readers read and nothing draws. Cells and headers wrap
+  long text instead of staying on one line, so a 360px phone shows every
+  value; add `whitespace-nowrap` in a column's `className` to keep a short
+  value on one line.
 - `DataTable` also takes `pagination?: {page, pageSize, onPageChange, labels?}`
   (1-based, clamped): it shows one page of `rows` with previous / next
   buttons (44px) and a "Page x of y" line, and omits the pager when

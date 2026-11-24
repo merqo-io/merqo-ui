@@ -85,10 +85,10 @@ export function PricingLadder({
                   : "border-border",
               )}
             >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-lg font-semibold">{plan.name}</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="min-w-0 break-words text-lg font-semibold">{plan.name}</h3>
                 {isHighlighted ? (
-                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                  <span className="shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
                     Recommended
                   </span>
                 ) : null}

@@ -39,4 +39,22 @@ describe("DataTable", () => {
     expect(screen.getByText("Amount")).toHaveClass("text-right");
     expect(screen.getByText("$500")).toHaveClass("text-right");
   });
+
+  it("lets cells and headers wrap so long values stay readable on a phone", () => {
+    render(<DataTable rows={ROWS} columns={COLUMNS} getRowKey={(r) => r.id} />);
+    for (const el of [screen.getByText("Name"), screen.getByText("Alice")]) {
+      expect(el.className).not.toContain("whitespace-nowrap");
+      expect(el).toHaveClass("break-words");
+    }
+  });
+
+  it("names the table for assistive tech when given a caption", () => {
+    render(<DataTable rows={ROWS} columns={COLUMNS} getRowKey={(r) => r.id} caption="Recent payments" />);
+    expect(screen.getByRole("table", { name: "Recent payments" })).toBeInTheDocument();
+  });
+
+  it("renders no caption element by default", () => {
+    const { container } = render(<DataTable rows={ROWS} columns={COLUMNS} getRowKey={(r) => r.id} />);
+    expect(container.querySelector("caption")).toBeNull();
+  });
 });

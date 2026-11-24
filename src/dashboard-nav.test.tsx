@@ -272,3 +272,26 @@ describe("DashboardNav touch target", () => {
     expect(burger).toHaveAttribute("aria-expanded", "true");
   });
 });
+
+describe("DashboardNav touch and focus", () => {
+  it("makes mobile panel links 44px tall with a focus ring", async () => {
+    const user = userEvent.setup();
+    render(<DashboardNav {...baseProps} />);
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Mobile navigation menu" }),
+    });
+    const panel = screen.getByRole("navigation", { name: "Mobile navigation menu" });
+    for (const link of within(panel).getAllByRole("link")) {
+      const tokens = link.className.split(" ");
+      expect(tokens).toContain("min-h-11");
+      expect(tokens).toContain("focus-visible:ring-[3px]");
+    }
+  });
+
+  it("gives inline links a focus ring", () => {
+    render(<DashboardNav {...baseProps} />);
+    const link = screen.getAllByRole("link", { name: "Orders" })[0]!;
+    expect(link.className.split(" ")).toContain("focus-visible:ring-[3px]");
+  });
+});

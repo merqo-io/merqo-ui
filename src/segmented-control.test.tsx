@@ -276,3 +276,19 @@ describe("SegmentedControl pressed feedback", () => {
     expect(other).toHaveClass("active:bg-primary/10");
   });
 });
+
+describe("SegmentedControl focus", () => {
+  it("shows a focus ring on every option in both variants", () => {
+    for (const variant of ["track", "pill"] as const) {
+      const { unmount } = render(
+        <SegmentedControl ariaLabel="x" options={options} value="a" onChange={() => {}} variant={variant} />,
+      );
+      for (const radio of screen.getAllByRole("radio")) {
+        const tokens = radio.className.split(" ");
+        expect(tokens).toContain("focus-visible:ring-[3px]");
+        expect(tokens).toContain("pointer-coarse:min-h-11");
+      }
+      unmount();
+    }
+  });
+});

@@ -271,7 +271,8 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   nothing.
 - `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
   at every viewport). Composes `AccountMenu`, forwarding its own
-  `LinkComponent` prop down to it. The burger always carries
+  `LinkComponent` prop down to it. Links in the burger panel are at least
+  44px tall, and every link shows a focus ring. The burger always carries
   `data-tour="nav-menu"`. Optional `tourAnchor?: (href) => string` stamps
   `data-tour` on each nav link; optional `isActiveHref?: (href) => boolean`
   applies the cross-kit default active styling — a primary-tinted pill —
@@ -757,7 +758,8 @@ reversible ones.
 - `AvatarIdentity({name, avatarUrl?, label?, className?})` — avatar with the label (default `name`; `null` for none)
   on its right, hidden below `sm` and truncated. The side is fixed across kits; there is no prop to flip it.
 - `AsyncSubmitButton({pending, pendingChildren?, className?, children})` — submit button with a spinner,
-  `aria-busy` and disabled state while pending. Also used inside `FeedbackSheet` and `HelpSheet`.
+  `aria-busy` and disabled state while pending. Renders the shared `Button`, so it is 44px tall on coarse
+  pointers (36px on a mouse) and shows the same focus ring. Also used inside `FeedbackSheet` and `HelpSheet`.
 - `CopyButton({value, label?="Copy", copiedLabel?="Copied", onCopied?, onError?, variant?="outline", size?="sm", ...buttonProps})` —
   copies `value` with `navigator.clipboard.writeText`, swaps the icon to a check and shows `copiedLabel` for 2s, and
   announces it through a polite live region. On failure (or no clipboard) it calls `onError` and shows no copied state.

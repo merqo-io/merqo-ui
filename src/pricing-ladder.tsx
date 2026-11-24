@@ -94,7 +94,7 @@ export function PricingLadder({
                   <p className="text-2xl font-bold">Free</p>
                 ) : (
                   <>
-                    <p className="text-2xl font-bold">
+                    <p className="text-2xl font-bold tabular-nums">
                       {formatCatalogPrice(plan.monthly_cents)}
                       <span className="text-sm font-normal text-muted-foreground">
                         {" a month"}

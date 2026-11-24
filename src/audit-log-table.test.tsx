@@ -39,9 +39,15 @@ describe("AuditLogTable", () => {
     expect(screen.getByText("Auntie Lim's Kopitiam")).toBeInTheDocument();
   });
 
-  it("renders a raw action string when formatAction is omitted", () => {
+  it("humanises the action code when formatAction is omitted", () => {
     render(<AuditLogTable entries={entries} />);
-    expect(screen.getByText("set_vendor_plan")).toBeInTheDocument();
+    expect(screen.getByText("Set vendor plan")).toBeInTheDocument();
+    expect(screen.queryByText("set_vendor_plan")).not.toBeInTheDocument();
+  });
+
+  it("humanises hyphens as well as underscores", () => {
+    render(<AuditLogTable entries={[{ ...entries[0], action: "reset-vendor_pin" }]} />);
+    expect(screen.getByText("Reset vendor pin")).toBeInTheDocument();
   });
 
   it("maps the action through formatAction when given", () => {
@@ -55,9 +61,16 @@ describe("AuditLogTable", () => {
     expect(screen.queryByText("set_vendor_plan")).not.toBeInTheDocument();
   });
 
-  it("renders an em dash for a missing target, not a blank cell", () => {
-    render(<AuditLogTable entries={[entries[1]]} />);
-    expect(screen.getByText("—")).toBeInTheDocument();
+  it("renders no em dash for a missing target and exposes it to assistive tech", () => {
+    const { container } = render(<AuditLogTable entries={[entries[1]]} />);
+    expect(container).not.toHaveTextContent("—");
+    const note = screen.getByText("No target");
+    expect(note).toHaveClass("sr-only");
+  });
+
+  it("treats an empty target string like a missing one", () => {
+    render(<AuditLogTable entries={[{ ...entries[1], target: "" }]} />);
+    expect(screen.getByText("No target")).toBeInTheDocument();
   });
 
   it("renders detail as a secondary line under the action when present", () => {

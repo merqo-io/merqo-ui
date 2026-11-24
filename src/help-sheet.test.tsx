@@ -30,6 +30,79 @@ describe("HelpSheet", () => {
     expect(onSubmit).toHaveBeenCalledWith({ message: "I can't sign in" });
   });
 
+  it("form mode: blank message shows 'Write a message first', skips onSubmit and clears on typing", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={onSubmit} />);
+
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Write a message first");
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    await user.type(screen.getByLabelText(/message/i), "x");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("form mode: a successful send shows a confirmation and closes only on Done", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<HelpSheet open onOpenChange={onOpenChange} mode="form" onSubmit={onSubmit} />);
+
+    await user.type(screen.getByLabelText(/message/i), "help");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    const status = await screen.findByRole("status");
+    expect(within(status).getByText("Message sent")).toHaveFocus();
+    expect(document.activeElement).toBe(within(status).getByText("Message sent"));
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    await user.pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: "Done" }),
+    });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("form mode: reopening after a send and a non-Done close shows an empty form", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const { rerender } = render(
+      <HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/message/i), "help");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+    await screen.findByRole("status");
+
+    rerender(<HelpSheet open={false} onOpenChange={() => {}} mode="form" onSubmit={onSubmit} />);
+    rerender(<HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={onSubmit} />);
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/message/i)).toHaveValue("");
+  });
+
+  it("form mode: keeps the draft message and category when closed without sending", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const categories = [
+      { value: "a", label: "Alpha" },
+      { value: "b", label: "Beta" },
+    ];
+    const ui = (open: boolean) => (
+      <HelpSheet open={open} onOpenChange={() => {}} mode="form" onSubmit={onSubmit} categories={categories} />
+    );
+    const { rerender } = render(ui(true));
+    await user.type(screen.getByLabelText(/message/i), "draft");
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("radio", { name: "Beta" }) });
+
+    rerender(ui(false));
+    rerender(ui(true));
+
+    expect(screen.getByLabelText(/message/i)).toHaveValue("draft");
+    expect(screen.getByRole("radio", { name: "Beta" })).toHaveAttribute("aria-checked", "true");
+  });
+
   it("renders nothing visible when closed", () => {
     render(
       <HelpSheet open={false} onOpenChange={() => {}} mode="mailto" address="a@b.com" />,

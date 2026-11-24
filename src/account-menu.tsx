@@ -70,6 +70,8 @@ export interface AccountMenuProps {
   feedbackMetric?: string;
   /** Forwarded to the internal FeedbackSheet's `showNps`. */
   showNps?: boolean;
+  /** Forwarded to the internal FeedbackSheet's `npsLabel`. */
+  feedbackNpsLabel?: string;
   /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
   onError?: (error: unknown) => void;
   /** One extra menu link. `icon` is a component (not an element) so the menu
@@ -180,6 +182,7 @@ export function AccountMenu({
   feedbackSource,
   feedbackMetric,
   showNps,
+  feedbackNpsLabel,
   onError,
   extraLink,
   tier,
@@ -350,6 +353,7 @@ export function AccountMenu({
         source={feedbackSource}
         metric={feedbackMetric}
         showNps={showNps}
+        npsLabel={feedbackNpsLabel}
         onError={onError}
       />
 

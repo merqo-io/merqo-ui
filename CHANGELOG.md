@@ -6,6 +6,13 @@
 
 - Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.
 
+### Changed
+
+- `FeedbackSheet` and `HelpSheet`: a blank required message now shows "Write a message first" under the textarea instead of doing nothing. A successful send keeps the sheet open on a "Feedback sent" / "Message sent" confirmation with a Done button, instead of closing silently. Kits that relied on the sheet closing right after `onSubmit` resolves now see it close on Done. A draft is kept when the sheet is closed without sending and reset after a successful send; `HelpSheet` now keeps its draft message and category across a close too (previously it lost them).
+- `FeedbackSheet`: the 0-10 score row wraps to two rows of six so each target is tappable on a phone, and has a visible question. New optional `npsLabel` prop; `AccountMenu` forwards it as `feedbackNpsLabel`.
+- `AuditLogTable`: without `formatAction`, the action renders as a humanised label ("Set vendor plan") instead of the raw code. A missing target renders an empty cell with screen-reader text "No target" instead of an em dash.
+- `PricingLadder`: plan prices use `tabular-nums` so digits align across cards.
+
 ## [0.60.0] - 2026-11-23
 
 ### Changed

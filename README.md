@@ -577,8 +577,8 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   responsive?, className, ...rest})` — top of a dashboard/admin page:
   `back` slot, small-caps eyebrow, display-font h1, muted line
   (`description`, or `children` for the older call style) and a
-  right-aligned `action` (below the title on a phone). `responsive` drops
-  the title one size on a phone.
+  right-aligned `action` (below the title on a phone). The title is always
+  `text-3xl`; `responsive` is kept for compatibility and no longer changes it.
 - `SegmentedControl<T extends string>({ariaLabel, options, value, onChange,
   size?, variant?, className?, optionClassName?})` — mutually exclusive
   options as a radiogroup (roving tabindex; arrows, Home and End; disabled
@@ -1991,8 +1991,8 @@ private), all from semantic classes so each kit's own tokens drive the look.
 - **Eyebrow** (`text-xs font-semibold uppercase tracking-wider`): `Section`,
   `PageHeader`, `StatusCard`, `Faq`.
 - **Page title** (`font-display text-3xl font-bold tracking-tight text-balance
-  break-words`): `PageHeader` (when `responsive`), `AuthShell`, `Faq`. A
-  `PageHeader` without `responsive` keeps `text-4xl`.
+  break-words`): `PageHeader`, `AuthShell`, `Faq`. Every
+  `PageHeader` title is `text-3xl`, responsive or not.
 - **Card title** (`font-display text-2xl font-bold tracking-tight`):
   `StatusCard`, `EmptyState`.
 - **Section title** (`text-base font-semibold`): `Section`.
@@ -2000,8 +2000,8 @@ private), all from semantic classes so each kit's own tokens drive the look.
 Visual changes against earlier releases: `Section` card is `rounded-2xl`
 (was `rounded-lg`); `PricingLadder` tiers and `Faq` items are `rounded-xl` (was
 `rounded-lg`); `AuditLogTable` frame is `rounded-xl` (was `rounded-2xl`);
-`EmptyState` title is bold; `PageHeader` title no longer steps to `text-4xl` on
-wide screens when `responsive`; the `Faq` eyebrow is no longer monospace; every
+`EmptyState` title is bold; `PageHeader` title is `text-3xl` (36px to 30px
+when not `responsive`, and no `text-4xl` step when `responsive`); the `Faq` eyebrow is no longer monospace; every
 eyebrow shares one tracking. `className` still overrides.
 
 ## Z-index scale

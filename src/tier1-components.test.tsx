@@ -49,11 +49,11 @@ describe("PageHeader", () => {
     expect(h1).not.toHaveClass("sm:text-4xl");
   });
 
-  it("keeps the large title when not responsive", () => {
+  it("uses the page title recipe when not responsive", () => {
     render(<PageHeader title="T" />);
     const h1 = screen.getByRole("heading", { level: 1 });
-    expect(h1).toHaveClass("text-4xl", "font-bold", "text-balance");
-    expect(h1).not.toHaveClass("text-3xl");
+    expect(h1).toHaveClass(...PAGE_TITLE.split(" "));
+    expect(h1).not.toHaveClass("text-4xl");
   });
 
   it("uses the eyebrow recipe", () => {

@@ -31,7 +31,7 @@ export interface PageHeaderProps
   actions?: React.ReactNode;
   /** Slot above the header: a node such as `BackButton`, or `{href, label}` for a plain back link. */
   back?: React.ReactNode | { href: string; label: string };
-  /** One size down on a phone, for a page whose title shares its row with a button. */
+  /** Kept for existing callers. The title is the same size either way, so it has no effect. */
   responsive?: boolean;
 }
 
@@ -48,7 +48,7 @@ export function PageHeader({
   action,
   actions,
   back,
-  responsive = false,
+  responsive: _responsive,
   className,
   ...rest
 }: PageHeaderProps): React.ReactElement {
@@ -78,11 +78,7 @@ export function PageHeader({
               {eyebrow}
             </p>
           )}
-          <h1
-            className={cn(PAGE_TITLE, !responsive && "text-4xl")}
-          >
-            {title}
-          </h1>
+          <h1 className={PAGE_TITLE}>{title}</h1>
           {line && (
             <div className="mt-2 text-sm text-muted-foreground">{line}</div>
           )}

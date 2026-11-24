@@ -219,7 +219,7 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   Send shows "Write a message first" under the textarea and does not call
   `onSubmit`. After `onSubmit` resolves the sheet stays open on a
   "Feedback sent" (`HelpSheet`: "Message sent") confirmation with a Done
-  button that closes it; closing by any route resets the form. A rejected
+  button that closes it. A draft (message, score, category) is kept when the sheet is closed without sending and reset after a successful send. A rejected
   `onSubmit` is unchanged: inline error and `onError`.
   `HelpSheet`'s form mode takes an optional
   `categories?: {value, label}[]` to add a category radiogroup above the

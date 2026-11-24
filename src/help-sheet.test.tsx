@@ -55,6 +55,7 @@ describe("HelpSheet", () => {
 
     const status = await screen.findByRole("status");
     expect(within(status).getByText("Message sent")).toHaveFocus();
+    expect(document.activeElement).toBe(within(status).getByText("Message sent"));
     expect(onOpenChange).not.toHaveBeenCalled();
 
     await user.pointer({
@@ -64,7 +65,7 @@ describe("HelpSheet", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("form mode: reopening after a send shows an empty form", async () => {
+  it("form mode: reopening after a send and a non-Done close shows an empty form", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     const { rerender } = render(
@@ -79,6 +80,27 @@ describe("HelpSheet", () => {
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.getByLabelText(/message/i)).toHaveValue("");
+  });
+
+  it("form mode: keeps the draft message and category when closed without sending", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    const categories = [
+      { value: "a", label: "Alpha" },
+      { value: "b", label: "Beta" },
+    ];
+    const ui = (open: boolean) => (
+      <HelpSheet open={open} onOpenChange={() => {}} mode="form" onSubmit={onSubmit} categories={categories} />
+    );
+    const { rerender } = render(ui(true));
+    await user.type(screen.getByLabelText(/message/i), "draft");
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("radio", { name: "Beta" }) });
+
+    rerender(ui(false));
+    rerender(ui(true));
+
+    expect(screen.getByLabelText(/message/i)).toHaveValue("draft");
+    expect(screen.getByRole("radio", { name: "Beta" })).toHaveAttribute("aria-checked", "true");
   });
 
   it("renders nothing visible when closed", () => {

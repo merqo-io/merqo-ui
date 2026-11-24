@@ -30,6 +30,16 @@ export type HelpSheetProps = {
 
 export function HelpSheet(props: HelpSheetProps) {
   const { open, onOpenChange, onError } = props;
+  const firstCategory =
+    props.mode === "form" ? props.categories?.[0]?.value : undefined;
+  // The draft lives here, not in the sheet content, so an accidental dismiss
+  // keeps it. It resets only after a send.
+  const [message, setMessage] = React.useState("");
+  const [category, setCategory] = React.useState<string | undefined>(firstCategory);
+  const [sent, setSent] = React.useState(false);
+
+  // Any close drops the confirmation so the next open shows the empty form.
+  if (!open && sent) setSent(false);
 
   const title =
     props.mode === "form" ? props.title ?? "Get help" : "Get help";
@@ -60,6 +70,13 @@ export function HelpSheet(props: HelpSheetProps) {
           onOpenChange={onOpenChange}
           onError={onError}
           categories={props.categories}
+          message={message}
+          setMessage={setMessage}
+          category={category}
+          setCategory={setCategory}
+          sent={sent}
+          setSent={setSent}
+          resetCategory={firstCategory}
         />
       )}
     </SheetShell>
@@ -71,23 +88,34 @@ function HelpForm({
   onOpenChange,
   onError,
   categories,
+  message,
+  setMessage,
+  category,
+  setCategory,
+  sent,
+  setSent,
+  resetCategory,
 }: {
+  message: string;
+  setMessage: (message: string) => void;
+  category: string | undefined;
+  setCategory: (category: string | undefined) => void;
+  sent: boolean;
+  setSent: (sent: boolean) => void;
+  resetCategory: string | undefined;
   onSubmit: (data: SupportRequest) => Promise<void>;
   onOpenChange: (open: boolean) => void;
   onError?: (error: unknown) => void;
   categories?: { value: string; label: string }[];
 }) {
-  const [message, setMessage] = React.useState("");
-  const [category, setCategory] = React.useState<string | undefined>(categories?.[0]?.value);
-
-  const [sent, setSent] = React.useState(false);
-
   const { pending, error, run } = useAsyncAction(async () => {
     const payload: SupportRequest = { message };
     if (categories && category) {
       payload.category = category;
     }
     await onSubmit(payload);
+    setMessage("");
+    setCategory(resetCategory);
     setSent(true);
   });
 

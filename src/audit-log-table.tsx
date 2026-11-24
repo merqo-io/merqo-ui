@@ -67,13 +67,13 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
             ) : null}
           </span>
           <span className="min-w-0 break-words text-muted-foreground">
-            <span className="mr-1 text-xs uppercase tracking-wider sm:hidden">Actor</span>
+            <span className="mr-1 text-xs font-medium sm:hidden">Actor</span>
             {entry.actor}
           </span>
           <span className="min-w-0 break-words text-muted-foreground">
             {entry.target ? (
               <>
-                <span className="mr-1 text-xs uppercase tracking-wider sm:hidden">Target</span>
+                <span className="mr-1 text-xs font-medium sm:hidden">Target</span>
                 {entry.target}
               </>
             ) : (

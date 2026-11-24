@@ -5,7 +5,10 @@ import {
   AuditLogTable,
   AuthConfirmForm,
   AuthConfirmInvalid,
+  AsyncSubmitButton,
   AuthShell,
+  DashboardNav,
+  TermsAcceptanceCheckbox,
   DataTable,
   DataTablePager,
   ElevatedCard,
@@ -105,6 +108,26 @@ function SegmentedGroup() {
         value={pill}
         onChange={setPill}
       />
+    </Group>
+  );
+}
+
+function ControlsGroup() {
+  const [accepted, setAccepted] = React.useState(false);
+  return (
+    <Group name="Touch and focus controls">
+      <DashboardNav
+        wordmark={<span className="text-xl font-semibold">qkit</span>}
+        navLinks={[{ href: "#orders", label: "Orders" }, { href: "#stats", label: "Stats" }]}
+        vendor={{ name: LONG_STALL }}
+        signOutAction={noop}
+        getHelp={{ type: "mailto", address: "help@example.com" }}
+        onFeedbackSubmit={noop}
+      />
+      <TermsAcceptanceCheckbox checked={accepted} onCheckedChange={setAccepted} />
+      <form onSubmit={(event) => event.preventDefault()}>
+        <AsyncSubmitButton pending={false}>Save changes</AsyncSubmitButton>
+      </form>
     </Group>
   );
 }
@@ -244,6 +267,8 @@ function Preview() {
           />
         </div>
       </Group>
+
+      <ControlsGroup />
 
       <Sheets />
     </div>

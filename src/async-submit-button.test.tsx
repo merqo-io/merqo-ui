@@ -43,3 +43,23 @@ describe("AsyncSubmitButton reduced motion", () => {
     expect(tokens).not.toContain("animate-spin");
   });
 });
+
+describe("AsyncSubmitButton touch and focus", () => {
+  it("keeps the same horizontal padding while pending", () => {
+    const pad = (el: HTMLElement) => el.className.split(" ").filter((t) => /px-/.test(t)).sort();
+    const idle = render(<AsyncSubmitButton pending={false}>Save</AsyncSubmitButton>);
+    const idlePad = pad(screen.getByRole("button"));
+    idle.unmount();
+    render(<AsyncSubmitButton pending>Save</AsyncSubmitButton>);
+    expect(pad(screen.getByRole("button"))).toEqual(idlePad);
+    expect(idlePad).toContain("has-[>svg]:px-4");
+  });
+
+  it("grows to 44px on coarse pointers and shows the shared focus ring", () => {
+    render(<AsyncSubmitButton pending={false}>Save</AsyncSubmitButton>);
+    const tokens = screen.getByRole("button", { name: "Save" }).className.split(" ");
+    expect(tokens).toContain("pointer-coarse:h-11");
+    expect(tokens).toContain("focus-visible:ring-[3px]");
+    expect(tokens).toContain("focus-visible:ring-ring/50");
+  });
+});

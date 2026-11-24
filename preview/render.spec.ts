@@ -282,6 +282,26 @@ async function finishSend(
   await expect(dialog).toBeHidden();
 }
 
+test("hand-rolled controls show a focus ring when tabbed to", async ({ page }) => {
+  const group = page.locator('[data-group="Touch and focus controls"]');
+  await group.scrollIntoViewIfNeeded();
+  const burger = group.getByRole("button", { name: "Mobile navigation menu" });
+  const navEntry = (await burger.isVisible()) ? burger : group.getByRole("link", { name: "Orders" });
+  const targets = [
+    navEntry,
+    group.getByRole("checkbox"),
+    group.getByRole("button", { name: "Save changes" }),
+  ];
+  for (const target of targets) {
+    await target.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await expect(target).toBeFocused();
+    const ring = await target.evaluate((el) => getComputedStyle(el).boxShadow);
+    expect(ring, "focus-visible ring").not.toBe("none");
+  }
+});
+
 test("feedback sheet with NPS: fit, targets, validation and sent states", async ({ page }, testInfo) => {
   const touch = Boolean(testInfo.project.use.hasTouch);
   const errors = watchConsole(page);

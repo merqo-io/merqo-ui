@@ -15,6 +15,11 @@
 - `AuditLogTable`: without `formatAction`, the action renders as a humanised label ("Set vendor plan") instead of the raw code. A missing target renders an empty cell with screen-reader text "No target" instead of an em dash.
 - `PricingLadder`: plan prices use `tabular-nums` so digits align across cards.
 - `FeedbackSheet` and `HelpSheet`: the Send button is at least 44px tall on coarse pointers (it was 36px). The local render check now opens each sheet at 360px and asserts fit, tap targets, validation and sent states.
+- `AsyncSubmitButton` renders the shared `Button`: 44px tall on coarse pointers (36px with a mouse, unchanged) and a visible focus ring. Callers passing `className` still win through `tailwind-merge`.
+- `TermsAcceptanceCheckbox` uses the shared `Checkbox` primitive: a 44px tap area on coarse pointers, a label that is at least 44px tall there, and a focus ring on the box and its links. The redundant `role="checkbox"` is gone.
+- `SheetMessageForm` and `SheetConfirmation` (inside `FeedbackSheet` and `HelpSheet`) use the shared `Textarea` and `Button`, so the textarea and the Done button show the shared focus ring.
+- `DashboardNav`: links in the mobile panel are at least 44px tall, and all nav links show a focus ring.
+- `SegmentedControl`: every option shows a focus ring in both variants.
 
 ## [0.60.0] - 2026-11-23
 

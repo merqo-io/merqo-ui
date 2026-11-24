@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.
+
 ## [0.60.0] - 2026-11-23
 
 ### Changed

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `AuditLogTable`: without `formatAction`, the action renders as a humanised label ("Set vendor plan") instead of the raw code. A missing target renders an empty cell with screen-reader text "No target" instead of an em dash.
+- `PricingLadder`: plan prices use `tabular-nums` so digits align across cards.
+
 ## [0.60.0] - 2026-11-23
 
 ### Changed

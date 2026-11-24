@@ -2121,6 +2121,31 @@ update; no release is created by these checks. A release changes `version` in
 `package.json`, the install snippet above and the changelog heading together,
 then tags `v<version>`. `src/release-version.test.ts` fails when they disagree.
 
+### Render check
+
+jsdom cannot see overflow, wrapping or tap-target size, so a local check mounts
+the shared components in a real browser:
+
+```bash
+pnpm preview       # serves the preview page at http://127.0.0.1:5199
+pnpm test:render   # Playwright, chromium only, at 360x800 (touch) and 1280x800
+```
+
+`preview/` holds a single page that renders the components from `src/` in their
+key states, with a long stall or plan name in each group, under a neutral
+shadcn theme (`preview/theme.css`, the only place literal colours are allowed).
+The run asserts, per viewport: no horizontal overflow (the failing group is
+named), no console errors on load or when opening each sheet, and the
+FeedbackSheet opens by tap. On the touch viewport it also asserts every button,
+link, input and radio/tab/menuitem is at least 44px tall; inline links inside
+paragraphs are exempt. Real defects it finds are parked in `knownTapIssues()` in
+`preview/render.spec.ts` with a reason, never by loosening an assertion.
+
+Full-page and per-sheet screenshots are written to `preview/.screenshots/`
+(gitignored) for a person or agent to look at; they are not pixel-diffed. This
+check is local only: it is not part of CI and not part of the published
+package. It needs `pnpm exec playwright install chromium` once.
+
 ### Upload and navigation contracts
 
 Deferred image previews belong to their mounted ImageUploader. Keep its preview

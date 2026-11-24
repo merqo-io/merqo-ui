@@ -11,5 +11,5 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "include": ["src", "tsup.config.ts", "vitest.config.ts"]
+  "include": ["src", "preview", "tsup.config.ts", "vitest.config.ts"]
 }

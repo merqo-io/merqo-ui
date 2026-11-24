@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.
+
 ### Changed
 
 - `FeedbackSheet` and `HelpSheet`: a blank required message now shows "Write a message first" under the textarea instead of doing nothing. A successful send keeps the sheet open on a "Feedback sent" / "Message sent" confirmation with a Done button, instead of closing silently. Kits that relied on the sheet closing right after `onSubmit` resolves now see it close on Done. A draft is kept when the sheet is closed without sending and reset after a successful send; `HelpSheet` now keeps its draft message and category across a close too (previously it lost them).

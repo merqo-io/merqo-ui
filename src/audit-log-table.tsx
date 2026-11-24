@@ -11,11 +11,16 @@ export interface AuditLogEntry {
 
 export interface AuditLogTableProps {
   entries: AuditLogEntry[];
-  /** Maps a raw action string (e.g. "set_vendor_plan") to a human label. Omit to render the raw string. */
+  /** Maps a raw action string (e.g. "set_vendor_plan") to a human label. Omit to render a humanised label ("Set vendor plan"). */
   formatAction?: (action: string) => string;
   emptyState?: React.ReactNode;
   /** Overrides the default Intl.DateTimeFormat rendering of `createdAt`. */
   dateFormatter?: (date: Date) => string;
+}
+
+function humaniseAction(action: string) {
+  const spaced = action.replace(/[_-]+/g, " ").trim();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
 const GRID_COLS = "grid-cols-[1fr_1fr_1fr_auto]";
@@ -54,13 +59,13 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
           className={`grid ${GRID_COLS} items-baseline gap-x-4 border-t border-border px-5 py-3 text-sm`}
         >
           <span>
-            {formatAction ? formatAction(entry.action) : entry.action}
+            {formatAction ? formatAction(entry.action) : humaniseAction(entry.action)}
             {entry.detail ? (
               <span className="block text-xs text-muted-foreground">{entry.detail}</span>
             ) : null}
           </span>
           <span className="text-muted-foreground">{entry.actor}</span>
-          <span className="text-muted-foreground">{entry.target ?? "—"}</span>
+          <span className="text-muted-foreground">{entry.target ? entry.target : <span className="sr-only">No target</span>}</span>
           <span className="whitespace-nowrap text-right text-xs text-muted-foreground">
             {formatTimestamp(entry.createdAt, dateFormatter)}
           </span>

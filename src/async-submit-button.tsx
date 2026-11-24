@@ -28,7 +28,7 @@ export function AsyncSubmitButton({
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className={cn("gap-1.5", className)}
+      className={cn("gap-1.5 has-[>svg]:px-4", className)}
     >
       {pending ? (
         <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />

@@ -25,13 +25,13 @@ export function TermsAcceptanceCheckbox({
     <div className={cn("space-y-3", className)}>
       <label
         htmlFor={id}
-        className="flex items-start gap-2 text-sm pointer-coarse:min-h-11 pointer-coarse:items-center"
+        className="flex items-start gap-2 text-sm pointer-coarse:min-h-11"
       >
         <Checkbox
           id={id}
           checked={checked}
           onCheckedChange={(next) => onCheckedChange(next === true)}
-          className="mt-0.5 pointer-coarse:mt-0"
+          className="mt-0.5"
         />
         <span>
           I have read and agree to the{" "}

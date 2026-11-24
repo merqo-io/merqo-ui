@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { AsyncSubmitButton } from "./async-submit-button";
+import { Button } from "./ui/button";
 import {
   Sheet,
   SheetContent,
@@ -11,6 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./ui/sheet";
+import { Textarea } from "./ui/textarea";
 
 /** Private: the drawer frame HelpSheet and FeedbackSheet share. Not exported from the package. */
 export function SheetShell({
@@ -79,7 +81,7 @@ export function SheetMessageForm({
         <label htmlFor={messageId} className="text-sm font-medium">
           Message
         </label>
-        <textarea
+        <Textarea
           id={messageId}
           value={message}
           onChange={(event) => {
@@ -88,7 +90,7 @@ export function SheetMessageForm({
           }}
           aria-invalid={blankError || undefined}
           aria-describedby={blankError ? blankErrorId : undefined}
-          className="border-input bg-background flex-1 min-h-24 resize-none rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="min-h-24 flex-1 resize-none"
         />
         {blankError ? (
           <p id={blankErrorId} className="text-destructive text-sm" role="alert">
@@ -102,7 +104,7 @@ export function SheetMessageForm({
         ) : null}
       </div>
       <SheetFooter className="px-0 pb-4">
-        <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2 pointer-coarse:min-h-11">
+        <AsyncSubmitButton pending={pending} pendingChildren="Sending…">
           Send
         </AsyncSubmitButton>
       </SheetFooter>
@@ -136,13 +138,9 @@ export function SheetConfirmation({
         </h3>
         <p className="text-muted-foreground text-sm">{body}</p>
       </div>
-      <button
-        type="button"
-        onClick={onDone}
-        className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex min-h-11 w-full items-center justify-center rounded-md px-4 text-sm font-medium"
-      >
+      <Button type="button" onClick={onDone} className="w-full">
         Done
-      </button>
+      </Button>
     </div>
   );
 }

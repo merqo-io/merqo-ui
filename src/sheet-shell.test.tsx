@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SheetShell, SheetMessageForm } from "./sheet-shell";
+import { SheetShell, SheetMessageForm, SheetConfirmation } from "./sheet-shell";
 
 describe("SheetShell", () => {
   it("renders title, description and children when open", () => {
@@ -78,6 +78,19 @@ describe("SheetMessageForm touch target", () => {
         errorMessage={null}
       />,
     );
-    expect(screen.getByRole("button", { name: "Send" })).toHaveClass("pointer-coarse:min-h-11");
+    expect(screen.getByRole("button", { name: "Send" })).toHaveClass("pointer-coarse:h-11");
+  });
+});
+
+describe("SheetMessageForm primitives", () => {
+  it("renders the shared textarea and the Done button with focus rings", () => {
+    render(
+      <SheetMessageForm messageId="m" message="" onMessageChange={() => {}} onSubmit={() => {}} pending={false} />,
+    );
+    expect(screen.getByLabelText("Message")).toHaveAttribute("data-slot", "textarea");
+    render(<SheetConfirmation title="Sent" body="Thanks" onDone={() => {}} />);
+    const done = screen.getByRole("button", { name: "Done" });
+    expect(done).toHaveAttribute("data-slot", "button");
+    expect(done.className.split(" ")).toContain("pointer-coarse:h-11");
   });
 });

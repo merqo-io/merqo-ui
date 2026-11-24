@@ -99,7 +99,7 @@ export function DashboardNav({
                 data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
                 aria-current={isActiveHref?.(link.href) ? "page" : undefined}
                 className={cn(
-                  "rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  "rounded-lg px-3 py-1.5 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 font-medium text-muted-foreground hover:bg-secondary hover:text-foreground",
                   isActiveHref?.(link.href) &&
                     "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary",
                 )}
@@ -138,7 +138,7 @@ export function DashboardNav({
                 data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
                 aria-current={isActiveHref?.(link.href) ? "page" : undefined}
                 className={cn(
-                  "rounded-lg px-2 py-2 text-sm font-medium",
+                  "flex min-h-11 items-center rounded-lg px-2 py-2 text-sm font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   isActiveHref?.(link.href)
                     ? "bg-primary/10 text-primary"
                     : "text-foreground hover:bg-secondary",

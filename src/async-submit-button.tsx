@@ -4,6 +4,7 @@ import * as React from "react";
 import { Loader2 } from "lucide-react";
 
 import { cn } from "./lib/utils";
+import { Button } from "./ui/button";
 
 export interface AsyncSubmitButtonProps {
   pending: boolean;
@@ -23,19 +24,16 @@ export function AsyncSubmitButton({
   className,
 }: AsyncSubmitButtonProps) {
   return (
-    <button
+    <Button
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className={cn(
-        "bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium disabled:pointer-events-none disabled:opacity-50",
-        className,
-      )}
+      className={cn("gap-1.5", className)}
     >
       {pending ? (
         <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
       ) : null}
       {pending ? (pendingChildren ?? children) : children}
-    </button>
+    </Button>
   );
 }

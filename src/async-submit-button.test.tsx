@@ -43,3 +43,13 @@ describe("AsyncSubmitButton reduced motion", () => {
     expect(tokens).not.toContain("animate-spin");
   });
 });
+
+describe("AsyncSubmitButton touch and focus", () => {
+  it("grows to 44px on coarse pointers and shows the shared focus ring", () => {
+    render(<AsyncSubmitButton pending={false}>Save</AsyncSubmitButton>);
+    const tokens = screen.getByRole("button", { name: "Save" }).className.split(" ");
+    expect(tokens).toContain("pointer-coarse:h-11");
+    expect(tokens).toContain("focus-visible:ring-[3px]");
+    expect(tokens).toContain("focus-visible:ring-ring/50");
+  });
+});

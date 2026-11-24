@@ -54,6 +54,12 @@ const card = (name: string) =>
   screen.getByRole("heading", { name, level: 3 }).closest("li") as HTMLElement;
 
 describe("PricingLadder prices", () => {
+  it("sets the price in tabular figures so plan cards align", () => {
+    render(<PricingLadder catalog={CATALOG} />);
+    const price = screen.getByText("S$19.90", { exact: false, selector: "p" });
+    expect(price).toHaveClass("tabular-nums");
+  });
+
   it("renders every price from the catalog", () => {
     render(<PricingLadder catalog={CATALOG_WITH_INACTIVE_PLANS} />);
     expect(card("Pro")).toHaveTextContent("S$19.90 a month");

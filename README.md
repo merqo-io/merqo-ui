@@ -494,14 +494,15 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
 - `AuditLogTable` — renders a list of audit/activity entries
   (`{id, actor, action, target?, detail?, createdAt}`) as a bordered
   row list: action (with `detail` as a secondary line when present),
-  actor, target (an em dash when omitted), and a right-aligned
+  actor, target (an empty cell, announced as "No target" to screen readers, when omitted), and a right-aligned
   timestamp. `actor` is expected to already be a resolved display
   string (an email, a name) — this package has no auth/DB dependency,
   so resolving an `admin_id` to a human-readable actor is the caller's
   job, same as `ImageUploader`'s injected `onUpload`. Optional
   `formatAction?: (action: string) => string` maps a raw action string
-  (e.g. `"set_vendor_plan"`) to a human label — omit it to render the
-  raw string as-is. Optional `dateFormatter?: (date: Date) => string`
+  (e.g. `"set_vendor_plan"`) to a human label — omit it to render a
+  humanised label (underscores and hyphens become spaces, first letter
+  capitalised: `"set_vendor_plan"` becomes "Set vendor plan"). Optional `dateFormatter?: (date: Date) => string`
   overrides the default `Intl.DateTimeFormat` rendering. Optional
   `emptyState?: ReactNode` replaces the default "No activity recorded
   yet." message for a zero-row list.

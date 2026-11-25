@@ -7,6 +7,11 @@ export interface StatusCardProps {
   wordmark?: React.ReactNode;
   eyebrow?: React.ReactNode;
   code?: React.ReactNode;
+  /**
+   * An image or illustration in a fixed-aspect frame above the eyebrow, for a
+   * page that should show something other than text.
+   */
+  media?: React.ReactNode;
   title: React.ReactNode;
   description?: React.ReactNode;
   children?: React.ReactNode;
@@ -18,6 +23,7 @@ export function StatusCard({
   wordmark,
   eyebrow,
   code,
+  media,
   title,
   description,
   children,
@@ -28,6 +34,11 @@ export function StatusCard({
       <div className="w-full max-w-md">
         {wordmark ? <div className="mb-8 text-center">{wordmark}</div> : null}
         <ElevatedCard className="px-7 py-10 text-center">
+          {media ? (
+            <div className="mx-auto mb-6 aspect-video w-full overflow-hidden rounded-lg [&_img]:size-full [&_img]:object-cover [&_svg]:size-full">
+              {media}
+            </div>
+          ) : null}
           {eyebrow ? (
             <p className={cn("mb-2", LABEL)}>
               {eyebrow}

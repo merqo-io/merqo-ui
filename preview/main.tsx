@@ -27,6 +27,7 @@ import {
 import type { AuditLogEntry, PlanCatalog } from "../src";
 import { StatusCard } from "../src/status-card";
 import { Input } from "../src/ui/input";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "../src/ui/item";
 import { Label } from "../src/ui/label";
 import { Textarea } from "../src/ui/textarea";
 import { Button } from "../src/ui/button";
@@ -159,6 +160,27 @@ function Preview() {
       <Group name="EmptyState">
         <EmptyState title="No orders yet" description="Orders appear here as soon as a customer joins the queue." actions={<Button>Share queue link</Button>} />
         <EmptyState size="compact" title="Nothing here" />
+        <EmptyState
+          title="No orders yet"
+          description="Orders appear here as soon as a customer joins the queue."
+          media={<div className="size-full bg-muted" />}
+        />
+        <EmptyState
+          title="No menu items yet"
+          description="Add your first dish and it shows up like this."
+          preview={
+            <ItemGroup>
+              <Item variant="outline" size="sm">
+                <ItemContent>
+                  <ItemTitle>Kopi peng</ItemTitle>
+                  <ItemDescription>S$1.60</ItemDescription>
+                </ItemContent>
+                <ItemActions>Edit</ItemActions>
+              </Item>
+            </ItemGroup>
+          }
+          actions={<Button>Add a dish</Button>}
+        />
         <EmptyState title={LONG_STALL} description={LONG_STALL} actions={<Button>Create a stall</Button>} />
       </Group>
 

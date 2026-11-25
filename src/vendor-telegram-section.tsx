@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 import { ConfirmDialog } from "./confirm-dialog";
 import { Section } from "./section";
@@ -9,6 +9,7 @@ import { isTelegramLink } from "./telegram-link";
 import { isRedirectError } from "./redirect-error";
 import { useAsyncAction } from "./use-async-action";
 import { cn } from "./lib/utils";
+import { Spinner } from "./ui/spinner";
 
 interface VendorTelegramSectionCommon {
   /** Forwarded to `Section`'s own `wrapper` prop. */
@@ -134,7 +135,7 @@ function ConnectPanel({
       )}
     >
       {connectAction.pending ? (
-        <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
+        <Spinner aria-hidden="true" />
       ) : null}
       {connectAction.pending ? "Connecting…" : "Connect Telegram"}
     </button>

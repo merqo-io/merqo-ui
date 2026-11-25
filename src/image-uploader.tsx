@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import { undoToast, type UndoToastHandle } from "./undo-toast";
 
 import { cn } from "./lib/utils";
 import { GROUP, MOTION_STATE } from "./recipes";
+import { Spinner } from "./ui/spinner";
 import {
   discardPendingImage,
   isPendingImage,
@@ -203,11 +204,9 @@ function UploadTrigger({
       )}
     >
       {uploading ? (
-        <Loader2
-          className={cn(
-            "motion-safe:animate-spin",
-            variant === "thumb" ? "size-4" : "size-6",
-          )}
+        <Spinner
+          aria-hidden="true"
+          className={variant === "thumb" ? "size-4" : "size-6"}
         />
       ) : (
         <ImagePlus className={variant === "thumb" ? "size-4" : "size-6"} />

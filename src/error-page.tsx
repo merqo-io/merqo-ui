@@ -12,6 +12,8 @@ export interface ErrorPageProps {
   /** Kit wordmark shown above the card. */
   wordmark?: React.ReactNode;
   eyebrow?: React.ReactNode;
+  /** Image or illustration shown above the title. */
+  media?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
   resetLabel?: string;
@@ -30,6 +32,7 @@ export function ErrorPage({
   reset,
   wordmark,
   eyebrow,
+  media,
   title = "Something went wrong",
   description = "Could not load this page. This is usually a flaky connection, so try again.",
   resetLabel = "Try again",
@@ -42,7 +45,13 @@ export function ErrorPage({
   }, [error, onError]);
 
   return (
-    <StatusCard wordmark={wordmark} eyebrow={eyebrow} title={title} description={description}>
+    <StatusCard
+      wordmark={wordmark}
+      eyebrow={eyebrow}
+      media={media}
+      title={title}
+      description={description}
+    >
       <Button type="button" onClick={() => reset()} className="h-11 w-full">
         {resetLabel}
       </Button>

@@ -7,6 +7,8 @@ export interface NotFoundProps {
   wordmark?: React.ReactNode;
   /** Large status code above the title, e.g. "404". Omitted by default. */
   code?: string;
+  /** Image or illustration shown above the title. */
+  media?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
   homeHref?: string;
@@ -21,6 +23,7 @@ export interface NotFoundProps {
 export function NotFound({
   wordmark,
   code,
+  media,
   title = "Page not found",
   description = "This link may be out of date, or the page it pointed to no longer exists.",
   homeHref = "/",
@@ -29,7 +32,13 @@ export function NotFound({
   LinkComponent = DefaultAppLink,
 }: NotFoundProps): React.ReactElement {
   return (
-    <StatusCard wordmark={wordmark} code={code} title={title} description={description}>
+    <StatusCard
+      wordmark={wordmark}
+      code={code}
+      media={media}
+      title={title}
+      description={description}
+    >
       {action ?? (
         <Button asChild className="h-11 w-full">
           <LinkComponent href={homeHref}>{homeLabel}</LinkComponent>

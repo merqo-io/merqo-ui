@@ -4,6 +4,8 @@
 
 ### Added
 
+- `Empty` parts, `Item` parts and `Spinner` in `@merqo/ui/primitives` (shadcn, `Spinner` stops under reduced motion).
+- `EmptyState` takes `media` (image or illustration in a fixed-aspect frame, wins over `icon`) and `preview` (sample rows, faded, inert and `aria-hidden`, above the title). `StatusCard`, `ErrorPage` and `NotFound` take `media`.
 - `DropdownMenuGroup` in `@merqo/ui/primitives`.
 - `Alert`, `AlertTitle` and `AlertDescription` in `@merqo/ui/primitives` (shadcn, `default` and `destructive` variants, `role="alert"` by default).
 - `AUTH_BUTTON` recipe: one 44px, full-width, `rounded-xl`, semibold primary auth action with the press state.
@@ -11,6 +13,8 @@
 
 ### Changed
 
+- `EmptyState` is built on the shadcn `Empty` parts with its props unchanged. `size="compact"` drops its dashed border and card background (visible in every compact site, for example merqo's nine); the default keeps the dashed border. The description is now a `div` instead of a `p`.
+- `AsyncSubmitButton`, `DownloadButton`, `ImageUploader` and `VendorTelegramSection` use `Spinner` instead of `Loader2`, hidden from assistive tech because the control already carries `aria-busy`.
 - `Avatar` and `AvatarIdentity` fall back to the initials tile when the photo URL fails to load, and retry when `avatarUrl` changes.
 - `Tabs` triggers use the shared focus ring (`border-ring`, 3px `ring-ring/50`) like the other primitives.
 - `SheetMessageForm` errors (HelpSheet and FeedbackSheet) render in the destructive `Alert`; `role="alert"` and the `aria-describedby` id are unchanged.

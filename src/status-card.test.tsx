@@ -18,3 +18,25 @@ describe("StatusCard", () => {
     expect(container.querySelector(".rounded-2xl")).toHaveClass("shadow-sm");
   });
 });
+
+describe("StatusCard media", () => {
+  it("renders media in a clipped frame above the title", () => {
+    render(
+      <StatusCard
+        title="Gone"
+        media={<img alt="" src="/x.png" data-testid="media" />}
+      />,
+    );
+    const frame = screen.getByTestId("media").parentElement as HTMLElement;
+    expect(frame).toHaveClass("overflow-hidden", "rounded-lg");
+    const title = screen.getByRole("heading", { name: "Gone" });
+    expect(
+      frame.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("renders no frame without media", () => {
+    const { container } = render(<StatusCard title="Gone" />);
+    expect(container.querySelector(".aspect-video")).toBeNull();
+  });
+});

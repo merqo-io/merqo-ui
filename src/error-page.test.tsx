@@ -86,3 +86,18 @@ describe("GlobalError", () => {
     container.remove();
   });
 });
+
+describe("ErrorPage media", () => {
+  it("threads media to the status card", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <ErrorPage
+        error={new Error("boom")}
+        reset={() => {}}
+        media={<img alt="" src="/x.png" data-testid="media" />}
+      />,
+    );
+    expect(screen.getByTestId("media")).toBeInTheDocument();
+    spy.mockRestore();
+  });
+});

@@ -628,11 +628,17 @@ Hold-to-confirm is deliberately not offered. It is hard to operate with
 gloves, one hand or assistive tech, and the tiers above already separate
 routine, irreversible and high-stakes actions.
 
-- `EmptyState({icon?, title, description?, children?, actions?, className, size?, role?})`
-  — dashed "nothing here yet" card with up to two actions. `size="compact"`
-  is for a one-line message inside a list or card ("No vendors yet."): the
-  title is a muted `<p>` instead of the `<h2>`, with a smaller radius and
-  padding. `role` is passed to the root, for example `role="status"`.
+- `EmptyState({icon?, media?, preview?, title, description?, children?, actions?, className, size?, role?})`
+  — dashed "nothing here yet" card with up to two actions, built on the
+  shadcn `Empty` parts. An empty state shows the shape of what will be there,
+  not a mood icon. `preview` takes sample rows (for example `Item` rows) that
+  render faded, inert and `aria-hidden` above the title. `media` is an image
+  or illustration in a fixed 16:9 frame (clipped, `rounded-lg`) and wins over
+  `icon`; `icon` stays a bare muted glyph, never a tinted tile. `size="compact"`
+  is for a one-line message inside a list or card ("No vendors yet."): it has
+  no border or background of its own, and the title is a muted `<p>` instead
+  of the `<h2>`. The default keeps its dashed border, which reads as a slot
+  to fill. `role` is passed to the root, for example `role="status"`.
 - `DataTable` also takes `caption?: string`, an accessible name for the
   table that screen readers read and nothing draws. Cells and headers wrap
   long text instead of staying on one line, so a 360px phone shows every
@@ -1223,7 +1229,7 @@ pages. The package ships no colours or fonts; each kit passes its own text,
 colour classes and colour values. Links use a `LinkComponent` prop (pass
 `next/link`'s `Link`) so the package never imports a router.
 
-- `ErrorPage({error, reset, wordmark?, eyebrow?, title?, description?,
+- `ErrorPage({error, reset, wordmark?, eyebrow?, media?, title?, description?,
   resetLabel?, actions?, onError?})` - client body for `app/error.tsx`. Logs
   the error once (`onError` replaces `console.error`), shows a full-width
   44px "Try again" button and Next's digest as a reference line. Replaces the
@@ -1240,7 +1246,8 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
 - `NotFound({wordmark?, code?, title?, description?, homeHref?, homeLabel?,
   action?, LinkComponent?})` - server-safe body for `app/not-found.tsx`.
   `code="404"` shows the big number (qkit, stockkit); `action` replaces the
-  default link home.
+  default link home. `media` (here and on `ErrorPage`, through `StatusCard`)
+  puts an image or illustration in a clipped 16:9 frame above the title.
 - `brandIcon(size, {monogram, background, foreground, fontFamily?, radius?})` with `ICON_SIZE`
   (32) and `APPLE_ICON_SIZE` (180) - the tile for `icon.tsx` and
   `apple-icon.tsx`. Server-safe; the kit owns the `next/og` import and the
@@ -1480,6 +1487,19 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   44px on coarse pointers. `ToggleGroup` takes `spacing` (default `0`): at `0`
   the items fuse into one segmented control, above `0` they are separate with
   that gap.
+- `Empty`, `EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`,
+  `EmptyContent`: the shadcn empty-state parts `EmptyState` is built on. Do not
+  use `EmptyMedia variant="icon"` (the tinted square tile) for a kit's empty
+  states; the bare default variant is the house style.
+- `Item`, `ItemGroup`, `ItemSeparator`, `ItemMedia`, `ItemContent`,
+  `ItemTitle`, `ItemDescription`, `ItemActions`, `ItemHeader`, `ItemFooter`:
+  the shadcn row (media, title, description, actions). `Item asChild` turns a
+  row into a link. Use it for sample rows in `EmptyState preview`.
+- `Spinner`: `role="status"` with `aria-label="Loading"`; it stops spinning
+  under `prefers-reduced-motion`. A spinner only goes inside the control that
+  is busy, never centred in content: content that is loading shows its shape
+  with `Skeleton`. When the parent already announces the busy state with
+  `aria-busy`, pass `aria-hidden="true"` so it is not announced twice.
 - `Skeleton`: pulsing placeholder block; it stops pulsing under
   `prefers-reduced-motion`. To cross-fade into the loaded content, give the
   content's wrapper `transition-opacity duration-200 ease-out starting:opacity-0

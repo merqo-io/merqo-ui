@@ -2,6 +2,9 @@
 
 import * as React from "react";
 import { rawErrorText, runOnce } from "./auth-form-utils";
+import { cn } from "./lib/utils";
+import { AUTH_BUTTON } from "./recipes";
+import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -146,16 +149,16 @@ export function MfaForm({
       onClick={() =>
         submit({ kind: "cancel", run: async (kind) => showMessage(await onCancel(), kind) })
       }
-      className="h-11 w-full rounded-xl"
+      className={cn(AUTH_BUTTON, "font-medium")}
     >
       {cancelLabel}
     </Button>
   ) : null;
 
   const alert = shown ? (
-    <p id={ERROR_ID} role="alert" className="text-sm text-destructive">
-      {shown}
-    </p>
+    <Alert id={ERROR_ID} variant="destructive">
+      <AlertDescription>{shown}</AlertDescription>
+    </Alert>
   ) : null;
 
   if (!hasForm) {
@@ -177,7 +180,7 @@ export function MfaForm({
                 },
               });
             }}
-            className="h-11 w-full rounded-xl"
+            className={AUTH_BUTTON}
           >
             Set up authenticator
           </Button>
@@ -215,7 +218,7 @@ export function MfaForm({
           />
         </div>
         {alert}
-        <Button type="submit" disabled={pending} className="h-11 w-full rounded-xl">
+        <Button type="submit" disabled={pending} className={AUTH_BUTTON}>
           {pending && lastKind === "verify" ? "Verifying" : "Verify"}
         </Button>
         {cancel}

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AsyncSubmitButton } from "./async-submit-button";
 import type { AuthConfirmType } from "./auth/confirm";
+import { AUTH_BUTTON } from "./recipes";
 
 export type AuthConfirmFormProps = {
   tokenHash: string;
@@ -34,7 +35,6 @@ const COPY: Record<AuthConfirmType, { title: string; button: string }> = {
   email_change: { title: "Confirm your new email", button: "Confirm new email" },
 };
 
-const BUTTON_CLASS = "min-h-11 w-full rounded-xl font-semibold";
 const LINK_CLASS =
   "inline-flex min-h-11 items-center justify-center text-sm font-semibold text-primary underline-offset-4 hover:underline";
 
@@ -81,7 +81,7 @@ export function AuthConfirmForm({
           {body ?? "Press the button below to complete this step."}
         </p>
       </div>
-      <AsyncSubmitButton pending={pending} className={BUTTON_CLASS}>
+      <AsyncSubmitButton pending={pending} className={AUTH_BUTTON}>
         {buttonLabel ?? copy.button}
       </AsyncSubmitButton>
     </form>

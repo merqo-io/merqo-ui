@@ -477,3 +477,18 @@ describe("ResetPasswordForm passwordLabelSlot", () => {
     expect(screen.getByText("Confirm password").parentElement).not.toHaveClass("flex");
   });
 });
+
+describe("ResetPasswordForm shadcn Alert and AUTH_BUTTON", () => {
+  it("renders a submit error in an Alert and the submit button as AUTH_BUTTON", async () => {
+    await fillAndSubmit({ onSubmit: vi.fn().mockResolvedValue("x") });
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveAttribute("data-slot", "alert");
+    expect(screen.getByRole("button", { name: "Update password" })).toHaveClass("h-11", "w-full", "font-semibold");
+  });
+
+  it("keeps a field error as plain inline text, not an Alert", async () => {
+    await fillAndSubmit({}, "short");
+    expect(screen.getByLabelText("New password")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+});

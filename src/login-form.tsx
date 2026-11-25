@@ -4,6 +4,9 @@ import * as React from "react";
 import { ContextAppLink } from "./app-link-provider";
 import { GoogleMark } from "./google-mark";
 import { rawErrorText, runOnce } from "./auth-form-utils";
+import { AUTH_BUTTON } from "./recipes";
+import { cn } from "./lib/utils";
+import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -114,14 +117,14 @@ function GoogleBlock({ pending, onClick }: { pending: boolean; onClick: () => vo
         variant="outline"
         disabled={pending}
         onClick={onClick}
-        className="h-12 w-full gap-2.5 rounded-xl text-[0.95rem] font-medium"
+        className={cn(AUTH_BUTTON, "gap-2.5 font-medium")}
       >
         <GoogleMark />
         Continue with Google
       </Button>
       <div className="my-6 flex items-center gap-3">
         <span className="h-px flex-1 bg-border" />
-        <span className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           or with email
         </span>
         <span className="h-px flex-1 bg-border" />
@@ -181,14 +184,14 @@ function Feedback({ error, notice }: { error: string | null | undefined; notice:
   return (
     <>
       {error ? (
-        <p id={ERROR_ID} role="alert" className="text-sm font-medium text-destructive">
-          {error}
-        </p>
+        <Alert id={ERROR_ID} variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
       {notice ? (
-        <p role="status" className="text-sm font-medium text-foreground">
-          {notice}
-        </p>
+        <Alert role="status">
+          <AlertDescription className="text-foreground">{notice}</AlertDescription>
+        </Alert>
       ) : null}
     </>
   );
@@ -258,7 +261,7 @@ function ConfirmPanel({
         type="button"
         variant="outline"
         onClick={onBack}
-        className="min-h-11 w-full rounded-xl font-semibold"
+        className={cn(AUTH_BUTTON, "font-medium")}
       >
         Back to sign in
       </Button>
@@ -565,7 +568,7 @@ export function LoginForm({
           type="submit"
           size="lg"
           disabled={pending}
-          className="h-12 w-full rounded-xl text-base font-semibold"
+          className={AUTH_BUTTON}
         >
           {submitLabel}
         </Button>

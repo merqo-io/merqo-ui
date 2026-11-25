@@ -350,3 +350,14 @@ describe("FeedbackSheet", () => {
     expect(screen.getByText("What's working, what's missing, what's broken?")).toBeInTheDocument();
   });
 });
+
+describe("FeedbackSheet score error Alert", () => {
+  it("shows the missing-score error in an Alert", async () => {
+    const user = userEvent.setup();
+    render(<FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} showNps />);
+    await user.type(screen.getByLabelText(/message/i), "Great app!");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+    const alert = (await screen.findByText("Pick a score first")).closest("[role=alert]");
+    expect(alert).toHaveAttribute("data-slot", "alert");
+  });
+});

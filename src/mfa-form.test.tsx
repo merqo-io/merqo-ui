@@ -312,3 +312,33 @@ describe("MfaForm shake on failure", () => {
     expect(animate).not.toHaveBeenCalled();
   });
 });
+
+describe("MfaForm shadcn Alert and AUTH_BUTTON", () => {
+  it("renders the error in an Alert that keeps the id the input points at", async () => {
+    const user = userEvent.setup();
+    render(<MfaForm hasFactor onVerify={vi.fn()} />);
+    const input = screen.getByLabelText("6-digit code");
+    await user.type(input, "12");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveAttribute("data-slot", "alert");
+    expect(alert).toHaveAttribute("id", "mfa-form-error");
+    expect(input).toHaveAttribute("aria-describedby", "mfa-form-error");
+  });
+
+  it("keeps Verify the one semibold button and the cancel action medium", () => {
+    render(<MfaForm hasFactor onVerify={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Verify" })).toHaveClass("font-semibold");
+    const cancel = screen.getByRole("button", { name: "Sign out" });
+    expect(cancel).toHaveClass("h-11", "font-medium");
+    expect(cancel).not.toHaveClass("font-semibold");
+  });
+
+  it("gives Verify and Set up the shared 44px auth button", () => {
+    const { unmount } = render(<MfaForm hasFactor onVerify={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Verify" })).toHaveClass("h-11", "w-full", "font-semibold");
+    unmount();
+    render(<MfaForm hasFactor={false} onVerify={vi.fn()} onEnrol={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Set up authenticator" })).toHaveClass("h-11", "font-semibold");
+  });
+});

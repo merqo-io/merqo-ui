@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { Alert, AlertDescription } from "./ui/alert";
 import { buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import { cn } from "./lib/utils";
@@ -224,9 +225,9 @@ export function ConfirmDialog({
           />
         )}
         {error && (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
+          <Alert variant="destructive" className="px-3 py-2">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>

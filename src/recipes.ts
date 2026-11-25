@@ -68,3 +68,9 @@ export const INTERACTIVE_SURFACE = `${SURFACE} transition-[box-shadow,transform]
 // The shadow for a layer floating above the page. Bigger than SURFACE so the
 // stack reads: page, card, floating layer.
 export const OVERLAY_ELEVATION = "shadow-lg";
+
+// The full-width action that finishes an auth step (sign in, verify, confirm,
+// set password). h-11 is 44px, the touch-target minimum, and as a fixed height
+// it replaces Button's default h-9 under twMerge where min-h-11 would only
+// stretch it. One radius and one weight so every auth screen reads alike.
+export const AUTH_BUTTON = `${PRESS} h-11 w-full rounded-xl text-base font-semibold`;

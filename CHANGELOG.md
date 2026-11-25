@@ -4,10 +4,13 @@
 
 ### Added
 
+- `Alert`, `AlertTitle` and `AlertDescription` in `@merqo/ui/primitives` (shadcn, `default` and `destructive` variants, `role="alert"` by default).
+- `AUTH_BUTTON` recipe: one 44px, full-width, `rounded-xl`, semibold primary auth action with the press state.
 - Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.
 
 ### Changed
 
+- Form-level errors in `LoginForm`, `MfaForm`, `ResetPasswordForm`, `ConfirmDialog` and the `FeedbackSheet` score check now render in the shadcn `Alert`; the `LoginForm` success notice is an `Alert` with `role="status"`. Ids, `aria-describedby` wiring and `role="alert"` are unchanged; field errors (`FormError`, `FORM_ERROR_CLASS`) are untouched. The primary actions of `LoginForm`, `MfaForm`, `AuthConfirmForm` and `ResetPasswordForm` share `AUTH_BUTTON` (the 48px buttons are now 44px), and the "or with email" divider drops its arbitrary text size and tracking.
 - Fluid continuity motion: the `SegmentedControl` track pill slides between options, `Tabs` ease the active tint, `FaqRows` ease open like `Faq`, and the `ImageUploader` preview fades in. All CSS, 200ms, near-instant under reduced motion. `Skeleton` is unchanged; the README documents the fade-in class set for the content that replaces it.
 - Motion tokens and elevation by meaning in the recipes: `MOTION_FEEDBACK` (150ms), `MOTION_STATE` (200ms), `MOTION_OVERLAY` (300ms) on one ease-out curve, `INTERACTIVE_SURFACE` for whole-card taps, `OVERLAY_ELEVATION`, and `PRESS`.
 - Every `Button` variant and `PressButton` has a pressed state that fires on touch (colour step plus a 0.98 scale; reduced motion drops the scale).

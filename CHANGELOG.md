@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.61.2] - 2026-11-26
+
 ### Fixed
 
 - `AboutMerqo` describes paykit as in pilot with Merqo stalls; loopkit and

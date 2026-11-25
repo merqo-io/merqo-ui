@@ -11,7 +11,7 @@
 - Motion tokens and elevation by meaning in the recipes: `MOTION_FEEDBACK` (150ms), `MOTION_STATE` (200ms), `MOTION_OVERLAY` (300ms) on one ease-out curve, `INTERACTIVE_SURFACE` for whole-card taps, `OVERLAY_ELEVATION`, and `PRESS`.
 - Every `Button` variant and `PressButton` has a pressed state that fires on touch (colour step plus a 0.98 scale; reduced motion drops the scale).
 - Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select share one reduced-motion contract: 1ms duration, slide and zoom zeroed, fade kept, so `animationend` still fires. Modals enter in 300ms and leave in 200ms; popups enter in 200ms and leave in 150ms.
-- `DashboardTour` card uses the kit's `--shadow-lg` token instead of a literal black `box-shadow`.
+- `DashboardTour` card follows the Tailwind `--shadow-lg` token (kits can override it) instead of a literal black `box-shadow`.
 - New sentence-case label recipe replaces the uppercase tracked string on the form-field label (`FORM_LABEL_CLASS`, now `text-sm font-medium text-muted-foreground`), the `AdminShell` badge, the `StatusCard` kicker and the `AuditLogTable` column headings.
 - `JourneyStep` label is sentence case in the primary colour: no longer mono, uppercase or tracked.
 - The uppercase eyebrow stays on `Section`, `PageHeader` and `Faq` only.

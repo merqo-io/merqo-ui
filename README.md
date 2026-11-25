@@ -2016,8 +2016,9 @@ Elevation follows meaning, not decoration. A group is flat, a surface is
 `shadow-sm`, and a floating layer is `shadow-lg` (`OVERLAY_ELEVATION`). Only a
 card that is tappable as a whole uses `INTERACTIVE_SURFACE`: `shadow-sm`,
 deepening to `shadow-md` on hover, `shadow-xs` and a 0.98 scale while pressed.
-Hover may change a shadow, never move the hit target. No shipped component uses
-`INTERACTIVE_SURFACE` yet; it is the recipe for kits and later slices.
+Hover may change a shadow, never move the hit target. `INTERACTIVE_SURFACE`
+and `OVERLAY_ELEVATION` are defined for adoption in follow-up slices; no
+shipped component uses them yet.
 
 Motion tokens share one ease-out curve: `MOTION_FEEDBACK` 150ms (press, hover),
 `MOTION_STATE` 200ms (a control changing state), `MOTION_OVERLAY` 300ms (a
@@ -2027,8 +2028,8 @@ reduced-motion contract: 1ms duration (not `animate-none`, so `animationend`
 still fires), slide and zoom zeroed, opacity kept. `PRESS` is the pressed
 state: a 0.98 scale that reduced motion removes. Every `hover:` has an
 `active:` twin so touch gets the same feedback. `Button` and `PressButton` use
-`PRESS`; the `DashboardTour` card uses the kit's `--shadow-lg` token instead of
-a literal colour.
+`PRESS`; the `DashboardTour` card follows the Tailwind `--shadow-lg` token (kits can
+override it) instead of a literal colour.
 
 Visual changes against earlier releases: the default `Section` card is a flat
 in-page group, `rounded-xl border` with no shadow (was `rounded-lg`; pass

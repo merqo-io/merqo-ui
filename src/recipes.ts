@@ -58,7 +58,7 @@ export const POPUP_TRANSITION = `ease-out duration-200 data-[state=closed]:durat
 // A pressed control. Tailwind v4 fires hover: only on hover-capable pointers,
 // so active: is what touch users see. The scale is dropped under reduced
 // motion and the colour step each site adds stays.
-export const PRESS = `transition-[color,background-color,border-color,box-shadow,transform] ${MOTION_FEEDBACK} active:scale-[0.98] motion-reduce:active:scale-100`;
+export const PRESS = `transition-[color,background-color,border-color,outline-color,box-shadow,opacity,transform] ${MOTION_FEEDBACK} active:scale-[0.98] motion-reduce:active:scale-100`;
 
 // A surface that is tappable as a whole (not one with a button inside it): the
 // only card that lifts on hover. Hover may deepen the shadow but never moves

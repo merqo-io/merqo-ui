@@ -103,10 +103,10 @@ function popoverCss(scopeClassName: string): string {
   color: var(--popover-foreground);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  /* The kit's own layered shadow token, so the tour card matches every other
-     floating layer and follows the kit's theme. Tailwind emits --shadow-lg
-     whenever any primitive uses shadow-lg; none keeps the card readable if a
-     kit has stripped it. */
+  /* Tailwind's shadow-lg token, so the tour card matches every other floating
+     layer and a kit can override it. Tailwind emits --shadow-lg because the
+     primitives use shadow-lg. The fallback is none, not a shadow, because this
+     package may not ship colour literals. */
   box-shadow: var(--shadow-lg, none);
   font-family: var(--font-sans);
   max-width: 320px;

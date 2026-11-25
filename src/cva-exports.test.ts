@@ -84,4 +84,22 @@ describe("cva exports", () => {
     const offenders = sourceFiles(srcDir).flatMap(exportedCvaValues);
     expect(offenders).toEqual([]);
   });
+
+  it("does not derive exported prop types from a raw cva() value", () => {
+    const offenders = sourceFiles(srcDir).flatMap((file) => {
+      const text = readFileSync(file, "utf8");
+      const source = ts.createSourceFile(
+        file,
+        text,
+        ts.ScriptTarget.Latest,
+        true,
+      );
+      const consts = new Map<string, boolean>();
+      source.statements.forEach((st) => collectCvaConsts(st, consts));
+      return [...consts.keys()]
+        .filter((name) => text.includes(`VariantProps<typeof ${name}>`))
+        .map((name) => `${path.relative(srcDir, file)}: ${name}`);
+    });
+    expect(offenders).toEqual([]);
+  });
 });

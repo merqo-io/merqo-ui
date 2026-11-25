@@ -5,7 +5,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { undoToast, type UndoToastHandle } from "./undo-toast";
 
 import { cn } from "./lib/utils";
-import { GROUP } from "./recipes";
+import { GROUP, MOTION_STATE } from "./recipes";
 import {
   discardPendingImage,
   isPendingImage,
@@ -488,13 +488,22 @@ export function ImageUploader({
             box,
           )}
         >
-          <PreviewImage
-            src={value}
-            alt={previewAlt}
-            fill
-            sizes={previewSizes}
-            className="object-cover"
-          />
+          <div
+            data-slot="image-preview"
+            className={cn(
+              "absolute inset-0 transition-opacity starting:opacity-0",
+              MOTION_STATE,
+              "motion-reduce:duration-1",
+            )}
+          >
+            <PreviewImage
+              src={value}
+              alt={previewAlt}
+              fill
+              sizes={previewSizes}
+              className="object-cover"
+            />
+          </div>
           <button
             type="button"
             onClick={() => removeImage(value)}

@@ -210,7 +210,7 @@ describe("SegmentedControl", () => {
       <SegmentedControl ariaLabel="g" options={options} value="a" onChange={() => {}} size="sm" className="grid grid-cols-3" />,
     );
     expect(screen.getByRole("radiogroup")).toHaveClass("rounded-lg", "text-xs", "grid");
-    expect(screen.getByRole("radio", { name: "Alpha" })).toHaveClass("bg-primary/10");
+    expect(screen.getByRole("radio", { name: "Alpha" })).toHaveClass("text-primary");
     rerender(
       <SegmentedControl ariaLabel="g" options={options} value="a" onChange={() => {}} variant="pill" />,
     );
@@ -290,5 +290,48 @@ describe("SegmentedControl focus", () => {
       }
       unmount();
     }
+  });
+});
+
+describe("SegmentedControl sliding pill", () => {
+  function track(value: string | null) {
+    return (
+      <SegmentedControl
+        ariaLabel="Pick one"
+        options={options}
+        value={value}
+        onChange={() => {}}
+      />
+    );
+  }
+
+  it("renders one decorative indicator that eases between options", () => {
+    const { container } = render(track("a"));
+    const pill = container.querySelector("[data-slot='segmented-indicator']");
+    expect(pill).not.toBeNull();
+    expect(pill).toHaveAttribute("aria-hidden", "true");
+    expect(pill).toHaveClass("pointer-events-none", "duration-200", "ease-out", "motion-reduce:duration-1!");
+  });
+
+  it("puts the tint on the indicator, not on the checked button", () => {
+    render(track("b"));
+    expect(screen.getByRole("radio", { name: "Beta" })).not.toHaveClass("bg-primary/10");
+  });
+
+  it("renders no indicator when nothing is checked or in the pill variant", () => {
+    const { container, rerender } = render(track(null));
+    expect(container.querySelector("[data-slot='segmented-indicator']")).toBeNull();
+    rerender(
+      <SegmentedControl ariaLabel="Pick" options={options} value="a" onChange={() => {}} variant="pill" />,
+    );
+    expect(container.querySelector("[data-slot='segmented-indicator']")).toBeNull();
+  });
+
+  it("selects by touch", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<SegmentedControl ariaLabel="Pick" options={options} value="a" onChange={onChange} />);
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("radio", { name: "Gamma" }) });
+    expect(onChange).toHaveBeenCalledWith("c");
   });
 });

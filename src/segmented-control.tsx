@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { cn } from "./lib/utils";
+import { MOTION_STATE } from "./recipes";
 
 export interface SegmentedOption<T extends string = string> {
   value: T;
@@ -65,6 +66,47 @@ export function SegmentedControl<T extends string = string>({
     (option) => option.value === value && !option.disabled,
   );
   const rovingIndex = checkedIndex === -1 ? (enabled[0] ?? 0) : checkedIndex;
+  const groupRef = React.useRef<HTMLDivElement | null>(null);
+  const [pill, setPill] = React.useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    slides: boolean;
+  } | null>(null);
+  const track = variant === "track";
+
+  // The pill is measured from the checked button so it follows any label
+  // width, size or wrapped layout. It only animates after the first
+  // measurement so it never slides in from the corner on mount.
+  React.useLayoutEffect(() => {
+    const el = checkedIndex === -1 || !track ? null : buttonRefs.current[checkedIndex];
+    if (!el) {
+      setPill(null);
+      return;
+    }
+    function measure() {
+      if (!el) return;
+      setPill((prev) => {
+        const next = {
+          x: el.offsetLeft,
+          y: el.offsetTop,
+          w: el.offsetWidth,
+          h: el.offsetHeight,
+          slides: prev !== null,
+        };
+        return prev && prev.x === next.x && prev.y === next.y && prev.w === next.w && prev.h === next.h
+          ? prev
+          : next;
+      });
+    }
+    measure();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    observer?.observe(el);
+    if (groupRef.current) observer?.observe(groupRef.current);
+    return () => observer?.disconnect();
+  }, [checkedIndex, track, size, options]);
+
 
   function moveTo(position: number) {
     if (enabled.length === 0) return;
@@ -100,20 +142,32 @@ export function SegmentedControl<T extends string = string>({
     }
   }
 
-  const track = variant === "track";
-
   return (
     <div
+      ref={groupRef}
       role="radiogroup"
       aria-label={ariaLabel}
       className={cn(
         track
-          ? ["inline-flex rounded-lg border border-border p-0.5", TRACK_SIZE[size].group]
+          ? ["relative inline-flex rounded-lg border border-border p-0.5", TRACK_SIZE[size].group]
           : "grid",
         className,
       )}
       onKeyDown={handleKeyDown}
     >
+      {track && pill && (
+        <span
+          aria-hidden="true"
+          data-slot="segmented-indicator"
+          className={cn(
+            "pointer-events-none absolute top-0 left-0 rounded-md bg-primary/10 transition-[transform,width,height]",
+            MOTION_STATE,
+            "motion-reduce:duration-1!",
+            !pill.slides && "transition-none",
+          )}
+          style={{ width: pill.w, height: pill.h, transform: `translate(${pill.x}px, ${pill.y}px)` }}
+        />
+      )}
       {options.map((option, index) => {
         const checked = option.value === value && !option.disabled;
         return (
@@ -133,10 +187,10 @@ export function SegmentedControl<T extends string = string>({
               track
                 ? [
                     // Finger-sized on a touch screen whatever the mouse size.
-                    "rounded-md font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11",
+                    "relative rounded-md font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11",
                     TRACK_SIZE[size].item,
                     checked
-                      ? "bg-primary/10 text-primary active:bg-primary/20"
+                      ? "text-primary active:bg-primary/20"
                       : "text-muted-foreground hover:text-foreground active:bg-primary/10 active:text-foreground",
                   ]
                 : [

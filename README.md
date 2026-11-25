@@ -385,7 +385,8 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   />;
   ```
 - `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
-  with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
+  whose preview fades in when it mounts (200ms, near-instant under reduced
+  motion), with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays
   backend-agnostic. `uploading` always resets — success, validation failure,
   or throw. Default `variant` is `"thumb"` — qkit's booth-banner usage
@@ -586,7 +587,9 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   options as a radiogroup (roving tabindex; arrows, Home and End; disabled
   options are skipped). `options` is `{value, label, ariaLabel?, disabled?}[]`;
   `value` may be `null`. `variant="track"` (default, `size` `sm`|`md`) is the
-  bordered row with a tinted active pill; `"pill"` is a grid of bordered
+  bordered row with a tinted active pill that slides to the chosen option
+  (200ms; near-instant under reduced motion, selection still updates);
+  `"pill"` is a grid of bordered
   buttons (give it `className="grid-cols-11 gap-1"`). For link-based
   switches, call `router.push` from `onChange`.
 - `StatCard` — `StatTile` (all its props) inside the `ElevatedCard` shell.
@@ -650,7 +653,8 @@ reversible ones.
   where the browser supports `::details-content` and `interpolate-size`
   (others toggle instantly); reduced motion turns it off. Server-safe.
 - `FaqRows({rows})` and `type FaqRow = {q, a}` — ruled native `<details>`
-  rows (44px summary, `+` and `-` marker) for the three landing objections
+  rows (44px summary, `+` and `-` marker; the answer eases open where the
+  browser supports `::details-content`, instantly elsewhere) for the three landing objections
   under a `Journey`. Use `Faq` for a carded accordion with an eyebrow and
   title; use `FaqRows` for plain ruled rows. Server-safe.
 - `FaqPage({title, intro?, groups, closing?, jsonLd?, className?})`,
@@ -1469,8 +1473,13 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   the items fuse into one segmented control, above `0` they are separate with
   that gap.
 - `Skeleton`: pulsing placeholder block; it stops pulsing under
-  `prefers-reduced-motion`.
-- `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`.
+  `prefers-reduced-motion`. To cross-fade into the loaded content, give the
+  content's wrapper `transition-opacity duration-200 ease-out starting:opacity-0
+  motion-reduce:duration-1` so it fades in when it replaces the skeleton. The
+  component itself stays unchanged.
+- `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`. The active tint and
+  colour ease over 200ms (CSS only, so Radix behaviour is unchanged; the tint
+  fades rather than slides because the triggers are separate elements).
 - `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`,
   `CardContent`, `CardFooter`.
 - `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipProvider`. A tooltip

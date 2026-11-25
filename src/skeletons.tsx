@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "./lib/utils";
-import { SURFACE } from "./recipes";
+import { ElevatedCard } from "./elevated-card";
 import { Skeleton } from "./ui/skeleton";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "./ui/item";
 
@@ -62,7 +62,7 @@ export function DataTableSkeleton({
             <tr key={r} className="border-b">
               {cols.map((c) => (
                 <td key={c} className="p-2 align-middle">
-                  <Skeleton className={cn("h-4", widthAt(r + c))} />
+                  <Skeleton className={cn("h-5", widthAt(r + c))} />
                 </td>
               ))}
             </tr>
@@ -80,17 +80,18 @@ export interface StatTileSkeletonProps extends SkeletonBaseProps {
 
 /** The loading shape of `StatTile`: a label line, a large value line and a caption line. */
 export function StatTileSkeleton({ card = true, label = "Loading", className }: StatTileSkeletonProps) {
+  const Root = card ? ElevatedCard : "div";
   return (
-    <div
+    <Root
       role="status"
       aria-busy="true"
-      className={cn("flex flex-col gap-2", card && `${SURFACE} p-4`, className)}
+      className={cn("flex flex-col gap-2", card && "p-4", className)}
     >
       <Label>{label}</Label>
       <Skeleton aria-hidden="true" className="h-3 w-1/3" />
       <Skeleton aria-hidden="true" className="h-6 w-1/2" />
       <Skeleton aria-hidden="true" className="h-3 w-2/3" />
-    </div>
+    </Root>
   );
 }
 

@@ -94,3 +94,17 @@ describe("ListSkeleton", () => {
     expect(container.querySelectorAll('[data-slot="item-actions"]')).toHaveLength(0);
   });
 });
+
+describe("class handling", () => {
+  it("stops the pulse under reduced motion", () => {
+    const { container } = render(<StatTileSkeleton />);
+    expect(blocks(container)[0]).toHaveClass("motion-reduce:animate-none");
+  });
+
+  it("lets a caller class beat a base class", () => {
+    render(<StatTileSkeleton className="p-8 flex-row" />);
+    const root = screen.getByRole("status");
+    expect(root).toHaveClass("p-8", "flex-row");
+    expect(root).not.toHaveClass("p-4", "flex-col");
+  });
+});

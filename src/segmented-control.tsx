@@ -76,16 +76,24 @@ export function SegmentedControl<T extends string = string>({
   } | null>(null);
   const track = variant === "track";
 
+  const indicatorShown = pill !== null && pill.w > 0 && pill.h > 0;
+  const optionsKey = options.map((option) => option.value).join("\u0000");
+  const lastChecked = React.useRef(-1);
+
   // The pill is measured from the checked button so it follows any label
-  // width, size or wrapped layout. It only animates after the first
-  // measurement so it never slides in from the corner on mount.
+  // width, size or wrapped layout. It only animates when the checked option
+  // changes; mount and size-only re-measures (rotation, font load, sibling
+  // reflow) snap, so the pill never slides in from the corner or lags a resize.
   React.useLayoutEffect(() => {
     const el = checkedIndex === -1 || !track ? null : buttonRefs.current[checkedIndex];
     if (!el) {
+      lastChecked.current = -1;
       setPill(null);
       return;
     }
-    function measure() {
+    const changed = lastChecked.current !== -1 && lastChecked.current !== checkedIndex;
+    lastChecked.current = checkedIndex;
+    function measure(animate: boolean) {
       if (!el) return;
       setPill((prev) => {
         const next = {
@@ -93,20 +101,31 @@ export function SegmentedControl<T extends string = string>({
           y: el.offsetTop,
           w: el.offsetWidth,
           h: el.offsetHeight,
-          slides: prev !== null,
+          slides: animate && prev !== null,
         };
         return prev && prev.x === next.x && prev.y === next.y && prev.w === next.w && prev.h === next.h
-          ? prev
+          ? { ...prev, slides: animate }
           : next;
       });
     }
-    measure();
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
-    observer?.observe(el);
-    if (groupRef.current) observer?.observe(groupRef.current);
-    return () => observer?.disconnect();
-  }, [checkedIndex, track, size, options]);
-
+    measure(changed);
+    const remeasure = () => measure(false);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(remeasure);
+    if (observer) {
+      if (groupRef.current) observer.observe(groupRef.current);
+      for (const button of buttonRefs.current) if (button) observer.observe(button);
+    }
+    let cancelled = false;
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      void document.fonts.ready.then(() => {
+        if (!cancelled) remeasure();
+      });
+    }
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+    };
+  }, [checkedIndex, track, size, optionsKey]);
 
   function moveTo(position: number) {
     if (enabled.length === 0) return;
@@ -190,7 +209,11 @@ export function SegmentedControl<T extends string = string>({
                     "relative rounded-md font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11",
                     TRACK_SIZE[size].item,
                     checked
-                      ? "text-primary active:bg-primary/20"
+                      ? [
+                          "text-primary active:bg-primary/20",
+                          // Until the indicator has a measured size (server render, no layout) the button carries the tint itself.
+                          !indicatorShown && "bg-primary/10",
+                        ]
                       : "text-muted-foreground hover:text-foreground active:bg-primary/10 active:text-foreground",
                   ]
                 : [

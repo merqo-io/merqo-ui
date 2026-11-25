@@ -26,7 +26,7 @@ describe("Tabs motion", () => {
       "duration-200",
       "ease-out",
       "motion-reduce:duration-1",
-      "active:text-foreground",
+      "data-[state=inactive]:active:text-foreground",
     );
   });
 

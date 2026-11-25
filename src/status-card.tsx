@@ -15,6 +15,12 @@ export interface StatusCardProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   children?: React.ReactNode;
+  /**
+   * The kit's one identity mark (a small glyph or illustration) anchored to the
+   * card's top-end corner. Decorative and `aria-hidden`; it takes the kit's
+   * colour through `currentColor`. The library ships no art.
+   */
+  signature?: React.ReactNode;
   className?: string;
 }
 
@@ -27,13 +33,19 @@ export function StatusCard({
   title,
   description,
   children,
+  signature,
   className,
 }: StatusCardProps): React.ReactElement {
   return (
     <main className={cn("flex min-h-screen items-center justify-center p-5", className)}>
       <div className="w-full max-w-md">
         {wordmark ? <div className="mb-8">{wordmark}</div> : null}
-        <ElevatedCard className="px-7 py-10 text-left">
+        <ElevatedCard className={cn("px-7 py-10 text-left", signature && "relative")}>
+          {signature ? (
+            <div aria-hidden="true" className="pointer-events-none absolute top-4 end-4 size-10 text-primary [&_img]:size-full [&_img]:object-contain [&_svg]:size-full">
+              {signature}
+            </div>
+          ) : null}
           {media ? (
             <div className="mb-6 aspect-video w-full overflow-hidden rounded-lg [&_img]:size-full [&_img]:object-cover [&_svg]:size-full">
               {media}
@@ -45,7 +57,7 @@ export function StatusCard({
             </p>
           ) : null}
           {code ? <p className="mb-1 font-mono text-5xl font-bold text-primary">{code}</p> : null}
-          <h1 className={CARD_TITLE}>{title}</h1>
+          <h1 className={cn(CARD_TITLE, signature && "pe-12")}>{title}</h1>
           {description ? (
             <p className="mt-3 text-sm text-muted-foreground">{description}</p>
           ) : null}

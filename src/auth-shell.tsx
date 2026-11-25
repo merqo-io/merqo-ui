@@ -15,6 +15,12 @@ export type AuthShellProps = {
   children: React.ReactNode;
   /** Legal links or terms copy rendered under the card. */
   footer?: React.ReactNode;
+  /**
+   * The kit's one identity mark (a small glyph or illustration) anchored to the
+   * card's top-end corner. Decorative and `aria-hidden`; it takes the kit's
+   * colour through `currentColor`. The library ships no art.
+   */
+  signature?: React.ReactNode;
   className?: string;
 };
 
@@ -30,6 +36,7 @@ export function AuthShell({
   subtitle,
   children,
   footer,
+  signature,
   className,
 }: AuthShellProps): React.ReactElement {
   const centred = align === "center" ? "text-center" : undefined;
@@ -42,8 +49,13 @@ export function AuthShell({
             {tagline ? <div className="mt-2 text-sm text-muted-foreground">{tagline}</div> : null}
           </div>
         ) : null}
-        <ElevatedCard className="px-7 pt-9 pb-8">
-          <h1 className={cn(PAGE_TITLE, centred)}>{title}</h1>
+        <ElevatedCard className={cn("px-7 pt-9 pb-8", signature && "relative")}>
+          {signature ? (
+            <div aria-hidden="true" className="pointer-events-none absolute top-4 end-4 size-10 text-primary [&_img]:size-full [&_img]:object-contain [&_svg]:size-full">
+              {signature}
+            </div>
+          ) : null}
+          <h1 className={cn(PAGE_TITLE, centred, signature && "pe-12")}>{title}</h1>
           {subtitle ? (
             <p className={cn("mt-1.5 text-sm text-muted-foreground", centred)}>{subtitle}</p>
           ) : null}

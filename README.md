@@ -1010,7 +1010,7 @@ Security duties that stay with the kit:
   `qr` starts with `data:image/`; anything else leaves just the manual key.
 
 - `AuthShell({wordmark?, tagline?, align?, title, subtitle?, children, footer?,
-  className?})` -
+  signature?, className?})` -
   centred card with a wordmark slot above, an `h1` title, optional subtitle
   and a footer slot (legal links) under the card. `tagline` renders under the
   wordmark; `align` (`"start"` default, or `"center"`) aligns the title and
@@ -1247,7 +1247,7 @@ pages. The package ships no colours or fonts; each kit passes its own text,
 colour classes and colour values. Links use a `LinkComponent` prop (pass
 `next/link`'s `Link`) so the package never imports a router.
 
-- `ErrorPage({error, reset, wordmark?, eyebrow?, media?, title?, description?,
+- `ErrorPage({error, reset, wordmark?, eyebrow?, media?, signature?, title?, description?,
   resetLabel?, actions?, onError?})` - client body for `app/error.tsx`. Logs
   the error once (`onError` replaces `console.error`), shows a full-width
   44px "Try again" button and Next's digest as a reference line. Replaces the
@@ -1261,11 +1261,22 @@ colour classes and colour values. Links use a `LinkComponent` prop (pass
   colours. `fontFamily` and `radius` (a CSS length for the button) are
   optional and unset by default, so the kit passes its own. The content sits
   in a `main` landmark. paykit and printkit can now add the file they lack.
-- `NotFound({wordmark?, code?, title?, description?, homeHref?, homeLabel?,
+- `NotFound({wordmark?, code?, media?, signature?, title?, description?, homeHref?, homeLabel?,
   action?, LinkComponent?})` - server-safe body for `app/not-found.tsx`.
   `code="404"` shows the big number (qkit, stockkit); `action` replaces the
   default link home. `media` (here and on `ErrorPage`, through `StatusCard`)
   puts an image or illustration in a clipped 16:9 frame above the title.
+  `signature` (here, on `ErrorPage`, on `StatusCard` and on `AuthShell`) is
+  the kit's one identity mark: a small glyph or illustration anchored to the
+  card's top-end corner, 40px, decorative and `aria-hidden`. It takes the
+  kit's colour through `currentColor` (`text-primary`), the title gains end
+  padding only when it is set, and nothing renders without it. Use one per
+  page; the library ships no art and the mark never animates.
+
+  ```tsx
+  <NotFound code="404" signature={<StallGlyph />} wordmark={<Wordmark />} />
+  <AuthShell title="Welcome back" signature={<StallGlyph />}>...</AuthShell>
+  ```
 - `brandIcon(size, {monogram, background, foreground, fontFamily?, radius?})` with `ICON_SIZE`
   (32) and `APPLE_ICON_SIZE` (180) - the tile for `icon.tsx` and
   `apple-icon.tsx`. Server-safe; the kit owns the `next/og` import and the

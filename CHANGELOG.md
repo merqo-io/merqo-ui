@@ -4,6 +4,7 @@
 
 ### Added
 
+- `signature` slot on `AuthShell`, `StatusCard`, `ErrorPage` and `NotFound`: one optional, decorative (`aria-hidden`) identity mark in the card's top-end corner, coloured by the kit through `currentColor`. Opt-in; output is unchanged when it is not passed.
 - `Empty` parts, `Item` parts and `Spinner` in `@merqo/ui/primitives` (shadcn, `Spinner` stops under reduced motion).
 - `EmptyState` takes `media` (image or illustration in a fixed-aspect frame, wins over `icon`) and `preview` (sample rows, faded, inert and `aria-hidden`, above the title). `StatusCard`, `ErrorPage` and `NotFound` take `media`.
 - `DropdownMenuGroup` in `@merqo/ui/primitives`.

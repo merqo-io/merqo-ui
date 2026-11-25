@@ -211,6 +211,22 @@ function Preview() {
         </div>
       </Group>
 
+      <Group name="Signature slot">
+        <div className="[&_main]:min-h-0">
+          <StatusCard
+            signature={<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" /></svg>}
+            title={LONG_STALL}
+            description="The mark sits in the top-end corner."
+          />
+          <AuthShell
+            signature={<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" /></svg>}
+            title={LONG_STALL}
+          >
+            <p className="text-sm text-muted-foreground">Body</p>
+          </AuthShell>
+        </div>
+      </Group>
+
       <Group name="PageHeader">
         <PageHeader eyebrow="Stalls" title="Menu" description="Edit what customers can order." actions={<Button>Add item</Button>} />
         <PageHeader eyebrow={LONG_STALL} title={LONG_STALL} description={LONG_STALL} back={{ href: "#", label: "Back to stalls" }} actions={<Button>Add item</Button>} />

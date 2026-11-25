@@ -14,6 +14,8 @@ export interface ErrorPageProps {
   eyebrow?: React.ReactNode;
   /** Image or illustration shown above the title. */
   media?: React.ReactNode;
+  /** The kit's identity mark in the card's top-end corner; see `StatusCard`. */
+  signature?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
   resetLabel?: string;
@@ -33,6 +35,7 @@ export function ErrorPage({
   wordmark,
   eyebrow,
   media,
+  signature,
   title = "Could not load this page",
   description = "This is usually a flaky connection. Try again in a moment.",
   resetLabel = "Try again",
@@ -49,6 +52,7 @@ export function ErrorPage({
       wordmark={wordmark}
       eyebrow={eyebrow}
       media={media}
+      signature={signature}
       title={title}
       description={description}
     >

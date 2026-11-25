@@ -429,7 +429,7 @@ describe("ImageUploader — upload pipeline", () => {
 
     await selectFile(container, makeFile());
     await waitFor(() => expect(trigger).toHaveAttribute("aria-busy", "true"));
-    expect(screen.queryByRole("status")).toBeNull();
+    expect(document.querySelector('[role="status"]')).toBeNull();
 
     await act(async () => {
       release("https://cdn.example.test/a.webp");

@@ -47,7 +47,7 @@ export function DownloadButton({
       }}
     >
       {pending ? (
-        <Spinner className={size === "xs" || size === "icon-xs" ? "size-3" : undefined} aria-hidden="true" />
+        <Spinner role={undefined} aria-label={undefined} className={size === "xs" || size === "icon-xs" ? "size-3" : undefined} aria-hidden="true" />
       ) : (
         <Download aria-hidden="true" />
       )}

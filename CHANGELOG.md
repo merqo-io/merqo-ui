@@ -13,7 +13,7 @@
 
 ### Changed
 
-- `EmptyState` is built on the shadcn `Empty` parts with its props unchanged. `size="compact"` drops its dashed border and card background (visible in every compact site, for example merqo's nine); the default keeps the dashed border. The description is now a `div` instead of a `p`.
+- `EmptyState` is built on the shadcn `Empty` parts with its props unchanged. `size="compact"` drops its dashed border and card background (visible in every compact site, for example merqo's nine); the default keeps the dashed border. DOM change for kits with element selectors: the description is now a `div` instead of a `p`, the compact title is a `p` inside a title wrapper, the headline `h2` sits inside a title wrapper, and spacing comes from flex `gap` instead of margins.
 - `AsyncSubmitButton`, `DownloadButton`, `ImageUploader` and `VendorTelegramSection` use `Spinner` instead of `Loader2`, hidden from assistive tech because the control already carries `aria-busy`.
 - `Avatar` and `AvatarIdentity` fall back to the initials tile when the photo URL fails to load, and retry when `avatarUrl` changes.
 - `Tabs` triggers use the shared focus ring (`border-ring`, 3px `ring-ring/50`) like the other primitives.

@@ -204,7 +204,7 @@ function UploadTrigger({
       )}
     >
       {uploading ? (
-        <Spinner
+        <Spinner role={undefined} aria-label={undefined}
           aria-hidden="true"
           className={variant === "thumb" ? "size-4" : "size-6"}
         />

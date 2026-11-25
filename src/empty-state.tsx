@@ -100,10 +100,10 @@ export function EmptyState({
       role={role}
       className={cn(
         compact
-          ? "flex-none gap-3 border-0 p-4 md:p-4"
+          ? "flex-none gap-3 border-0 p-4"
           : cn(
               GROUP,
-              "flex-none gap-5 border-dashed bg-card/50 px-6 py-10 md:px-6 md:py-10",
+              "flex-none gap-5 border-dashed bg-card/50 px-6 py-10",
             ),
         className,
       )}

@@ -135,7 +135,7 @@ function ConnectPanel({
       )}
     >
       {connectAction.pending ? (
-        <Spinner aria-hidden="true" />
+        <Spinner role={undefined} aria-label={undefined} aria-hidden="true" />
       ) : null}
       {connectAction.pending ? "Connecting…" : "Connect Telegram"}
     </button>

@@ -85,6 +85,23 @@ describe("EmptyState size and role", () => {
   });
 });
 
+describe("EmptyState caller padding", () => {
+  it.each(["default", "compact"] as const)(
+    "%s: a caller padding class leaves no responsive padding on the root",
+    (size) => {
+      for (const pad of ["py-2", "p-2"]) {
+        const { container, unmount } = render(
+          <EmptyState size={size} title="Empty" className={pad} />,
+        );
+        const root = container.firstElementChild as HTMLElement;
+        expect(root).toHaveClass(pad);
+        expect(root.className).not.toMatch(/md:p/);
+        unmount();
+      }
+    },
+  );
+});
+
 describe("EmptyState media and preview", () => {
   it("media wins over icon and sits in a clipped fixed-aspect frame", () => {
     const { container } = render(

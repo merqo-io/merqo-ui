@@ -24,7 +24,7 @@ Rules: each file declares its own `"use client"`; do not add a barrel, since a b
 | `alert` | `default` and `destructive` variants only, `role="alert"` by default, no icon colour variants | Errors are announced at once; a polite notice passes `role="status"` |
 | `sheet`, `dialog`, `alert-dialog` | `OVERLAY_TRANSITION` timing | Shared motion and reduced-motion contract |
 | `popover`, `select`, `tooltip` | `POPUP_TRANSITION` timing; select trigger is 44px on coarse pointers | Same |
-| `empty` | Verbatim upstream parts. `EmptyState` never uses `EmptyMedia variant="icon"` | The tinted tile reads as generic; the bare icon is the house style |
+| `empty` | No `md:p-12` on `Empty` (padding is `p-6` at every width, so a caller's padding class wins at all widths). Otherwise upstream parts. `EmptyState` never uses `EmptyMedia variant="icon"` | The tinted tile reads as generic; the bare icon is the house style |
 | `spinner` | `motion-safe:animate-spin` instead of `animate-spin` | Reduced motion stops the spin; callers that already announce busy pass `aria-hidden` |
 | `item` | Upstream, with `Separator` from `radix-ui` | No separate separator primitive is shipped |
 | all animated primitives | Reduced motion shortens to 1ms instead of `animate-none` | `animationend` still fires |

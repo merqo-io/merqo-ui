@@ -1488,7 +1488,9 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   the items fuse into one segmented control, above `0` they are separate with
   that gap.
 - `Empty`, `EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`,
-  `EmptyContent`: the shadcn empty-state parts `EmptyState` is built on. Do not
+  `EmptyContent`: the shadcn empty-state parts `EmptyState` is built on.
+  `Empty` keeps upstream `flex-1`, so it grows in a flex layout (`EmptyState`
+  sets `flex-none`); it has no `md:p-12`, so a padding class always wins. Do not
   use `EmptyMedia variant="icon"` (the tinted square tile) for a kit's empty
   states; the bare default variant is the house style.
 - `Item`, `ItemGroup`, `ItemSeparator`, `ItemMedia`, `ItemContent`,

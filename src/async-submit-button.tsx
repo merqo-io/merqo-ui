@@ -31,7 +31,7 @@ export function AsyncSubmitButton({
       className={cn("gap-1.5 has-[>svg]:px-4", className)}
     >
       {pending ? (
-        <Spinner aria-hidden="true" />
+        <Spinner role={undefined} aria-label={undefined} aria-hidden="true" />
       ) : null}
       {pending ? (pendingChildren ?? children) : children}
     </Button>

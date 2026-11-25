@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { Separator as SeparatorPrimitive, Slot } from "radix-ui";
 
 import { cn } from "../lib/utils";
@@ -32,6 +32,9 @@ function ItemSeparator({
   );
 }
 
+type ItemVariant = "default" | "outline" | "muted";
+type ItemSize = "default" | "sm";
+
 const itemVariants = cva(
   "group/item flex flex-wrap items-center rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a&]:transition-colors [a&]:hover:bg-accent/50",
   {
@@ -60,7 +63,11 @@ function Item({
   asChild = false,
   ...props
 }: React.ComponentProps<"div"> &
-  VariantProps<typeof itemVariants> & { asChild?: boolean }): React.ReactElement {
+  {
+    variant?: ItemVariant | null;
+    size?: ItemSize | null;
+    asChild?: boolean;
+  }): React.ReactElement {
   const Comp = asChild ? Slot.Root : "div";
   return (
     <Comp
@@ -72,6 +79,8 @@ function Item({
     />
   );
 }
+
+type ItemMediaVariant = "default" | "icon" | "image";
 
 const itemMediaVariants = cva(
   "flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none",
@@ -94,8 +103,9 @@ function ItemMedia({
   className,
   variant = "default",
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof itemMediaVariants>): React.ReactElement {
+}: React.ComponentProps<"div"> & {
+  variant?: ItemMediaVariant | null;
+}): React.ReactElement {
   return (
     <div
       data-slot="item-media"

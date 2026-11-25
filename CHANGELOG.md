@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.61.1] - 2026-11-25
+
+### Fixed
+
+- Declaration build failing in git-dependency installs (TS2742): `Empty`, `EmptyMedia`, `Item` and `ItemMedia` props now use explicit variant unions instead of types inferred from `cva()`. The public API is unchanged.
+
 ## [0.61.0] - 2026-11-25
 
 ### Added

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
 
@@ -32,6 +32,8 @@ function EmptyHeader({
   );
 }
 
+type EmptyMediaVariant = "default" | "icon";
+
 const emptyMediaVariants = cva(
   "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
@@ -51,8 +53,9 @@ function EmptyMedia({
   className,
   variant = "default",
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof emptyMediaVariants>): React.ReactElement {
+}: React.ComponentProps<"div"> & {
+  variant?: EmptyMediaVariant | null;
+}): React.ReactElement {
   return (
     <div
       data-slot="empty-icon"

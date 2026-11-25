@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SegmentedControl } from "./segmented-control";
 
@@ -210,7 +210,7 @@ describe("SegmentedControl", () => {
       <SegmentedControl ariaLabel="g" options={options} value="a" onChange={() => {}} size="sm" className="grid grid-cols-3" />,
     );
     expect(screen.getByRole("radiogroup")).toHaveClass("rounded-lg", "text-xs", "grid");
-    expect(screen.getByRole("radio", { name: "Alpha" })).toHaveClass("bg-primary/10");
+    expect(screen.getByRole("radio", { name: "Alpha" })).toHaveClass("text-primary");
     rerender(
       <SegmentedControl ariaLabel="g" options={options} value="a" onChange={() => {}} variant="pill" />,
     );
@@ -290,5 +290,123 @@ describe("SegmentedControl focus", () => {
       }
       unmount();
     }
+  });
+});
+
+describe("SegmentedControl sliding pill", () => {
+  function track(value: string | null) {
+    return (
+      <SegmentedControl
+        ariaLabel="Pick one"
+        options={options}
+        value={value}
+        onChange={() => {}}
+      />
+    );
+  }
+
+  it("renders one decorative indicator that eases between options", () => {
+    const { container } = render(track("a"));
+    const pill = container.querySelector("[data-slot='segmented-indicator']");
+    expect(pill).not.toBeNull();
+    expect(pill).toHaveAttribute("aria-hidden", "true");
+    expect(pill).toHaveClass("pointer-events-none", "duration-200", "ease-out", "motion-reduce:duration-1!");
+  });
+
+  it("keeps the tint on the checked button while the indicator has no size", () => {
+    render(track("b"));
+    expect(screen.getByRole("radio", { name: "Beta" })).toHaveClass("bg-primary/10");
+  });
+
+  describe("with layout", () => {
+    const widths: Record<string, number> = { Alpha: 40, Beta: 50, Gamma: 60 };
+    const lefts: Record<string, number> = { Alpha: 0, Beta: 40, Gamma: 90 };
+    let resize: (() => void) | null = null;
+
+    beforeEach(() => {
+      for (const [prop, source] of [
+        ["offsetLeft", lefts],
+        ["offsetWidth", widths],
+      ] as const) {
+        Object.defineProperty(HTMLElement.prototype, prop, {
+          configurable: true,
+          get(this: HTMLElement) {
+            return source[this.textContent ?? ""] ?? 0;
+          },
+        });
+      }
+      Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+        configurable: true,
+        get(this: HTMLElement) {
+          return this.textContent ? 30 : 0;
+        },
+      });
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(cb: () => void) {
+            resize = cb;
+          }
+          observe() {}
+          disconnect() {}
+        },
+      );
+    });
+
+    afterEach(() => {
+      for (const prop of ["offsetLeft", "offsetWidth", "offsetHeight"]) {
+        delete (HTMLElement.prototype as unknown as Record<string, unknown>)[prop];
+      }
+      vi.unstubAllGlobals();
+      resize = null;
+    });
+
+    const pillOf = (container: HTMLElement) =>
+      container.querySelector<HTMLElement>("[data-slot='segmented-indicator']")!;
+
+    it("snaps on mount, drops the button tint and sizes the pill", () => {
+      const { container } = render(track("a"));
+      const pill = pillOf(container);
+      expect(pill).toHaveClass("transition-none");
+      expect(pill.style.width).toBe("40px");
+      expect(screen.getByRole("radio", { name: "Alpha" })).not.toHaveClass("bg-primary/10");
+    });
+
+    it("slides when the checked option changes", () => {
+      const { container, rerender } = render(track("a"));
+      rerender(track("c"));
+      const pill = pillOf(container);
+      expect(pill.style.transform).toBe("translate(90px, 0px)");
+      expect(pill.style.width).toBe("60px");
+      expect(pill).not.toHaveClass("transition-none");
+    });
+
+    it("snaps on a resize-only re-measure", () => {
+      const { container, rerender } = render(track("a"));
+      rerender(track("b"));
+      expect(pillOf(container)).not.toHaveClass("transition-none");
+      widths.Beta = 70;
+      act(() => resize?.());
+      expect(pillOf(container).style.width).toBe("70px");
+      expect(pillOf(container)).toHaveClass("transition-none");
+      widths.Beta = 50;
+    });
+  });
+
+  it("renders no indicator when nothing is checked or in the pill variant", () => {
+    const { container, rerender } = render(track(null));
+    expect(container.querySelector("[data-slot='segmented-indicator']")).toBeNull();
+    rerender(
+      <SegmentedControl ariaLabel="Pick" options={options} value="a" onChange={() => {}} variant="pill" />,
+    );
+    expect(container.querySelector("[data-slot='segmented-indicator']")).toBeNull();
+  });
+
+  it("selects by touch", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<SegmentedControl ariaLabel="Pick" options={options} value="a" onChange={onChange} />);
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("radio", { name: "Gamma" }) });
+    expect(onChange).toHaveBeenCalledWith("c");
   });
 });

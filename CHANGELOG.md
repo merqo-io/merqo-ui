@@ -8,6 +8,7 @@
 
 ### Changed
 
+- Fluid continuity motion: the `SegmentedControl` track pill slides between options, `Tabs` ease the active tint, `FaqRows` ease open like `Faq`, and the `ImageUploader` preview fades in. All CSS, 200ms, near-instant under reduced motion. `Skeleton` is unchanged; the README documents the fade-in class set for the content that replaces it.
 - Motion tokens and elevation by meaning in the recipes: `MOTION_FEEDBACK` (150ms), `MOTION_STATE` (200ms), `MOTION_OVERLAY` (300ms) on one ease-out curve, `INTERACTIVE_SURFACE` for whole-card taps, `OVERLAY_ELEVATION`, and `PRESS`.
 - Every `Button` variant and `PressButton` has a pressed state that fires on touch (colour step plus a 0.98 scale; reduced motion drops the scale).
 - Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select share one reduced-motion contract: 1ms duration, slide and zoom zeroed, fade kept, so `animationend` still fires. Modals enter in 300ms and leave in 200ms; popups enter in 200ms and leave in 150ms.

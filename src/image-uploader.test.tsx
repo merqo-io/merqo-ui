@@ -684,6 +684,21 @@ describe("ImageUploader object paths", () => {
   });
 });
 
+describe("ImageUploader preview fade", () => {
+  it("fades the preview in from transparent, near-instant under reduced motion", () => {
+    const { container } = render(<ImageUploader {...baseProps({ value: "https://cdn.example.test/a.webp" })} />);
+    const wrap = container.querySelector("[data-slot='image-preview']");
+    expect(wrap).toHaveClass(
+      "starting:opacity-0",
+      "transition-opacity",
+      "duration-200",
+      "motion-reduce:duration-1",
+    );
+    expect(wrap?.querySelector("img")).not.toBeNull();
+    expect(wrap).not.toContainElement(screen.getByRole("button", { name: "Remove image" }));
+  });
+});
+
 describe("ImageUploader touch and legibility", () => {
   it("gives the remove button a 44px coarse-pointer hit area", () => {
     render(<ImageUploader {...baseProps({ value: "https://cdn.example.test/a.webp" })} />);

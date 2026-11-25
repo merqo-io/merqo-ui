@@ -21,6 +21,16 @@ describe("FaqRows", () => {
         ?.classList.contains("[&::-webkit-details-marker]:hidden"),
     ).toBe(true);
   });
+  it("eases the row open with a no-animation fallback and near-zero reduced motion", () => {
+    const { container } = render(<FaqRows rows={rows} />);
+    expect(container.querySelector("details")).toHaveClass(
+      "details-content:h-0",
+      "details-content:overflow-clip",
+      "details-content:duration-200",
+      "open:details-content:h-auto",
+      "motion-reduce:details-content:duration-1",
+    );
+  });
   it("opens a row by touch", async () => {
     const user = userEvent.setup();
     const { container } = render(<FaqRows rows={rows} />);

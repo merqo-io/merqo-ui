@@ -44,7 +44,7 @@ function TabsTrigger({
       className={cn(
         // h-11 = a 44px touch target (iPad-friendly); flex-1 splits the bar
         // evenly. Keyboard focus + arrow-key nav come from Radix.
-        "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold whitespace-nowrap text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-[state=active]:bg-primary/10 data-[state=active]:text-primary disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+        "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold whitespace-nowrap text-muted-foreground transition-[color,background-color] duration-200 ease-out motion-reduce:duration-1 outline-none hover:text-foreground data-[state=inactive]:active:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-[state=active]:bg-primary/10 data-[state=active]:text-primary disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
         className,
       )}
       {...props}

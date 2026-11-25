@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { rawErrorText, runOnce } from "./auth-form-utils";
+import { cn } from "./lib/utils";
 import { AUTH_BUTTON } from "./recipes";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
@@ -148,7 +149,7 @@ export function MfaForm({
       onClick={() =>
         submit({ kind: "cancel", run: async (kind) => showMessage(await onCancel(), kind) })
       }
-      className={AUTH_BUTTON}
+      className={cn(AUTH_BUTTON, "font-medium")}
     >
       {cancelLabel}
     </Button>

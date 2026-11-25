@@ -326,6 +326,14 @@ describe("MfaForm shadcn Alert and AUTH_BUTTON", () => {
     expect(input).toHaveAttribute("aria-describedby", "mfa-form-error");
   });
 
+  it("keeps Verify the one semibold button and the cancel action medium", () => {
+    render(<MfaForm hasFactor onVerify={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Verify" })).toHaveClass("font-semibold");
+    const cancel = screen.getByRole("button", { name: "Sign out" });
+    expect(cancel).toHaveClass("h-11", "font-medium");
+    expect(cancel).not.toHaveClass("font-semibold");
+  });
+
   it("gives Verify and Set up the shared 44px auth button", () => {
     const { unmount } = render(<MfaForm hasFactor onVerify={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Verify" })).toHaveClass("h-11", "w-full", "font-semibold");

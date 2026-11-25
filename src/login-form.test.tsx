@@ -452,6 +452,8 @@ describe("LoginForm", () => {
       const user = await signUp({}, onModeChange);
       const back = await screen.findByRole("button", { name: "Back to sign in" });
       expect(back.className).toContain("h-11");
+      expect(back).toHaveClass("font-medium");
+      expect(back).not.toHaveClass("font-semibold");
       await user.pointer({ keys: "[TouchA]", target: back });
       expect(onModeChange).toHaveBeenLastCalledWith("signin");
       expect(screen.getByLabelText("Email")).toHaveValue("a@b.sg");

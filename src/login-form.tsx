@@ -261,7 +261,7 @@ function ConfirmPanel({
         type="button"
         variant="outline"
         onClick={onBack}
-        className={AUTH_BUTTON}
+        className={cn(AUTH_BUTTON, "font-medium")}
       >
         Back to sign in
       </Button>

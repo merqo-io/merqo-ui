@@ -54,7 +54,7 @@ export function LandingNav({ wordmark, end, links }: LandingNavProps) {
             <>
               <div className="hidden items-center gap-1 sm:flex">
                 {navLinks.map((link) => (
-                  <Button key={link.href} asChild variant="ghost" size="sm" className="rounded-lg">
+                  <Button key={link.href} asChild variant="ghost" size="sm">
                     <a href={link.href}>{link.label}</a>
                   </Button>
                 ))}
@@ -65,7 +65,7 @@ export function LandingNav({ wordmark, end, links }: LandingNavProps) {
                 aria-label="Menu"
                 aria-expanded={open}
                 aria-controls={MOBILE_PANEL_ID}
-                className="focus-visible:ring-ring/50 hover:bg-secondary inline-flex h-11 min-w-11 items-center justify-center rounded-lg outline-none focus-visible:ring-2 motion-reduce:transition-none motion-safe:transition-colors sm:hidden"
+                className="focus-visible:ring-ring/50 hover:bg-secondary active:bg-secondary inline-flex h-11 min-w-11 items-center justify-center rounded-md outline-none focus-visible:ring-2 motion-reduce:transition-none motion-safe:transition-colors sm:hidden"
                 onClick={() => setOpen((value) => !value)}
               >
                 <Menu className="size-5" />
@@ -96,7 +96,7 @@ export function LandingNav({ wordmark, end, links }: LandingNavProps) {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-foreground hover:bg-secondary flex min-h-11 items-center rounded-lg px-3 text-sm font-medium motion-reduce:transition-none motion-safe:transition-colors"
+                className="text-foreground hover:bg-secondary active:bg-secondary flex min-h-11 items-center rounded-md px-3 text-sm font-medium motion-reduce:transition-none motion-safe:transition-colors"
                 onClick={() => setOpen(false)}
               >
                 {link.label}

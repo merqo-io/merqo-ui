@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { LABEL } from "./recipes";
 import { FORM_ERROR_CLASS, FORM_LABEL_CLASS, FormError } from "./form-field";
 
 describe("FORM_ERROR_CLASS", () => {
@@ -13,10 +14,9 @@ describe("FORM_ERROR_CLASS", () => {
 });
 
 describe("FORM_LABEL_CLASS", () => {
-  it("is the shared small-caps field label style", () => {
-    expect(FORM_LABEL_CLASS).toBe(
-      "text-xs font-semibold uppercase tracking-wider text-muted-foreground",
-    );
+  it("is the shared sentence-case label recipe", () => {
+    expect(FORM_LABEL_CLASS).toBe(LABEL);
+    expect(FORM_LABEL_CLASS).not.toMatch(/uppercase|tracking/);
   });
 });
 

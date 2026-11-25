@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { cn } from "./lib/utils";
-import { CARD_TITLE } from "./recipes";
+import { CARD_TITLE, GROUP } from "./recipes";
 
 export interface EmptyStateProps {
   /** Decorative icon shown above the headline. */
@@ -56,9 +56,10 @@ export function EmptyState({
     <div
       role={role}
       className={cn(
+        GROUP,
         compact
-          ? "rounded-xl border border-dashed bg-card/50 px-4 py-6 text-center"
-          : "rounded-2xl border border-dashed bg-card/50 px-6 py-10 text-center",
+          ? "border-dashed bg-card/50 px-4 py-6 text-center"
+          : "border-dashed bg-card/50 px-6 py-10 text-center",
         className,
       )}
     >

@@ -15,6 +15,13 @@ describe("BackButton", () => {
     expect(link).toHaveClass("inline-flex", "items-center");
   });
 
+  it("uses the Button radius with no rounded-lg override", () => {
+    render(<BackButton href="/dashboard" label="Back to board" />);
+    const link = screen.getByRole("link", { name: /back to board/i });
+    expect(link).toHaveClass("rounded-md");
+    expect(link).not.toHaveClass("rounded-lg");
+  });
+
   it("renders through a custom LinkComponent when given one", () => {
     const CustomLink = ({
       href,

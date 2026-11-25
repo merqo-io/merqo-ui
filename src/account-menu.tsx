@@ -291,8 +291,6 @@ export function AccountMenu({
 
           {extraLinkOnTop ? null : extraLinkItem}
 
-          <DropdownMenuSeparator />
-
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className={MENU_PRESS}>
               <span className="flex items-center gap-2">

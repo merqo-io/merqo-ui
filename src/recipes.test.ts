@@ -3,6 +3,7 @@ import {
   CARD_TITLE,
   EYEBROW,
   GROUP,
+  LABEL,
   PAGE_TITLE,
   SECTION_TITLE,
   SURFACE,
@@ -14,6 +15,12 @@ describe("recipes", () => {
     expect(SURFACE).toContain("shadow-sm");
     expect(GROUP).toContain("rounded-xl");
     expect(GROUP).not.toContain("shadow");
+  });
+
+  it("has a sentence-case label with no uppercase or tracking", () => {
+    expect(LABEL).toContain("font-medium");
+    expect(LABEL).toContain("text-muted-foreground");
+    expect(LABEL).not.toMatch(/uppercase|tracking|font-mono/);
   });
 
   it("has one eyebrow without mono or alternative trackings", () => {

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "./lib/utils";
+import { LABEL } from "./recipes";
 
 export type AdminShellLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string;
@@ -59,7 +60,7 @@ export function AdminShell({
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           <div className="flex items-center">
             {wordmark}
-            <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className={cn(LABEL, "ml-2 rounded bg-muted px-1.5 py-0.5 text-xs")}>
               {badge}
             </span>
           </div>

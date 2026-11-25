@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { EmptyState } from "./empty-state";
-import { CARD_TITLE } from "./recipes";
+import { cn } from "./lib/utils";
+import { CARD_TITLE, GROUP } from "./recipes";
 
 describe("EmptyState size and role", () => {
   it("keeps the default rendering unchanged", () => {
@@ -9,7 +10,7 @@ describe("EmptyState size and role", () => {
       <EmptyState title="Nothing yet" description="Add one" />,
     );
     expect(container.innerHTML).toBe(
-      '<div class="rounded-2xl border border-dashed bg-card/50 px-6 py-10 text-center">' +
+      `<div class="${cn(GROUP, "border-dashed bg-card/50 px-6 py-10 text-center")}">` +
         `<h2 class="${CARD_TITLE}">Nothing yet</h2>` +
         '<p class="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Add one</p></div>',
     );
@@ -29,6 +30,7 @@ describe("EmptyState size and role", () => {
       "py-6",
     );
     expect(root).not.toHaveClass("rounded-2xl");
+    expect(root.className).not.toMatch(/shadow/);
     const title = screen.getByText("No vendors yet.");
     expect(title.tagName).toBe("P");
     expect(title).toHaveClass("text-sm", "text-muted-foreground");

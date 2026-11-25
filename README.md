@@ -205,9 +205,10 @@ works locally.
   `className`, not baked into the component. Optional `wrapper?: (content:
 ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
-  default bg-card/border/shadow classes don't apply.
-  `surface?: "default" | "elevated" | "none"` picks the default shell: the existing
-  bordered card (`rounded-lg`, driven by the kit's `--radius`), the `ElevatedCard` look, or no chrome (ignored with `wrapper`).
+  default bg-card/border classes don't apply.
+  `surface?: "default" | "elevated" | "none"` picks the default shell: a flat in-page
+  group (`rounded-xl border`, no shadow), the lifted `ElevatedCard` look
+  (`surface="elevated"`, for the page's primary object), or no chrome (ignored with `wrapper`).
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -774,7 +775,7 @@ reversible ones.
 - `DownloadButton({label?="Download", pendingLabel?, onDownload, onError?, variant?="outline", size?="sm", ...buttonProps})` —
   runs `onDownload` (sync or async), stays disabled with `aria-busy` and a spinner until it settles, and passes a
   rejection to `onError`.
-- `FORM_LABEL_CLASS` — small-caps field label classes. `FORM_ERROR_CLASS` —
+- `FORM_LABEL_CLASS` — sentence-case field label classes (`text-sm font-medium text-muted-foreground`). `FORM_ERROR_CLASS` —
   the `text-sm font-medium text-destructive` classes `FormError` renders, for
   error text a kit lays out itself. `FormError({message, id?, className?})` — inline
   `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
@@ -1989,14 +1990,19 @@ injected dependency, and none throws to the caller except `callMerqoRpc`.
 Shared components draw cards and headings from one recipe (`src/recipes.ts`,
 private), all from semantic classes so each kit's own tokens drive the look.
 
-- **Standalone surface** (`rounded-2xl border bg-card shadow-sm`): a card that
-  stands alone on the page. `ElevatedCard`, the default `Section` card,
-  `StatusCard`.
+- **Standalone surface** (`rounded-2xl border bg-card shadow-sm`): the page's
+  primary object, the only lifted card. `ElevatedCard` (`AuthShell`,
+  `StatusCard`, `Section surface="elevated"`).
 - **In-page group** (`rounded-xl border bg-card`, no shadow): a box inside a
   page or inside a surface, usually repeated. `PricingLadder` tiers and note
-  boxes, `Faq` items, the `AuditLogTable` frame.
-- **Eyebrow** (`text-xs font-semibold uppercase tracking-wider`): `Section`,
-  `PageHeader`, `StatusCard`, `Faq`.
+  boxes, `Faq` items, the `AuditLogTable` frame, the default `Section` card
+  (so `VendorTelegramSection`), `EmptyState` (dashed) and the `ImageUploader`
+  drop zone.
+- **Label** (`text-sm font-medium text-muted-foreground`, sentence case): form
+  field labels, the `AdminShell` badge, `JourneyStep` labels (in `text-primary`),
+  the `StatusCard` kicker and `AuditLogTable` column headings.
+- **Eyebrow** (`text-xs font-semibold uppercase tracking-wider`): page-level
+  section labels only, `Section`, `PageHeader`, `Faq`.
 - **Page title** (`font-display text-3xl font-bold tracking-tight text-balance
   break-words`): `PageHeader`, `AuthShell`, `Faq`. Every
   `PageHeader` title is `text-3xl`, responsive or not.
@@ -2004,8 +2010,9 @@ private), all from semantic classes so each kit's own tokens drive the look.
   `StatusCard`, `EmptyState`.
 - **Section title** (`text-base font-semibold`): `Section`.
 
-Visual changes against earlier releases: `Section` card is `rounded-2xl`
-(was `rounded-lg`); `PricingLadder` tiers and `Faq` items are `rounded-xl` (was
+Visual changes against earlier releases: the default `Section` card is a flat
+in-page group, `rounded-xl border` with no shadow (was `rounded-lg`; pass
+`surface="elevated"` for the lifted `rounded-2xl` card); `PricingLadder` tiers and `Faq` items are `rounded-xl` (was
 `rounded-lg`); `AuditLogTable` frame is `rounded-xl` (was `rounded-2xl`);
 `EmptyState` title is bold; `PageHeader` title is `text-3xl` (36px to 30px
 when not `responsive`, and no `text-4xl` step when `responsive`); the `Faq` eyebrow is no longer monospace; every

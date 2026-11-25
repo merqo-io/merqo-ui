@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ElevatedCard } from "./elevated-card";
 import { cn } from "./lib/utils";
-import { CARD_TITLE, EYEBROW } from "./recipes";
+import { CARD_TITLE, LABEL } from "./recipes";
 
 export interface StatusCardProps {
   wordmark?: React.ReactNode;
@@ -29,7 +29,7 @@ export function StatusCard({
         {wordmark ? <div className="mb-8 text-center">{wordmark}</div> : null}
         <ElevatedCard className="px-7 py-10 text-center">
           {eyebrow ? (
-            <p className={cn("mb-2", EYEBROW)}>
+            <p className={cn("mb-2", LABEL)}>
               {eyebrow}
             </p>
           ) : null}

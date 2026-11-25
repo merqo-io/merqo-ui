@@ -26,6 +26,14 @@ describe("AdminShell", () => {
     expect(screen.getByText("page")).toBeInTheDocument();
   });
 
+  it("renders the badge as a sentence-case label, not uppercase", () => {
+    setup("/admin");
+    const badge = screen.getByText("Admin");
+    expect(badge).toHaveClass("font-medium", "text-muted-foreground", "text-xs");
+    expect(badge).not.toHaveClass("text-sm");
+    expect(badge.className).not.toMatch(/uppercase|tracking/);
+  });
+
   it("shows a custom badge instead of Admin", () => {
     setup("/admin", { badge: "Staff" });
     expect(screen.getByText("Staff")).toBeInTheDocument();

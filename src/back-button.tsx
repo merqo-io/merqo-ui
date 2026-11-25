@@ -25,7 +25,7 @@ export function BackButton({
 }: BackButtonProps): React.ReactElement {
   const Link = LinkComponent ?? DefaultLink;
   return (
-    <Button asChild variant="ghost" size="sm" className="rounded-lg">
+    <Button asChild variant="ghost" size="sm">
       <Link href={href}>
         <ArrowLeft className="size-4" />
         {label}

@@ -467,6 +467,18 @@ describe("AccountMenu", () => {
     expect(separator).toHaveAttribute("data-slot", "dropdown-menu-separator");
   });
 
+  it("draws a rule after the account header and one before Sign out", async () => {
+    await openMenu({ vendor: { name: "M", subtitle: "m@example.com" } });
+    expect(document.querySelectorAll('[data-slot="dropdown-menu-separator"]')).toHaveLength(2);
+  });
+
+  it("draws only the Sign out rule without a header", async () => {
+    await openMenu();
+    const rules = document.querySelectorAll('[data-slot="dropdown-menu-separator"]');
+    expect(rules).toHaveLength(1);
+    expect(rules[0].nextElementSibling).toHaveTextContent(/sign out/i);
+  });
+
   it("does not render a label or separator in the dropdown when vendor.subtitle is not set", async () => {
     await openMenu();
     // Profile should be the first item (no label/separator before it)
@@ -658,7 +670,7 @@ describe("AccountMenu separators", () => {
     await screen.findByRole("menuitem", { name: /profile/i });
     const kids = menuChildren();
     const rules = kids.filter((k) => k === "|").length;
-    expect(rules).toBe(c.subtitle ? 3 : 2);
+    expect(rules).toBe(c.subtitle ? 2 : 1);
     expect(kids[0]).not.toBe("|");
     expect(kids[kids.length - 1]).not.toBe("|");
     kids.forEach((k, i) => {
@@ -666,7 +678,8 @@ describe("AccountMenu separators", () => {
     });
     expect(kids[kids.length - 2]).toBe("|");
     const theme = kids.findIndex((k) => k.startsWith("Theme"));
-    expect(kids[theme - 1]).toBe("|");
+    expect(kids[theme - 1]).not.toBe("|");
+    expect(kids[theme + 1]).toBe("|");
     if (c.subtitle) expect(kids[1]).toBe("|");
     const switchIdx = kids.findIndex((k) => k.startsWith("Switch products"));
     if (switchIdx >= 0) {

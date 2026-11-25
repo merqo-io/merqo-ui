@@ -1,6 +1,7 @@
 import type { ReactNode, Ref } from "react";
 
 import { cn } from "./lib/utils";
+import { LABEL } from "./recipes";
 
 export function Journey({
   id,
@@ -44,7 +45,7 @@ export function JourneyStep({
   return (
     <div className="mt-10 grid items-center gap-8 border-t-[1.5px] border-dashed border-border pt-10 md:grid-cols-[5fr_7fr] md:gap-10 md:py-14">
       <div className="min-w-0">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.1em] text-primary">
+        <p className={cn(LABEL, "text-primary")}>
           {label}
         </p>
         <h3 className="font-display mt-2.5 text-balance text-2xl font-semibold leading-[1.1] sm:text-3xl">

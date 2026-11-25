@@ -22,6 +22,17 @@ describe("Journey", () => {
 });
 
 describe("JourneyStep", () => {
+  it("renders the step label in the sentence-case label recipe", () => {
+    render(
+      <Journey title="t">
+        <JourneyStep label="Step 1" heading="h" say="s" stage={<i />} />
+      </Journey>,
+    );
+    const label = screen.getByText("Step 1");
+    expect(label).toHaveClass("font-medium", "text-primary");
+    expect(label.className).not.toMatch(/uppercase|tracking|font-mono/);
+  });
+
   it("renders its copy and forwards stageRef to the stage element", () => {
     const stageRef = createRef<HTMLDivElement>();
     render(

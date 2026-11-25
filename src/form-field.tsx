@@ -1,10 +1,10 @@
 import * as React from "react";
 
 import { cn } from "./lib/utils";
+import { LABEL } from "./recipes";
 
 /** Shared field-label style across the vendor form pages. */
-export const FORM_LABEL_CLASS =
-  "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
+export const FORM_LABEL_CLASS = LABEL;
 
 /** Shared inline field-error style; kits reuse it on error text they render themselves. */
 export const FORM_ERROR_CLASS = "text-sm font-medium text-destructive";

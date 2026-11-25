@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Button } from "./button";
 import { Switch } from "./switch";
 import { Checkbox } from "./checkbox";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "./dialog";
@@ -26,7 +27,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tool
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 const HIT_AREA = ["pointer-coarse:after:size-11", "pointer-coarse:after:content-['']"];
-const REDUCED = "motion-reduce:animate-none!";
+const REDUCED = ["motion-reduce:duration-1!", "motion-reduce:[--tw-enter-scale:1]!", "motion-reduce:[--tw-exit-translate-y:0]!"];
 
 describe("touch hit areas", () => {
   it("gives Switch a 44px coarse hit area and toggles on touch", async () => {
@@ -129,10 +130,7 @@ describe("overlay motion", () => {
       </Sheet>,
     );
     const content = screen.getByRole("dialog");
-    expect(content).toHaveClass(
-      "data-[state=open]:duration-300",
-      "data-[state=closed]:duration-200",
-    );
+    expect(content).toHaveClass("duration-300", "data-[state=closed]:duration-200");
     expect(content.className).not.toContain("duration-500");
   });
 
@@ -190,8 +188,34 @@ describe("overlay motion", () => {
     const surfaces = [...document.querySelectorAll(selector)];
     expect(surfaces.length).toBeGreaterThanOrEqual(9);
     for (const el of surfaces) {
-      expect(el, el.getAttribute("data-slot") ?? "").toHaveClass(REDUCED);
+      expect(el, el.getAttribute("data-slot") ?? "").toHaveClass(...REDUCED);
     }
+  });
+
+  it("enters modals slower than popups and exits faster than it enters", () => {
+    render(
+      <>
+        <Dialog open>
+          <DialogContent>
+            <DialogTitle>D</DialogTitle>
+            <DialogDescription>D</DialogDescription>
+          </DialogContent>
+        </Dialog>
+        <Popover open>
+          <PopoverContent>pop</PopoverContent>
+        </Popover>
+      </>,
+    );
+    expect(document.querySelector("[data-slot=dialog-content]")).toHaveClass(
+      "ease-out",
+      "duration-300",
+      "data-[state=closed]:duration-200",
+    );
+    expect(document.querySelector("[data-slot=popover-content]")).toHaveClass(
+      "ease-out",
+      "duration-200",
+      "data-[state=closed]:duration-150",
+    );
   });
 
   it("guards reduced motion on the Select and dropdown submenu content", () => {
@@ -205,7 +229,7 @@ describe("overlay motion", () => {
         </SelectContent>
       </Select>,
     );
-    expect(document.querySelector("[data-slot=select-content]")).toHaveClass(REDUCED);
+    expect(document.querySelector("[data-slot=select-content]")).toHaveClass(...REDUCED);
   });
 });
 
@@ -266,5 +290,24 @@ describe("touch operation", () => {
     );
     await user.pointer({ keys: "[TouchA]", target: screen.getByRole("option", { name: "Beta" }) });
     expect(onValueChange).toHaveBeenCalledWith("b");
+  });
+});
+
+describe("button press state", () => {
+  const VARIANTS = ["default", "destructive", "outline", "secondary", "ghost", "link"] as const;
+
+  it.each(VARIANTS)("gives the %s variant a colour step and a scale that reduced motion drops", async (variant) => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <Button variant={variant} onClick={onClick}>
+        Go
+      </Button>,
+    );
+    const el = screen.getByRole("button");
+    expect(el).toHaveClass("active:scale-[0.98]", "motion-reduce:active:scale-100", "duration-150");
+    expect(el.className).toMatch(/(^|\s)active:(bg|text)-/);
+    await user.pointer({ keys: "[TouchA]", target: el });
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

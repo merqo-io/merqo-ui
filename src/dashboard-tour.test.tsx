@@ -467,11 +467,13 @@ describe("DashboardTour — injected popover CSS", () => {
     expect(style?.textContent).toContain(".test-tour");
   });
 
-  it("uses only CSS custom-property values, never a literal color/font/radius (box-shadow's raw rgb() alpha-black tint is the sole, deliberate exception — there is no cross-kit shadow-color token)", () => {
+  it("uses only CSS custom-property values, never a literal color/font/radius (the shadow comes from var(--shadow-lg))", () => {
     render(<DashboardTour {...baseProps({ seen: true })} />);
     const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(css).not.toMatch(/\bhsl\(|\boklch\(/);
+    expect(css).not.toMatch(/rgba?\(/);
+    expect(css).toContain("box-shadow: var(--shadow-lg, none)");
     expect(css).toContain("var(--popover)");
   });
 

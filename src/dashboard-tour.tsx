@@ -96,7 +96,6 @@ const STYLE_ELEMENT_ID = "merqo-tour-styles";
 
 // One shared block per scope class, appended (not replaced) so multiple
 // kit-branded tours mounted in the same document each keep their own rule.
-/* eslint-disable no-restricted-syntax -- no cross-kit shadow-colour token exists */
 function popoverCss(scopeClassName: string): string {
   return `
 .driver-popover.${scopeClassName} {
@@ -104,14 +103,11 @@ function popoverCss(scopeClassName: string): string {
   color: var(--popover-foreground);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  /* Literal black, not a theme token — intentional: drop shadows are
-     conventionally black regardless of brand color, matching every other
-     shadow in this package's own shadcn primitives (shadow-md/shadow-lg
-     utility classes also resolve to a black-based shadow). Not an
-     oversight to "fix" by swapping in --foreground or similar. */
-  box-shadow:
-    0 10px 30px -12px rgb(0 0 0 / 0.35),
-    0 2px 8px -4px rgb(0 0 0 / 0.2);
+  /* Tailwind's shadow-lg token, so the tour card matches every other floating
+     layer and a kit can override it. Tailwind emits --shadow-lg because the
+     primitives use shadow-lg. The fallback is none, not a shadow, because this
+     package may not ship colour literals. */
+  box-shadow: var(--shadow-lg, none);
   font-family: var(--font-sans);
   max-width: 320px;
 }
@@ -177,7 +173,6 @@ function popoverCss(scopeClassName: string): string {
 }
 `;
 }
-/* eslint-enable no-restricted-syntax */
 
 function ensureScopedStyles(scopeClassName: string) {
   let styleEl = document.getElementById(

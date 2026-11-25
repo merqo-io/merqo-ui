@@ -59,7 +59,7 @@ test("no horizontal overflow", async ({ page }) => {
   ).toBeLessThanOrEqual(overflow.clientWidth);
 });
 
-const DATA_GROUPS = ["StatTile", "PricingLadder", "AuditLogTable", "DataTable and DataTablePager"];
+const DATA_GROUPS = ["StatTile", "PricingLadder", "AuditLogTable", "DataTable and DataTablePager", "Skeletons"];
 
 // Clipped content leaves no page-level scroll, so the page check alone cannot
 // see it. Any element inside these groups whose content is wider than its box

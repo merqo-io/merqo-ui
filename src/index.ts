@@ -68,6 +68,8 @@ export { StatusBadge } from "./status-badge";
 export type { StatusBadgeProps, StatusBadgeConfig } from "./status-badge";
 export { DataTable } from "./data-table";
 export type { DataTableProps, DataTableColumn, DataTablePagination } from "./data-table";
+export { DataTableSkeleton, StatTileSkeleton, ListSkeleton } from "./skeletons";
+export type { DataTableSkeletonProps, StatTileSkeletonProps, ListSkeletonProps } from "./skeletons";
 export { DataTablePager, useDataTablePage } from "./data-table-pager";
 export type { DataTablePagerProps, DataTablePagerLabels } from "./data-table-pager";
 export { Faq } from "./faq";

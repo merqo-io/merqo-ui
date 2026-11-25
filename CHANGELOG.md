@@ -7,6 +7,7 @@
 - `Empty` parts, `Item` parts and `Spinner` in `@merqo/ui/primitives` (shadcn, `Spinner` stops under reduced motion).
 - `EmptyState` takes `media` (image or illustration in a fixed-aspect frame, wins over `icon`) and `preview` (sample rows, faded, inert and `aria-hidden`, above the title). `StatusCard`, `ErrorPage` and `NotFound` take `media`.
 - `DropdownMenuGroup` in `@merqo/ui/primitives`.
+- `DataTableSkeleton`, `StatTileSkeleton` and `ListSkeleton`: content-shaped loading placeholders (`role="status"`, `aria-busy`, sr-only `label`) built on `Skeleton` and `Item`, so kits can drop hand-rolled `animate-pulse` loading blocks.
 - `Alert`, `AlertTitle` and `AlertDescription` in `@merqo/ui/primitives` (shadcn, `default` and `destructive` variants, `role="alert"` by default).
 - `AUTH_BUTTON` recipe: one 44px, full-width, `rounded-xl`, semibold primary auth action with the press state.
 - Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.

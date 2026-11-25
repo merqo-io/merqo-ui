@@ -78,6 +78,7 @@ const ENTRIES = {
   "safe-redirect": "src/safe-redirect.ts",
   section: "src/section.tsx",
   "social-icons": "src/social-icons.tsx",
+  skeletons: "src/skeletons.tsx",
   "social-links-fields": "src/social-links-fields.tsx",
   "stat-card": "src/stat-card.tsx",
   "stat-tile": "src/stat-tile.tsx",

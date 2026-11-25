@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `AboutMerqo` describes paykit as in pilot with Merqo stalls; loopkit and
+  stockkit stay "in build (built, not yet tried with vendors)".
+
 ## [0.61.1] - 2026-11-25
 
 ### Fixed

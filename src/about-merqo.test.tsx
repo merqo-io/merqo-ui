@@ -16,6 +16,9 @@ describe("AboutMerqo", () => {
     const text = container.textContent ?? "";
     expect(text).toMatch(/piloting, running with a few vendors/);
     expect(text).toMatch(/is in build \(built, not yet tried with vendors\)/);
+    expect(text).toMatch(/paykit[^.]*in pilot with Merqo stalls/);
+    const inBuildSentence = text.split(".").find((s) => s.includes("in build")) ?? "";
+    expect(inBuildSentence).not.toMatch(/paykit/);
     expect(text).toMatch(/loopkit/);
     expect(text).toMatch(/paykit/);
     expect(text).toMatch(/stockkit/);

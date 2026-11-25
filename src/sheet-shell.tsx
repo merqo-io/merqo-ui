@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { AsyncSubmitButton } from "./async-submit-button";
+import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import {
   Sheet,
@@ -93,14 +94,14 @@ export function SheetMessageForm({
           className="min-h-24 flex-1 resize-none"
         />
         {blankError ? (
-          <p id={blankErrorId} className="text-destructive text-sm" role="alert">
-            Write a message first
-          </p>
+          <Alert id={blankErrorId} variant="destructive">
+            <AlertDescription>Write a message first</AlertDescription>
+          </Alert>
         ) : null}
         {errorMessage ? (
-          <p className="text-destructive text-sm" role="alert">
-            {errorMessage}
-          </p>
+          <Alert variant="destructive">
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
         ) : null}
       </div>
       <SheetFooter className="px-0 pb-4">

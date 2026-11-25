@@ -65,8 +65,7 @@ interface DriverInstance {
   destroy: () => void;
 }
 
-// Byte-identical across all 5 kits today — the actual duplicated value this
-// component exists to remove.
+// One driver.js config shared by every kit, so the tour behaves the same everywhere.
 function buildDriverConfig(
   steps: TourStep[],
   scopeClassName: string,

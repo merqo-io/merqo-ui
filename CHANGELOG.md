@@ -4,11 +4,17 @@
 
 ### Added
 
+- `DropdownMenuGroup` in `@merqo/ui/primitives`.
 - `Alert`, `AlertTitle` and `AlertDescription` in `@merqo/ui/primitives` (shadcn, `default` and `destructive` variants, `role="alert"` by default).
 - `AUTH_BUTTON` recipe: one 44px, full-width, `rounded-xl`, semibold primary auth action with the press state.
 - Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.
 
 ### Changed
+
+- `Avatar` and `AvatarIdentity` fall back to the initials tile when the photo URL fails to load, and retry when `avatarUrl` changes.
+- `Tabs` triggers use the shared focus ring (`border-ring`, 3px `ring-ring/50`) like the other primitives.
+- `SheetMessageForm` errors (HelpSheet and FeedbackSheet) render in the destructive `Alert`; `role="alert"` and the `aria-describedby` id are unchanged.
+- Docs: `src/ui/README.md` lists the deliberate local changes vs shadcn, the root README lists the exceptions to the no-literal rule and states that hold-to-confirm is not offered.
 
 - Form-level errors in `LoginForm`, `MfaForm`, `ResetPasswordForm`, `ConfirmDialog` and the `FeedbackSheet` score check now render in the shadcn `Alert`; the `LoginForm` success notice is an `Alert` with `role="status"`. Ids, `aria-describedby` wiring and `role="alert"` are unchanged; field errors (`FormError`, `FORM_ERROR_CLASS`) are untouched. The primary actions of `LoginForm`, `MfaForm`, `AuthConfirmForm` and `ResetPasswordForm` share `AUTH_BUTTON` (the 48px buttons are now 44px), and the "or with email" divider drops its arbitrary text size and tracking.
 - Fluid continuity motion: the `SegmentedControl` track pill slides between options, `Tabs` ease the active tint, `FaqRows` ease open like `Faq`, and the `ImageUploader` preview fades in. All CSS, 200ms, near-instant under reduced motion. `Skeleton` is unchanged; the README documents the fade-in class set for the content that replaces it.

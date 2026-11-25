@@ -624,6 +624,10 @@ reversible ones.
    the thing first. The visible instruction beside the field explains why
    Confirm is disabled.
 
+Hold-to-confirm is deliberately not offered. It is hard to operate with
+gloves, one hand or assistive tech, and the tiers above already separate
+routine, irreversible and high-stakes actions.
+
 - `EmptyState({icon?, title, description?, children?, actions?, className, size?, role?})`
   — dashed "nothing here yet" card with up to two actions. `size="compact"`
   is for a one-line message inside a list or card ("No vendors yet."): the
@@ -763,7 +767,7 @@ reversible ones.
   is an `AvatarIdentity`.
 - `StatTile` takes `card?: boolean` for the `ElevatedCard` shell (`className` then styles the
   card). `StatCard` is deprecated: use `<StatTile card />`; it stays as an alias that adds `icon` and `featured`.
-- `Avatar({name, avatarUrl?, className?})` — photo when `avatarUrl` is set, else initials in a tinted tile.
+- `Avatar({name, avatarUrl?, className?})` — photo when `avatarUrl` is set, else initials in a tinted tile (also when the photo fails to load; a new `avatarUrl` is tried again).
   `initials(name)`: one word gives its first two letters, several give first and last initial, empty gives a bullet.
 - `AvatarIdentity({name, avatarUrl?, label?, className?})` — avatar with the label (default `name`; `null` for none)
   on its right, hidden below `sm` and truncated. The side is fixed across kits; there is no prop to flip it.
@@ -1469,7 +1473,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon. The sheet opens in 300ms and closes in 200ms. `Dialog` close buttons get the same hit area. Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select content follow one reduced-motion contract: under `prefers-reduced-motion` the duration drops to 1ms (the animation still ends, so the layer unmounts on time), the slide and zoom offsets are zeroed and only the fade remains. Modal layers enter in 300ms and leave in 200ms; menus, popovers, select and tooltip enter in 200ms and leave in 150ms. Every `Button` variant has a pressed state (colour step and a 0.98 scale, dropped under reduced motion) that fires on touch. Dropdown menu and select items are at least 44px tall on coarse pointers, and the close buttons show a focus ring for keyboard focus only.
 - `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
   `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
-  `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,
+  `DropdownMenuGroup`, `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,
   `DropdownMenuSubTrigger`, `DropdownMenuSubContent`.
 - `Toggle`, `toggleVariants`, `ToggleGroup`, `ToggleGroupItem`. Variants:
   `default`, `outline`; sizes `default` (36px), `sm` (32px), `lg` (40px), all
@@ -1496,6 +1500,25 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   `TooltipProvider` uses that provider's settings (so the skip delay carries
   between tooltips); without one it wraps itself in a default provider. Wrap
   the app once, and pass the props to change the delays.
+
+### Exceptions to the no-literal rule
+
+The package ships no colour, font or radius values, with these deliberate
+exceptions. Nothing else in `src/` carries a literal colour.
+
+- `VendorTelegramSection` QR code: `bg-white`. A scanner needs a light
+  background with contrast whatever the kit theme or dark mode.
+- `GoogleMark`: the four Google brand hex fills. The mark must keep Google's
+  colours.
+- `PhoneFrame` and `TabletFrame`: `neutral-*` device bezels. They draw
+  hardware, not kit UI, and are not themed.
+- `Dialog` and `AlertDialog` overlays: `bg-black/50`, a scrim that must darken
+  any theme.
+- `Button` and `Badge` destructive variants: `text-white` on the destructive
+  fill, as upstream shadcn.
+
+`DashboardTour` no longer has a literal: its card shadow is
+`var(--shadow-lg, none)`, so a kit's own shadow token drives it.
 
 ## Shared tooling entries (since v0.35.0)
 

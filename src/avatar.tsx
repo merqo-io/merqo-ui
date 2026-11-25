@@ -22,11 +22,14 @@ export interface AvatarProps {
 
 /** The vendor's photo, or their initials in a tinted tile when none is set. */
 export function Avatar({ name, avatarUrl, className }: AvatarProps) {
-  if (avatarUrl) {
+  const [failedUrl, setFailedUrl] = React.useState<string | null>(null);
+  // Keyed on the URL that failed, so a new avatarUrl is tried again without an effect.
+  if (avatarUrl && avatarUrl !== failedUrl) {
     return (
       <img
         src={avatarUrl}
         alt=""
+        onError={() => setFailedUrl(avatarUrl)}
         className={cn(
           "size-8 shrink-0 rounded-md object-cover ring-1 ring-inset ring-primary/25",
           className,

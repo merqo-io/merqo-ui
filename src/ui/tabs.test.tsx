@@ -18,6 +18,19 @@ function Example() {
   );
 }
 
+describe("Tabs focus ring", () => {
+  it("uses the shared focus recipe, not the offset ring", () => {
+    render(<Example />);
+    const tab = screen.getByRole("tab", { name: "Alpha" });
+    expect(tab).toHaveClass(
+      "focus-visible:border-ring",
+      "focus-visible:ring-[3px]",
+      "focus-visible:ring-ring/50",
+    );
+    expect(tab).not.toHaveClass("focus-visible:ring-offset-1");
+  });
+});
+
 describe("Tabs motion", () => {
   it("eases the active colour and tint over the state duration, near-zero under reduced motion", () => {
     render(<Example />);

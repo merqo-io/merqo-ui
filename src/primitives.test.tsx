@@ -92,6 +92,7 @@ describe("@merqo/ui/primitives", () => {
       "Popover",
       "Sheet",
       "DropdownMenu",
+      "DropdownMenuGroup",
       "Toggle",
       "toggleVariants",
       "ToggleGroup",

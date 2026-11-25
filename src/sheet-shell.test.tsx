@@ -34,6 +34,7 @@ describe("SheetMessageForm", () => {
     );
     expect(screen.getByText("extra")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("Nope");
+    expect(screen.getByRole("alert")).toHaveAttribute("data-slot", "alert");
     const user = userEvent.setup();
     await user.type(screen.getByLabelText("Message"), "a");
     expect(onMessageChange).toHaveBeenCalledWith("hia");

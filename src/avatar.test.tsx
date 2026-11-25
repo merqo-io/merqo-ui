@@ -67,3 +67,13 @@ describe("AvatarIdentity", () => {
     expect(container.firstElementChild?.children).toHaveLength(1);
   });
 });
+
+describe("AvatarIdentity full value", () => {
+  it("carries the full label as a title on the truncated text", () => {
+    render(<AvatarIdentity name="Ada Lovelace" label="a.very.long.label@example.com" />);
+    expect(screen.getByText("a.very.long.label@example.com")).toHaveAttribute(
+      "title",
+      "a.very.long.label@example.com",
+    );
+  });
+});

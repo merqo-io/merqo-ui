@@ -741,3 +741,18 @@ describe("AccountMenu pressed feedback", () => {
     expect(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]')).toHaveLength(3);
   });
 });
+
+describe("AccountMenu full subtitle", () => {
+  it("shows the whole subtitle, wrapped, in the opened menu so a tap reveals what the trigger truncates", async () => {
+    const subtitle = "a.very.long.vendor.address@example-domain.com";
+    render(<AccountMenu {...baseProps} vendor={{ name: "Ada", subtitle }} />);
+    const trigger = screen.getByRole("button", { name: /account menu/i });
+    await userEvent.setup().pointer({ keys: "[TouchA]", target: trigger });
+    const inMenu = (await screen.findAllByText(subtitle)).find((el) =>
+      el.closest('[data-slot="dropdown-menu-label"]'),
+    );
+    expect(inMenu).toBeDefined();
+    expect(inMenu).toHaveClass("wrap-anywhere");
+    expect(inMenu).not.toHaveClass("truncate");
+  });
+});

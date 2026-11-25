@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "./lib/utils";
+import { formatDateTime } from "./time";
 import { GROUP, LABEL } from "./recipes";
 
 export interface AuditLogEntry {
@@ -16,7 +17,7 @@ export interface AuditLogTableProps {
   /** Maps a raw action string (e.g. "set_vendor_plan") to a human label. Omit to render a humanised label ("Set vendor plan"). */
   formatAction?: (action: string) => string;
   emptyState?: React.ReactNode;
-  /** Overrides the default Intl.DateTimeFormat rendering of `createdAt`. */
+  /** Overrides the default rendering of `createdAt`, which is Singapore time ("7 Nov 2026, 1:30 am"). */
   dateFormatter?: (date: Date) => string;
 }
 
@@ -30,10 +31,7 @@ const GRID_COLS = "sm:grid-cols-[1fr_1fr_1fr_auto]";
 function formatTimestamp(value: string | Date, dateFormatter?: (date: Date) => string) {
   const date = typeof value === "string" ? new Date(value) : value;
   if (dateFormatter) return dateFormatter(date);
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+  return formatDateTime(date);
 }
 
 export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter }: AuditLogTableProps) {
@@ -60,17 +58,17 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
           key={entry.id}
           className={`flex flex-col gap-1 border-t border-border px-5 py-3 text-sm sm:grid ${GRID_COLS} sm:items-baseline sm:gap-x-4`}
         >
-          <span className="min-w-0 break-words">
+          <span className="min-w-0 wrap-anywhere">
             {formatAction ? formatAction(entry.action) : humaniseAction(entry.action)}
             {entry.detail ? (
               <span className="block text-xs text-muted-foreground">{entry.detail}</span>
             ) : null}
           </span>
-          <span className="min-w-0 break-words text-muted-foreground">
+          <span className="min-w-0 wrap-anywhere text-muted-foreground">
             <span className="mr-1 text-xs font-medium sm:hidden">Actor</span>
             {entry.actor}
           </span>
-          <span className="min-w-0 break-words text-muted-foreground">
+          <span className="min-w-0 wrap-anywhere text-muted-foreground">
             {entry.target ? (
               <>
                 <span className="mr-1 text-xs font-medium sm:hidden">Target</span>
@@ -80,7 +78,7 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
               <span className="sr-only">No target</span>
             )}
           </span>
-          <span className="text-xs text-muted-foreground sm:whitespace-nowrap sm:text-right">
+          <span className="text-xs tabular-nums text-muted-foreground sm:whitespace-nowrap sm:text-right">
             {formatTimestamp(entry.createdAt, dateFormatter)}
           </span>
         </div>

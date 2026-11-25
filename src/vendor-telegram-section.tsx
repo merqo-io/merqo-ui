@@ -109,7 +109,7 @@ function ConnectPanel({
             href={link.deepLink}
             target="_blank"
             rel="noreferrer"
-            className="block truncate rounded-lg bg-muted px-3 py-2 font-mono text-xs"
+            className="block wrap-anywhere rounded-lg bg-muted px-3 py-2 font-mono text-xs"
           >
             {link.deepLink}
           </a>

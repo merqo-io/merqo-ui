@@ -34,6 +34,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle }
 import { Label } from "../src/ui/label";
 import { Textarea } from "../src/ui/textarea";
 import { Button } from "../src/ui/button";
+import { formatMoney } from "../src/money";
 import "./theme.css";
 
 const LONG_STALL = "Ah Seng Traditional Charcoal Teh Tarik and Kopi Peng Stall (Blk 123 Bedok North Hawker Centre)";
@@ -61,10 +62,12 @@ interface Row {
   id: string;
   stall: string;
   orders: number;
+  email: string;
+  cents: number;
 }
 const ROWS: Row[] = [
-  { id: "a", stall: "Ah Seng Teh Tarik", orders: 128 },
-  { id: "b", stall: LONG_STALL, orders: 87 },
+  { id: "a", stall: "Ah Seng Teh Tarik", orders: 128, email: "ahseng@example.com", cents: 12850 },
+  { id: "b", stall: LONG_STALL, orders: 87, email: "mei.ling.tan.with.a.very.long.address.that.keeps.going@example-vendor-domain.com", cents: 4 },
 ];
 
 function Group({ name, children }: { name: string; children: React.ReactNode }) {
@@ -279,7 +282,9 @@ function Preview() {
           getRowKey={(r) => r.id}
           columns={[
             { header: "Stall", cell: (r) => r.stall },
-            { header: "Orders", cell: (r) => r.orders },
+            { header: "Email", cell: (r) => r.email },
+            { header: "Orders", cell: (r) => r.orders, align: "end" },
+            { header: "Amount", cell: (r) => formatMoney(r.cents), align: "end" },
           ]}
         />
         <Pager />

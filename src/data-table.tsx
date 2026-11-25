@@ -5,7 +5,13 @@ import { cn } from "./lib/utils";
 export interface DataTableColumn<T> {
   header: string;
   cell: (row: T) => React.ReactNode;
-  /** Applied to both the header cell and every body cell in this column (e.g. "text-right" for a numeric column). */
+  /**
+   * "end" right-aligns the header and every cell (following text direction),
+   * uses tabular figures and keeps a cell on one line, so amounts line up and
+   * never split. Use it for numeric columns. Defaults to "start".
+   */
+  align?: "start" | "end";
+  /** Applied to both the header cell and every body cell in this column. Composes with `align`. */
   className?: string;
 }
 
@@ -27,6 +33,8 @@ export interface DataTableProps<T> {
   /** Accessible name for the table. Read by screen readers only, never drawn. */
   caption?: string;
 }
+
+const END = "text-end tabular-nums";
 
 /**
  * The rows-of-columns list shell shared across every kit's transaction/
@@ -62,7 +70,11 @@ export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination,
               {columns.map((col) => (
                 <th
                   key={col.header}
-                  className={cn("h-10 px-2 text-left align-middle font-medium break-words text-foreground", col.className)}
+                  className={cn(
+                    "h-10 px-2 align-middle font-medium text-foreground",
+                    col.align === "end" ? cn(END, "whitespace-nowrap") : "text-left wrap-anywhere",
+                    col.className,
+                  )}
                 >
                   {col.header}
                 </th>
@@ -73,7 +85,14 @@ export function DataTable<T>({ rows, columns, getRowKey, emptyState, pagination,
             {visible.map((row) => (
               <tr key={getRowKey(row)} className="border-b transition-colors hover:bg-muted/50">
                 {columns.map((col) => (
-                  <td key={col.header} className={cn("p-2 align-middle break-words", col.className)}>
+                  <td
+                    key={col.header}
+                    className={cn(
+                      "p-2 align-middle",
+                      col.align === "end" ? cn(END, "whitespace-nowrap") : "wrap-anywhere",
+                      col.className,
+                    )}
+                  >
                     {col.cell(row)}
                   </td>
                 ))}

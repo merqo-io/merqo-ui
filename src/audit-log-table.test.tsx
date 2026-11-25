@@ -144,7 +144,7 @@ describe("AuditLogTable small screens", () => {
     const header = screen.getAllByText("Actor")[0].parentElement as HTMLElement;
     expect(header).toHaveClass("hidden", "sm:grid");
     const actor = screen.getByText("someone.with.a.very.long.address@example.com");
-    expect(actor).toHaveClass("break-words");
+    expect(actor).toHaveClass("wrap-anywhere");
     expect(actor.querySelector("span")).toHaveClass("sm:hidden");
   });
 });
@@ -155,5 +155,32 @@ describe("AuditLogTable empty state alignment", () => {
     const msg = screen.getByText("No activity recorded yet.");
     expect(msg).toHaveClass("text-left");
     expect(msg).not.toHaveClass("text-center");
+  });
+});
+
+describe("AuditLogTable data shapes", () => {
+  const entry = (createdAt: string | Date): AuditLogEntry => ({
+    id: "1",
+    createdAt,
+    actor: "actor@example.com",
+    action: "x",
+    target: "t",
+  });
+
+  it("renders the default timestamp in Singapore time regardless of runtime locale", () => {
+    render(<AuditLogTable entries={[entry("2026-11-07T17:30:00Z")]} />);
+    expect(screen.getByText("8 Nov 2026, 1:30 am")).toHaveClass("tabular-nums");
+  });
+
+  it("still lets dateFormatter override the default", () => {
+    render(<AuditLogTable entries={[entry("2026-11-07T17:30:00Z")]} dateFormatter={() => "custom"} />);
+    expect(screen.getByText("custom")).toBeInTheDocument();
+    expect(screen.queryByText("8 Nov 2026, 1:30 am")).not.toBeInTheDocument();
+  });
+
+  it("wraps long actor and action text anywhere", () => {
+    render(<AuditLogTable entries={[entry("2026-11-07T17:30:00Z")]} />);
+    expect(screen.getByText("actor@example.com", { exact: false })).toHaveClass("wrap-anywhere");
+    expect(screen.getByText("X")).toHaveClass("wrap-anywhere");
   });
 });

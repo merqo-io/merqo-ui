@@ -552,10 +552,19 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   (not a wrapper over each consumer's own shadcn `Table`), styled to match
   shadcn/ui's own `Table` primitives exactly, so it carries no cross-
   package import-path dependency — same reasoning as `AuditLogTable`.
-  `columns: DataTableColumn<T>[]` (`{header, cell, className?}`) is
+  `columns: DataTableColumn<T>[]` (`{header, cell, align?, className?}`) is
   caller-supplied, so this component owns only the table shell, never the
   domain columns. Deliberately not extended to kanban/card-grid list views
   (e.g. qkit's order board) — those are a genuinely different shape.
+  **Data shapes.** Set `align: "end"` on numeric columns: the header and
+  cells right-align (`text-end`), use tabular figures and stay on one line.
+  `className: "text-right"` keeps working; `align: "end"` is preferred.
+  Show cents with `formatMoney` and times with `formatDate`, `formatDateTime`
+  or `formatRelativeTime`, all in Singapore time. `AuditLogTable` now uses
+  `formatDateTime` by default, so `dateFormatter` is only for a different
+  format. Text cells wrap anywhere, so a long email or ID never widens the
+  table past a phone. Truncate only when the full value is one tap away;
+  otherwise wrap.
 - `BackButton({href, label, LinkComponent?})` — the "leave this page" nav
   button (real `Button` hit target, not a plain text link) used at the top
   of every kit's setup/edit sub-pages. `LinkComponent` defaults to a plain

@@ -14,6 +14,16 @@ describe("PressButton", () => {
     render(<PressButton type="submit">Go</PressButton>);
     expect(screen.getByRole("button")).toHaveAttribute("type", "submit");
   });
+  it("presses with a scale that reduced motion drops, on the feedback timing", () => {
+    render(<PressButton>Go</PressButton>);
+    expect(screen.getByRole("button")).toHaveClass(
+      "active:scale-[0.98]",
+      "motion-reduce:active:scale-100",
+      "active:bg-foreground/70",
+      "duration-150",
+      "ease-out",
+    );
+  });
   it("fires on a touch tap", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

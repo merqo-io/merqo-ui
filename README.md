@@ -699,8 +699,8 @@ reversible ones.
   optional top bar, `aria-hidden` camera dot, size it with `className`.
   `ClosingCall({heading, line, action, aside})` is the closing row under the
   steps. `PressButton` is a full-width 44px button with a hover darken, a
-  colour-only pressed state that fires by touch, and `type="button"` by
-  default. All server-safe.
+  pressed state that fires by touch (colour step plus a 0.98 scale that
+  reduced motion drops), and `type="button"` by default. All server-safe.
 - `useScrollPlay(ref, steps)` -> step `0..steps`, plus
   `usePrefersReducedMotion()`, `scrollProgress(rect, viewportHeight)` and
   `progressToStep(progress, steps)`. The step rises as the element scrolls
@@ -1458,7 +1458,7 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
 - `Sheet`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`,
   `SheetFooter`, `SheetTitle`, `SheetDescription`. `SheetContent` takes
   `side` and `showCloseButton` (default `true`; `false` drops the built-in X
-  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon. The sheet opens in 300ms and closes in 200ms. `Dialog` close buttons get the same hit area. Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select content skip their animation under `prefers-reduced-motion`. Dropdown menu and select items are at least 44px tall on coarse pointers, and the close buttons show a focus ring for keyboard focus only.
+  so the sheet supplies its own `SheetClose`)). The built-in close button gets a 44px hit area on coarse pointers without moving the icon. The sheet opens in 300ms and closes in 200ms. `Dialog` close buttons get the same hit area. Sheet, dialog, alert dialog, dropdown menu, popover, tooltip and select content follow one reduced-motion contract: under `prefers-reduced-motion` the duration drops to 1ms (the animation still ends, so the layer unmounts on time), the slide and zoom offsets are zeroed and only the fade remains. Modal layers enter in 300ms and leave in 200ms; menus, popovers, select and tooltip enter in 200ms and leave in 150ms. Every `Button` variant has a pressed state (colour step and a 0.98 scale, dropped under reduced motion) that fires on touch. Dropdown menu and select items are at least 44px tall on coarse pointers, and the close buttons show a focus ring for keyboard focus only.
 - `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`,
   `DropdownMenuItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`,
   `DropdownMenuRadioGroup`, `DropdownMenuRadioItem`, `DropdownMenuSub`,
@@ -2009,6 +2009,26 @@ private), all from semantic classes so each kit's own tokens drive the look.
 - **Card title** (`font-display text-2xl font-bold tracking-tight`):
   `StatusCard`, `EmptyState`.
 - **Section title** (`text-base font-semibold`): `Section`.
+
+### Motion and elevation
+
+Elevation follows meaning, not decoration. A group is flat, a surface is
+`shadow-sm`, and a floating layer is `shadow-lg` (`OVERLAY_ELEVATION`). Only a
+card that is tappable as a whole uses `INTERACTIVE_SURFACE`: `shadow-sm`,
+deepening to `shadow-md` on hover, `shadow-xs` and a 0.98 scale while pressed.
+Hover may change a shadow, never move the hit target. No shipped component uses
+`INTERACTIVE_SURFACE` yet; it is the recipe for kits and later slices.
+
+Motion tokens share one ease-out curve: `MOTION_FEEDBACK` 150ms (press, hover),
+`MOTION_STATE` 200ms (a control changing state), `MOTION_OVERLAY` 300ms (a
+layer arriving). Exits are shorter than enters (`OVERLAY_TRANSITION` 300 in,
+200 out; `POPUP_TRANSITION` 200 in, 150 out). `REDUCED_MOTION` is the one
+reduced-motion contract: 1ms duration (not `animate-none`, so `animationend`
+still fires), slide and zoom zeroed, opacity kept. `PRESS` is the pressed
+state: a 0.98 scale that reduced motion removes. Every `hover:` has an
+`active:` twin so touch gets the same feedback. `Button` and `PressButton` use
+`PRESS`; the `DashboardTour` card uses the kit's `--shadow-lg` token instead of
+a literal colour.
 
 Visual changes against earlier releases: the default `Section` card is a flat
 in-page group, `rounded-xl border` with no shadow (was `rounded-lg`; pass

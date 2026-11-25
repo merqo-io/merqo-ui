@@ -105,9 +105,12 @@ describe("reduced-motion guards win the cascade", () => {
       const el = document.querySelector(`[data-slot=${slot}]`);
       expect(el, slot).not.toBeNull();
       const tokens = (el!.getAttribute("class") ?? "").split(/\s+/);
-      const guards = tokens.filter((t) => t.startsWith("motion-reduce:") && t.includes("animate-none"));
+      const guards = tokens.filter(
+        (t) => t.startsWith("motion-reduce:") && (t.includes("duration-1!") || t.includes("--tw-")),
+      );
       const animations = tokens.filter((t) => /animate-(in|out)$/.test(t));
       expect(guards.length, `${slot} has a guard`).toBeGreaterThan(0);
+      expect(tokens, `${slot} keeps animations alive`).not.toContain("motion-reduce:animate-none!");
       for (const animation of animations) {
         const anim = await ruleFor(animation);
         for (const guard of guards) {

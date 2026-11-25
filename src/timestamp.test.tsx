@@ -117,7 +117,53 @@ describe("Timestamp relative", () => {
     render(<Timestamp value={THEN} />);
     await user.tab();
     expect(screen.getByRole("button")).toHaveFocus();
+    const trigger = screen.getByRole("button");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
     await user.keyboard("{Enter}");
     expect(await screen.findByText(ABSOLUTE)).toBeVisible();
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await user.keyboard("{Enter}");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("toggles on Space keyup exactly once", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<Timestamp value={THEN} />);
+    await user.tab();
+    const trigger = screen.getByRole("button");
+    await user.keyboard(" ");
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await user.keyboard(" ");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("does not paint a stale clock when remounted after idling", () => {
+    const first = render(<Timestamp value={NOW_MS - 30_000} />);
+    expect(screen.getByRole("button")).toHaveTextContent("just now");
+    first.unmount();
+    vi.setSystemTime(NOW_MS + 60 * 60_000);
+    let firstFrame = "";
+    render(
+      <div
+        ref={(el) => {
+          if (el && !firstFrame) firstFrame = el.textContent ?? "";
+        }}
+      >
+        <Timestamp value={NOW_MS - 30_000} />
+      </div>,
+    );
+    expect(firstFrame).toBe(formatDateTime(NOW_MS - 30_000));
+    expect(screen.getByRole("button")).toHaveTextContent("1h ago");
+    expect(screen.getByRole("button")).not.toHaveTextContent("just now");
+  });
+
+  it("keeps instances on one clock when another mounts later", () => {
+    render(<Timestamp value={NOW_MS - 30_000} />);
+    act(() => {
+      vi.setSystemTime(NOW_MS + 30_000);
+    });
+    render(<Timestamp value={NOW_MS - 30_000} />);
+    const buttons = screen.getAllByRole("button");
+    expect(buttons[0]).toHaveTextContent(buttons[1].textContent ?? "");
   });
 });

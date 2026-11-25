@@ -41,9 +41,10 @@ function onVisibilityChange() {
 }
 
 function subscribe(listener: () => void) {
-  snapshot = Date.now();
+  const first = listeners.size === 0;
+  if (first) snapshot = Date.now();
   listeners.add(listener);
-  if (listeners.size === 1) {
+  if (first) {
     document.addEventListener("visibilitychange", onVisibilityChange);
     startTimer();
   }
@@ -52,6 +53,8 @@ function subscribe(listener: () => void) {
     if (listeners.size === 0) {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       stopTimer();
+      // A later mount must not paint its first frame from an old clock.
+      snapshot = null;
     }
   };
 }
@@ -101,10 +104,15 @@ export function RelativeTimestamp({ value, isoString, now, className }: Relative
           role="button"
           aria-label={label}
           onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
+            if (event.key === "Enter") {
               event.preventDefault();
               setOpen((current) => !current);
+            } else if (event.key === " ") {
+              event.preventDefault();
             }
+          }}
+          onKeyUp={(event) => {
+            if (event.key === " ") setOpen((current) => !current);
           }}
           className={cn(
             "relative cursor-pointer rounded-sm tabular-nums underline decoration-dotted underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 after:absolute after:-inset-x-2 after:-inset-y-3",
@@ -114,7 +122,12 @@ export function RelativeTimestamp({ value, isoString, now, className }: Relative
           {text}
         </time>
       </PopoverTrigger>
-      <PopoverContent className="w-auto px-3 py-2">{exact}</PopoverContent>
+      <PopoverContent
+        className="w-auto px-3 py-2"
+        // The content is plain text already in the trigger's aria-label, so
+        // focus stays on the trigger and the same key closes it again.
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >{exact}</PopoverContent>
     </Popover>
   );
 }

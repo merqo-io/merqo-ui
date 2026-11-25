@@ -234,8 +234,8 @@ export function AccountMenu({
         <DropdownMenuContent align="end">
           {vendor.subtitle && (
             <>
-              <DropdownMenuLabel className="text-muted-foreground flex items-center gap-2 truncate text-xs font-normal">
-                <span className="truncate">{vendor.subtitle}</span>
+              <DropdownMenuLabel className="text-muted-foreground flex items-center gap-2 text-xs font-normal">
+                <span className="min-w-0 wrap-anywhere">{vendor.subtitle}</span>
                 <TierSlot tier={tier} tierBadge={tierBadge} />
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

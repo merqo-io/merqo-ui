@@ -392,3 +392,25 @@ test("signature slot stays clear of the title text and inside the card", async (
     expect(card.inside).toBe(true);
   }
 });
+
+test("DataTable with a long email stays inside the page and amounts share a right edge", async ({ page }) => {
+  const result = await page.evaluate(() => {
+    const group = document.querySelector<HTMLElement>('[data-group="DataTable and DataTablePager"]');
+    const table = group?.querySelector<HTMLElement>("table");
+    const wrapper = table?.parentElement;
+    if (!group || !table || !wrapper) return null;
+    const amountCol = Array.from(table.querySelectorAll("th")).findIndex((th) => th.textContent === "Amount");
+    const edges = Array.from(table.querySelectorAll("tbody tr")).map((tr) =>
+      Math.round((tr.children[amountCol] as HTMLElement).getBoundingClientRect().right),
+    );
+    return {
+      pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      wrapperOverflow: wrapper.scrollWidth - wrapper.clientWidth,
+      edges,
+    };
+  });
+  expect(result).not.toBeNull();
+  expect(result!.pageOverflow).toBeLessThanOrEqual(0);
+  expect(result!.wrapperOverflow).toBeLessThanOrEqual(0);
+  expect(new Set(result!.edges).size).toBe(1);
+});

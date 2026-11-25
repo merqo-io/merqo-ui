@@ -69,7 +69,10 @@ export function AvatarIdentity({
     <span className={cn("inline-flex items-center gap-2", className)}>
       <Avatar name={name} avatarUrl={avatarUrl} />
       {text ? (
-        <span className="hidden max-w-[12rem] truncate text-sm font-medium sm:inline">
+        <span
+          title={text}
+          className="hidden max-w-[12rem] truncate text-sm font-medium sm:inline"
+        >
           {text}
         </span>
       ) : null}

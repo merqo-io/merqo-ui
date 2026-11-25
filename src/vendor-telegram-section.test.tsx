@@ -283,3 +283,18 @@ describe("VendorTelegramSection heading", () => {
     expect(container.querySelector("header .rounded-full")).toBeNull();
   });
 });
+
+describe("VendorTelegramSection deep link", () => {
+  it("wraps the link instead of truncating so the vendor can read all of it", async () => {
+    const deepLink = "https://t.me/MerqoNotifyBot?start=abcdefghijklmnopqrstuvwxyz0123456789";
+    const onConnect = vi.fn().mockResolvedValue({ deepLink, qrSvgMarkup: "<svg/>" });
+    render(<VendorTelegramSection connected={false} onConnect={onConnect} />);
+    await userEvent.setup().pointer({
+      keys: "[TouchA]",
+      target: screen.getByRole("button", { name: /connect telegram/i }),
+    });
+    const link = await screen.findByRole("link");
+    expect(link).toHaveClass("wrap-anywhere");
+    expect(link).not.toHaveClass("truncate");
+  });
+});

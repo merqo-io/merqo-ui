@@ -4,6 +4,7 @@
 
 ### Added
 
+- `DataTableColumn.align`: `"end"` right-aligns a column's header and cells with tabular figures and no wrapping, so amounts line up. `className="text-right"` still works; `align="end"` is the preferred form.
 - `signature` slot on `AuthShell`, `StatusCard`, `ErrorPage` and `NotFound`: one optional, decorative (`aria-hidden`) identity mark in the card's top-end corner, coloured by the kit through `currentColor`. Opt-in; output is unchanged when it is not passed.
 - `Empty` parts, `Item` parts and `Spinner` in `@merqo/ui/primitives` (shadcn, `Spinner` stops under reduced motion).
 - `EmptyState` takes `media` (image or illustration in a fixed-aspect frame, wins over `icon`) and `preview` (sample rows, faded, inert and `aria-hidden`, above the title). `StatusCard`, `ErrorPage` and `NotFound` take `media`.
@@ -16,6 +17,8 @@
 
 ### Changed
 
+- `AuditLogTable` renders `createdAt` in Singapore time by default ("7 Nov 2026, 1:30 am", via `formatDateTime`) instead of the browser locale, so server and client agree and a Server Component needs no `dateFormatter`. Kit-visible: qkit, paykit, stockkit and merqo, which use the default, now show SGT. `dateFormatter` still overrides it; the timestamp uses tabular figures.
+- Wrapping over truncation: `DataTable` cells and `AuditLogTable` actor, action and target use `overflow-wrap: anywhere` (was `break-words`, which did not stop long emails and IDs widening a table past a phone). The `VendorTelegramSection` deep link wraps instead of truncating, and the `AccountMenu` subtitle wraps in the opened menu. The `AvatarIdentity` label stays truncated but carries the full text as a `title`; on touch the full value is in the opened `AccountMenu`.
 - Left-aligned text across the family: `StatusCard`, `ErrorPage`, `NotFound` and the `GlobalError` fallback, the auth forms, the `AuditLogTable` empty row, `FaqPage` heading, `CustomerTelegramConnect` and the `Footer` rows under `sm` now read from the left edge. This is a visible change in all six kits (ErrorPage, NotFound, footer, auth forms); the `sm` and up footer layout is unchanged.
 - Direct fallback copy: the `ErrorPage` and `GlobalError` default titles and descriptions, and the `LoginForm` pending label ("Signing in…" or "Creating account…" instead of "Please wait"), and the `AccountMenu`, sheet shell and `LandingAccountNav` fallbacks, now say what failed and what to do next, with no "Please" and no bare "Something went wrong".
 - `VendorTelegramSection` drops its decorative heading icon; `Section`'s `icon` is optional.

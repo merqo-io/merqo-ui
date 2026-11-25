@@ -1435,6 +1435,10 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   `icon-lg`. On coarse pointers (touch) every size is at least 44px (`lg` is
   48px), so a vendor on a tablet gets a full tap target; mouse and trackpad keep
   the compact sizes.
+- `Alert`, `AlertTitle`, `AlertDescription`, `AlertProps`. Variants: `default`
+  and `destructive`. Renders `role="alert"`; pass `role="status"` for a polite
+  success notice. Use it for a message about a whole form or panel; a message
+  beside one field stays `FormError`.
 - `Input` and `Label` carry shadcn's dark-mode (`dark:bg-input/30`, dark
   invalid ring) and disabled-state classes, so `LoginForm`, `MfaForm`,
   `SocialLinksFields` and `MoneyInput` pick them up. Internal `Button`,
@@ -2039,6 +2043,24 @@ state: a 0.98 scale that reduced motion removes. Every `hover:` has an
 `active:` twin so touch gets the same feedback. `Button` and `PressButton` use
 `PRESS`; the `DashboardTour` card follows the Tailwind `--shadow-lg` token (kits can
 override it) instead of a literal colour.
+
+### Auth button and errors
+
+`AUTH_BUTTON` is the one class recipe for the full-width action that finishes an
+auth step: `h-11` (44px, the touch minimum), `w-full`, `rounded-xl`,
+`text-base font-semibold` plus `PRESS`. `LoginForm`, `MfaForm`,
+`AuthConfirmForm` and `ResetPasswordForm` use it for their primary actions, and
+the Google button in `LoginForm` shares its size. Like the other recipes it is
+internal and not exported from the package.
+
+Form-level errors (a failed submit or server response) render in the shadcn
+`Alert` (`variant="destructive"`, `role="alert"`) in `LoginForm`, `MfaForm`,
+`ResetPasswordForm`, `ConfirmDialog` and the `FeedbackSheet` score check. A
+`LoginForm` success `notice` renders in an `Alert` with `role="status"`, so it
+is announced politely. The error keeps its original `id` (`login-form-error`,
+`mfa-form-error`), so the input's `aria-describedby` still points at the text.
+Use `FormError` or `FORM_ERROR_CLASS` for the error beside one field, and
+`Alert` for an error about the whole form.
 
 Visual changes against earlier releases: the default `Section` card is a flat
 in-page group, `rounded-xl border` with no shadow (was `rounded-lg`; pass

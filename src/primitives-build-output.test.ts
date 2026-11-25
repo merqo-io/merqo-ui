@@ -21,7 +21,7 @@ const CLIENT = [
   "toggle-group",
   "tooltip",
 ];
-const PLAIN = ["badge", "button", "card", "input", "skeleton", "textarea"];
+const PLAIN = ["alert", "badge", "button", "card", "input", "skeleton", "textarea"];
 
 // A Server Component imports `cn` or Button from the subpath: the shim must
 // carry no directive and point at per-module files, so only the client

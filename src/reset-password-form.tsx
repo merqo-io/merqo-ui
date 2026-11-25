@@ -7,6 +7,8 @@ import { rawErrorText, runOnce } from "./auth-form-utils";
 import { isRedirectError } from "./redirect-error";
 import { FORM_ERROR_CLASS, FORM_LABEL_CLASS } from "./form-field";
 import type { LoginFormLinkProps } from "./login-form";
+import { AUTH_BUTTON } from "./recipes";
+import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -177,7 +179,7 @@ function StatePanel({ props }: { props: ResetPasswordFormProps }) {
         <Button
           type="button"
           onClick={onRetry}
-          className="min-h-11 w-full rounded-xl font-semibold"
+          className={AUTH_BUTTON}
         >
           Try again
         </Button>
@@ -256,7 +258,7 @@ function SubmitButton({ props, pending }: { props: ResetPasswordFormProps; pendi
       type="submit"
       size="lg"
       disabled={pending}
-      className="h-12 w-full rounded-xl text-base font-semibold"
+      className={AUTH_BUTTON}
     >
       {pending ? pendingLabel : submitLabel}
     </Button>
@@ -352,9 +354,9 @@ function ReadyForm({ props }: { props: ResetPasswordFormProps }) {
           onChange={clearErrors}
         />
         {shown ? (
-          <p id={submitErrorId} role="alert" className={FORM_ERROR_CLASS}>
-            {shown}
-          </p>
+          <Alert id={submitErrorId} variant="destructive">
+            <AlertDescription>{shown}</AlertDescription>
+          </Alert>
         ) : null}
         <SubmitButton props={props} pending={pending} />
       </form>

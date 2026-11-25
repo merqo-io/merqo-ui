@@ -451,7 +451,7 @@ describe("LoginForm", () => {
       const onModeChange = vi.fn();
       const user = await signUp({}, onModeChange);
       const back = await screen.findByRole("button", { name: "Back to sign in" });
-      expect(back.className).toContain("min-h-11");
+      expect(back.className).toContain("h-11");
       await user.pointer({ keys: "[TouchA]", target: back });
       expect(onModeChange).toHaveBeenLastCalledWith("signin");
       expect(screen.getByLabelText("Email")).toHaveValue("a@b.sg");
@@ -736,7 +736,7 @@ describe("LoginForm", () => {
       it("keeps the 44px class on the button", async () => {
         await toPanel(vi.fn().mockResolvedValue({ confirmEmail: "a@b.sg" }));
         expect(await screen.findByRole("button", { name: "Back to sign in" })).toHaveClass(
-          "min-h-11",
+          "h-11",
         );
       });
 
@@ -830,5 +830,37 @@ describe("LoginForm shake on failure", () => {
     const animate = stubAnimate();
     render(<LoginForm onPasswordSignIn={vi.fn()} initialError="Link expired" />);
     expect(animate).not.toHaveBeenCalled();
+  });
+});
+
+describe("LoginForm shadcn Alert and AUTH_BUTTON", () => {
+  it("renders a submit error in an Alert with the id the inputs reference", async () => {
+    await submitSignIn({ onPasswordSignIn: vi.fn().mockResolvedValue("nope") });
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveAttribute("data-slot", "alert");
+    expect(alert).toHaveAttribute("id", "login-form-error");
+    expect(screen.getByLabelText("Email")).toHaveAttribute("aria-describedby", "login-form-error");
+  });
+
+  it("renders a success notice in a polite status Alert, not an alert", async () => {
+    const user = userEvent.setup();
+    render(
+      <LoginForm
+        onPasswordSignIn={vi.fn()}
+        onPasswordSignUp={vi.fn().mockResolvedValue({ notice: "Check your email." })}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Create an account" }));
+    await fill(user);
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    const status = await screen.findByRole("status");
+    expect(status).toHaveAttribute("data-slot", "alert");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("gives the primary and Google buttons one 44px size", () => {
+    render(<LoginForm onPasswordSignIn={vi.fn()} onGoogleSignIn={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Sign in" })).toHaveClass("h-11", "w-full", "font-semibold");
+    expect(screen.getByRole("button", { name: /continue with google/i })).toHaveClass("h-11", "w-full");
   });
 });

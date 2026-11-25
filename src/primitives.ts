@@ -3,6 +3,8 @@
 // scripts/build-index.mjs, so it carries no directive and each client
 // primitive keeps its own directive in dist/ui/.
 export { cn } from "./lib/utils";
+export { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+export type { AlertProps } from "./ui/alert";
 export {
   AlertDialog,
   AlertDialogAction,

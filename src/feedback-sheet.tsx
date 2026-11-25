@@ -5,6 +5,7 @@ import * as React from "react";
 import { SegmentedControl } from "./segmented-control";
 import { isRedirectError } from "./redirect-error";
 import { SheetConfirmation, SheetMessageForm, SheetShell, toErrorMessage } from "./sheet-shell";
+import { Alert, AlertDescription } from "./ui/alert";
 import { useAsyncAction } from "./use-async-action";
 
 export interface FeedbackData {
@@ -118,9 +119,9 @@ export function FeedbackSheet({
                 0 is not likely, 10 is very likely
               </p>
               {npsValidationError && (
-                <p className="text-destructive text-sm" role="alert">
-                  Pick a score first
-                </p>
+                <Alert variant="destructive" className="px-3 py-2">
+                  <AlertDescription>Pick a score first</AlertDescription>
+                </Alert>
               )}
             </div>
           )}

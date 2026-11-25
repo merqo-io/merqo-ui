@@ -108,6 +108,7 @@ const ENTRIES = {
   // Public @merqo/ui/primitives surface. dist/primitives.js is written by
   // scripts/build-index.mjs and re-exports these per-module files.
   "lib/utils": "src/lib/utils.ts",
+  "ui/alert": "src/ui/alert.tsx",
   "ui/alert-dialog": "src/ui/alert-dialog.tsx",
   "ui/badge": "src/ui/badge.tsx",
   "ui/button": "src/ui/button.tsx",

@@ -89,3 +89,10 @@ describe("AuthConfirmInvalid", () => {
     expect(screen.getByRole("link").getAttribute("href")).toBe("/signin");
   });
 });
+
+describe("AuthConfirmForm AUTH_BUTTON", () => {
+  it("uses the shared 44px full-width auth button", () => {
+    render(<AuthConfirmForm tokenHash={TOKEN} type="signup" next="/" />);
+    expect(screen.getByRole("button", { name: "Confirm email" })).toHaveClass("h-11", "w-full", "font-semibold");
+  });
+});

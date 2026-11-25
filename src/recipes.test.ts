@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  AUTH_BUTTON,
   CARD_TITLE,
   EYEBROW,
   GROUP,
@@ -100,5 +101,14 @@ describe("elevation by meaning", () => {
 
   it("gives floating layers the largest shadow", () => {
     expect(OVERLAY_ELEVATION).toBe("shadow-lg");
+  });
+
+  it("has one full-width auth button that meets the 44px target and presses", () => {
+    expect(AUTH_BUTTON).toContain("h-11");
+    expect(AUTH_BUTTON).toContain("w-full");
+    expect(AUTH_BUTTON).toContain("rounded-xl");
+    expect(AUTH_BUTTON).toContain("font-semibold");
+    expect(AUTH_BUTTON).toContain(PRESS);
+    expect(AUTH_BUTTON).not.toMatch(/text-\[|rounded-\[/);
   });
 });

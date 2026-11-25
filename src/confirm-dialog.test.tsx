@@ -251,3 +251,15 @@ describe("ConfirmDialog stakes", () => {
     expect(confirm).not.toHaveClass("bg-destructive");
   });
 });
+
+describe("ConfirmDialog error Alert", () => {
+  it("shows the failure in an Alert inside the dialog", async () => {
+    const user = userEvent.setup();
+    setup(vi.fn().mockRejectedValue(new Error("Server said no")));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Yes, delete" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveAttribute("data-slot", "alert");
+    expect(screen.getByRole("alertdialog")).toContainElement(alert);
+  });
+});

@@ -26,6 +26,8 @@ import {
   DataTableSkeleton,
   StatTileSkeleton,
   ListSkeleton,
+  Money,
+  Timestamp,
 } from "../src";
 import type { AuditLogEntry, PlanCatalog } from "../src";
 import { StatusCard } from "../src/status-card";
@@ -52,6 +54,8 @@ const CATALOG: PlanCatalog = {
 };
 
 const NOW = "2026-11-20T08:30:00+08:00";
+const STAMP = "2026-11-20T05:30:00+08:00";
+const STAMP_NOW = "2026-11-20T08:30:00+08:00";
 const AUDIT: AuditLogEntry[] = [
   { id: "1", actor: "ahseng@example.com", action: "menu.item_updated", target: "Teh Tarik", detail: "Price S$1.80 to S$2.00", createdAt: NOW },
   { id: "2", actor: "mei.ling.tan.with.a.very.long.address@example.com", action: "stall.settings_changed", target: LONG_STALL, detail: null, createdAt: NOW },
@@ -288,6 +292,23 @@ function Preview() {
           ]}
         />
         <Pager />
+      </Group>
+
+      <Group name="Money and Timestamp">
+        <DataTable
+          rows={ROWS}
+          getRowKey={(r) => r.id}
+          columns={[
+            { header: "Stall", cell: (r) => r.stall },
+            { header: "Total", cell: (r) => <Money cents={r.cents} />, align: "end" },
+            { header: "Updated", cell: () => <Timestamp value={STAMP} now={STAMP_NOW} />, align: "end" },
+          ]}
+        />
+        <p className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          <Timestamp value={STAMP} now={STAMP_NOW} />
+          <Timestamp value={STAMP} variant="date" />
+          <Timestamp value={STAMP} variant="datetime" />
+        </p>
       </Group>
 
       <Group name="FormField">

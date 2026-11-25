@@ -414,3 +414,14 @@ test("DataTable with a long email stays inside the page and amounts share a righ
   expect(result!.wrapperOverflow).toBeLessThanOrEqual(0);
   expect(new Set(result!.edges).size).toBe(1);
 });
+
+test("Money and Timestamp stay inside the page and a tap shows the exact time", async ({ page }) => {
+  const group = page.locator('[data-group="Money and Timestamp"]');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  const trigger = group.getByRole("button", { name: /3h ago/ }).first();
+  const touch = await page.evaluate(() => "ontouchstart" in window);
+  if (touch) await trigger.tap();
+  else await trigger.click();
+  await expect(page.getByRole("dialog").getByText("20 Nov 2026, 5:30 am")).toBeVisible();
+});

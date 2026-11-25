@@ -226,7 +226,10 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   `categories?: {value, label}[]` to add a category radiogroup above the
   message field (an empty array behaves like no categories at all). Both
   take optional `title?`/`description?` overrides (each kit's own copy) —
-  omit either for this package's own defaults. Both pill grids share an
+  omit either for this package's own defaults. Both also take an optional
+  `errorMessage?: string`, shown when a failed submit throws something with no
+  message (default: "Could not send your message. Check your connection and
+  try again."). Both pill grids share an
   shared `SegmentedControl` (`variant="pill"`) implementing the full WAI-ARIA "radio group"
   keyboard pattern — only the checked pill (or the first, before anything's
   checked) is a Tab stop; Left/Right/Up/Down move focus and selection

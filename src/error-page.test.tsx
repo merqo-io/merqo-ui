@@ -61,7 +61,7 @@ describe("GlobalError", () => {
     expect(html).toContain("font-family:serif");
     expect(html).toContain("border-radius:4px");
     expect(html).toContain("<main");
-    expect(html).toContain("The app hit an unexpected error");
+    expect(html).toContain("Could not load the app");
   });
 
   it("calls reset from the button by touch", async () => {

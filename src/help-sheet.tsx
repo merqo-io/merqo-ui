@@ -17,6 +17,8 @@ export type HelpSheetProps = {
   onOpenChange: (open: boolean) => void;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
+  /** Shown when a failed submit carries no message of its own. */
+  errorMessage?: string;
 } & (
   | { mode: "mailto"; address: string }
   | {
@@ -29,7 +31,7 @@ export type HelpSheetProps = {
 );
 
 export function HelpSheet(props: HelpSheetProps) {
-  const { open, onOpenChange, onError } = props;
+  const { open, onOpenChange, onError, errorMessage } = props;
   const firstCategory =
     props.mode === "form" ? props.categories?.[0]?.value : undefined;
   // The draft lives here, not in the sheet content, so an accidental dismiss
@@ -69,6 +71,7 @@ export function HelpSheet(props: HelpSheetProps) {
           onSubmit={props.onSubmit}
           onOpenChange={onOpenChange}
           onError={onError}
+          errorMessage={errorMessage}
           categories={props.categories}
           message={message}
           setMessage={setMessage}
@@ -87,6 +90,7 @@ function HelpForm({
   onSubmit,
   onOpenChange,
   onError,
+  errorMessage,
   categories,
   message,
   setMessage,
@@ -106,6 +110,7 @@ function HelpForm({
   onSubmit: (data: SupportRequest) => Promise<void>;
   onOpenChange: (open: boolean) => void;
   onError?: (error: unknown) => void;
+  errorMessage?: string;
   categories?: { value: string; label: string }[];
 }) {
   const { pending, error, run } = useAsyncAction(async () => {
@@ -135,7 +140,7 @@ function HelpForm({
       message={message}
       onMessageChange={setMessage}
       pending={pending}
-      errorMessage={error ? toErrorMessage(error) : null}
+      errorMessage={error ? toErrorMessage(error, errorMessage) : null}
       onSubmit={() => {
         run().catch((err) => {
           if (!isRedirectError(err)) onError?.(err);

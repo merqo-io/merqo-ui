@@ -382,6 +382,11 @@ function resolveSlot(
   return typeof slot === "function" ? slot(mode) : slot;
 }
 
+function pickSubmitLabel(isSignin: boolean, pending: boolean): string {
+  if (pending) return isSignin ? "Signing in…" : "Creating account…";
+  return isSignin ? "Sign in" : "Create account";
+}
+
 export function LoginForm({
   onPasswordSignIn,
   onPasswordSignUp,
@@ -469,9 +474,7 @@ export function LoginForm({
   useShakeOnFailure(fieldsRef, pending, Boolean(shown));
 
   const isSignin = mode === "signin";
-  let submitLabel = "Create account";
-  if (pending) submitLabel = "Please wait";
-  else if (isSignin) submitLabel = "Sign in";
+  const submitLabel = pickSubmitLabel(isSignin, pending);
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -28,6 +28,8 @@ export interface FeedbackSheetProps {
   npsLabel?: string;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
+  /** Shown when a failed submit carries no message of its own. */
+  errorMessage?: string;
 }
 
 export function FeedbackSheet({
@@ -41,6 +43,7 @@ export function FeedbackSheet({
   description = "Tell us what's working, or what isn't.",
   npsLabel = "How likely are you to recommend us?",
   onError,
+  errorMessage,
 }: FeedbackSheetProps) {
   // The draft lives here, not in the sheet content, so an accidental dismiss
   // (swipe, tap outside, Escape) keeps it. It resets only after a send.
@@ -89,7 +92,7 @@ export function FeedbackSheet({
           message={message}
           onMessageChange={setMessage}
           pending={pending}
-          errorMessage={error ? toErrorMessage(error) : null}
+          errorMessage={error ? toErrorMessage(error, errorMessage) : null}
           onSubmit={() => {
             run().catch((err) => {
               if (!isRedirectError(err)) onError?.(err);

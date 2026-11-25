@@ -34,7 +34,7 @@ export function ErrorPage({
   eyebrow,
   media,
   title = "Could not load this page",
-  description = "This is usually a flaky connection. Try again, and if it keeps happening, check back in a few minutes.",
+  description = "This is usually a flaky connection. Try again in a moment.",
   resetLabel = "Try again",
   actions,
   onError,
@@ -98,8 +98,8 @@ export function GlobalError({
   fontFamily,
   radius,
   lang = "en",
-  title = "The app hit an unexpected error",
-  description = "Try again. If it keeps happening, refresh the page or check back in a few minutes.",
+  title = "Could not load the app",
+  description = "Try again. If it keeps failing, refresh the page.",
   resetLabel = "Try again",
 }: GlobalErrorProps): React.ReactElement {
   return (

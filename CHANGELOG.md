@@ -11,12 +11,12 @@
 - `Alert`, `AlertTitle` and `AlertDescription` in `@merqo/ui/primitives` (shadcn, `default` and `destructive` variants, `role="alert"` by default).
 - `AUTH_BUTTON` recipe: one 44px, full-width, `rounded-xl`, semibold primary auth action with the press state.
 - Local render check: `pnpm preview` serves a page mounting the shared components in their key states, and `pnpm test:render` opens it in chromium at 360px (touch) and 1280px, asserting no horizontal overflow, 44px touch targets and no console errors, and saves screenshots to `preview/.screenshots/`. Dev-only; not in CI or the published package.
-- `AccountMenu` and `LandingAccountNav` take an optional `errorMessage` for failures that carry no message of their own; `toErrorMessage` in the sheet shell takes an optional `fallback`.
+- `AccountMenu`, `LandingAccountNav`, `FeedbackSheet` and `HelpSheet` take an optional `errorMessage` for failures that carry no message of their own; `toErrorMessage` in the sheet shell takes an optional `fallback`.
 
 ### Changed
 
 - Left-aligned text across the family: `StatusCard`, `ErrorPage`, `NotFound` and the `GlobalError` fallback, the auth forms, the `AuditLogTable` empty row, `FaqPage` heading, `CustomerTelegramConnect` and the `Footer` rows under `sm` now read from the left edge. This is a visible change in all six kits (ErrorPage, NotFound, footer, auth forms); the `sm` and up footer layout is unchanged.
-- Direct fallback copy: the `ErrorPage` and `GlobalError` default titles and descriptions, and the `AccountMenu`, sheet shell and `LandingAccountNav` fallbacks, now say what failed and what to do next, with no "Please" and no bare "Something went wrong".
+- Direct fallback copy: the `ErrorPage` and `GlobalError` default titles and descriptions, and the `LoginForm` pending label ("Signing in…" or "Creating account…" instead of "Please wait"), and the `AccountMenu`, sheet shell and `LandingAccountNav` fallbacks, now say what failed and what to do next, with no "Please" and no bare "Something went wrong".
 - `VendorTelegramSection` drops its decorative heading icon; `Section`'s `icon` is optional.
 - `EmptyState` is built on the shadcn `Empty` parts with its props unchanged. `size="compact"` drops its dashed border and card background (visible in every compact site, for example merqo's nine); the default keeps the dashed border. DOM change for kits with element selectors: the description is now a `div` instead of a `p`, the compact title is a `p` inside a title wrapper, the headline `h2` sits inside a title wrapper, and spacing comes from flex `gap` instead of margins.
 - `AsyncSubmitButton`, `DownloadButton`, `ImageUploader` and `VendorTelegramSection` use `Spinner` instead of `Loader2`, hidden from assistive tech because the control already carries `aria-busy`.

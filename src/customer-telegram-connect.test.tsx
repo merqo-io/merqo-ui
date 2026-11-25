@@ -40,3 +40,11 @@ describe("CustomerTelegramConnect", () => {
     expect(document.querySelector("p")).toBeNull();
   });
 });
+
+describe("CustomerTelegramConnect alignment", () => {
+  it("left-aligns its container", () => {
+    const { container } = render(<CustomerTelegramConnect deepLink="tg://resolve?domain=bot" linkLabel="Go" />);
+    expect(container.firstElementChild).toHaveClass("text-left");
+    expect(container.firstElementChild).not.toHaveClass("text-center");
+  });
+});

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SheetShell, SheetMessageForm, SheetConfirmation } from "./sheet-shell";
+import { SheetShell, SheetMessageForm, SheetConfirmation, toErrorMessage } from "./sheet-shell";
 
 describe("SheetShell", () => {
   it("renders title, description and children when open", () => {
@@ -93,5 +93,13 @@ describe("SheetMessageForm primitives", () => {
     const done = screen.getByRole("button", { name: "Done" });
     expect(done).toHaveAttribute("data-slot", "button");
     expect(done.className.split(" ")).toContain("pointer-coarse:h-11");
+  });
+});
+
+describe("toErrorMessage", () => {
+  it("uses the error's own message, else the default, else the override", () => {
+    expect(toErrorMessage(new Error("Nope"))).toBe("Nope");
+    expect(toErrorMessage("x")).toBe("Could not send your message. Check your connection and try again.");
+    expect(toErrorMessage("x", "Custom")).toBe("Custom");
   });
 });

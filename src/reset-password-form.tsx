@@ -172,7 +172,7 @@ function StatePanel({ props }: { props: ResetPasswordFormProps }) {
   } = props;
   const expired = state === "expired";
   return (
-    <div className="space-y-4 text-center">
+    <div className="space-y-4 text-left">
       <PanelHeading>{expired ? expiredTitle : failedTitle}</PanelHeading>
       <p className="text-sm text-muted-foreground">{expired ? expiredBody : failedBody}</p>
       {!expired && onRetry ? (
@@ -360,7 +360,7 @@ function ReadyForm({ props }: { props: ResetPasswordFormProps }) {
         ) : null}
         <SubmitButton props={props} pending={pending} />
       </form>
-      <SignInLink props={props} className="mt-4 text-center" />
+      <SignInLink props={props} className="mt-4 text-left" />
     </>
   );
 }
@@ -370,7 +370,7 @@ export function ResetPasswordForm(props: ResetPasswordFormProps): React.ReactEle
   let content: React.ReactNode;
   if (state === "checking") {
     content = (
-      <p role="status" className="text-center text-sm text-muted-foreground">
+      <p role="status" className="text-left text-sm text-muted-foreground">
         {checkingLabel}
       </p>
     );

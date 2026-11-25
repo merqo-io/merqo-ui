@@ -96,3 +96,15 @@ describe("AuthConfirmForm AUTH_BUTTON", () => {
     expect(screen.getByRole("button", { name: "Confirm email" })).toHaveClass("h-11", "w-full", "font-semibold");
   });
 });
+
+describe("auth confirm alignment", () => {
+  it("both panels default to left-aligned text", () => {
+    const a = render(<AuthConfirmForm tokenHash="t" type="signup" />);
+    expect(a.container.innerHTML).not.toContain("text-center");
+    expect(a.container.firstElementChild).toHaveClass("text-left");
+    a.unmount();
+    const b = render(<AuthConfirmInvalid />);
+    expect(b.container.innerHTML).not.toContain("text-center");
+    expect(b.container.firstElementChild).toHaveClass("text-left");
+  });
+});

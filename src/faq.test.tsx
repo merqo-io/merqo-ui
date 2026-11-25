@@ -43,12 +43,12 @@ describe("Faq", () => {
 });
 
 describe("Faq type", () => {
-  it("uses the eyebrow and page title recipes, centred", () => {
+  it("uses the eyebrow and page title recipes, left-aligned", () => {
     render(<Faq items={ITEMS} eyebrow="Questions" title="Answers" />);
     const eyebrow = screen.getByText("Questions");
-    expect(eyebrow).toHaveClass(...EYEBROW.split(" "), "text-center");
+    expect(eyebrow).toHaveClass(...EYEBROW.split(" "), "text-left");
     const title = screen.getByRole("heading", { name: "Answers" });
-    expect(title).toHaveClass(...PAGE_TITLE.split(" "), "text-center", "mt-3");
+    expect(title).toHaveClass(...PAGE_TITLE.split(" "), "text-left", "mt-3");
   });
 });
 

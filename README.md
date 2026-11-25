@@ -196,7 +196,7 @@ works locally.
   function, no React.
 - `TwoColumnSections` — the profile/settings two-column flex-stack layout
   (never a CSS grid — see the component's test file for why).
-- `Section` — visually-neutral field-group shell. `icon: ReactNode` (an
+- `Section` — visually-neutral field-group shell. Optional `icon: ReactNode` (an
   already-rendered element, e.g. `<Store className="size-5" />`, not a
   component reference), optional `eyebrow?: string`, title, optional
   `description?: string`, optional `tooltip?: ReactNode` (rich content, not
@@ -226,7 +226,10 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   `categories?: {value, label}[]` to add a category radiogroup above the
   message field (an empty array behaves like no categories at all). Both
   take optional `title?`/`description?` overrides (each kit's own copy) —
-  omit either for this package's own defaults. Both pill grids share an
+  omit either for this package's own defaults. Both also take an optional
+  `errorMessage?: string`, shown when a failed submit throws something with no
+  message (default: "Could not send your message. Check your connection and
+  try again."). Both pill grids share an
   shared `SegmentedControl` (`variant="pill"`) implementing the full WAI-ARIA "radio group"
   keyboard pattern — only the checked pill (or the first, before anything's
   checked) is a Tab stop; Left/Right/Up/Down move focus and selection
@@ -2129,6 +2132,29 @@ in-page group, `rounded-xl border` with no shadow (was `rounded-lg`; pass
 `EmptyState` title is bold; `PageHeader` title is `text-3xl` (36px to 30px
 when not `responsive`, and no `text-4xl` step when `responsive`); the `Faq` eyebrow is no longer monospace; every
 eyebrow shares one tracking. `className` still overrides.
+
+## Voice and alignment
+
+Text reads along one left edge. `StatusCard` (so `ErrorPage` and `NotFound`),
+the `GlobalError` fallback, the auth forms (`LoginForm`, `ResetPasswordForm`,
+`MfaForm`, `AuthConfirmForm`, `AuthConfirmInvalid`), `AuditLogTable`'s empty
+row, `FaqPage`'s heading, `CustomerTelegramConnect` and the stacked `Footer`
+rows under `sm` are left-aligned. Centring stays only where the element is a
+centred target, such as the `ImageUploader` drop tile, and in `AuthShell` via
+its own `align` prop.
+
+Copy the library ships:
+
+- Say what happened and what to do next: "Could not sign out. Check your
+  connection and try again."
+- No apology, no "Please", and no "Something went wrong" as the whole message.
+- Sentence case, no em dash, verbs on buttons ("Try again", "Back to home").
+- Fallbacks are overridable: `AccountMenu` and `LandingAccountNav` take
+  `errorMessage`, `ConfirmDialog` takes `errorMessage`, and `toErrorMessage`
+  from the sheet shell takes a second `fallback` argument.
+- Kits write vendor-specific copy (for example an `EmptyState` title like "No
+  orders today. Share your QR to get the first one.") through the existing
+  props in their own pull requests.
 
 ## Z-index scale
 

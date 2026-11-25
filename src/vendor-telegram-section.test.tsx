@@ -274,3 +274,12 @@ describe("VendorTelegramSection reduced motion", () => {
     expect(document.querySelector('[role="status"]')).toBeNull();
   });
 });
+
+describe("VendorTelegramSection heading", () => {
+  it("has no decorative icon in the heading", () => {
+    const { container } = render(<VendorTelegramSection connected={false} onConnect={vi.fn()} />);
+    const heading = screen.getByText("Telegram alerts");
+    expect(heading.closest("header")?.querySelector("svg")).toBeNull();
+    expect(container.querySelector("header .rounded-full")).toBeNull();
+  });
+});

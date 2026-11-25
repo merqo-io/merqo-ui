@@ -178,7 +178,7 @@ describe("LoginForm", () => {
     render(<LoginForm onPasswordSignIn={onPasswordSignIn} onGoogleSignIn={vi.fn()} />);
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(screen.getByRole("button", { name: "Please wait" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Signing in…" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
     expect(screen.getByLabelText("Email")).toBeDisabled();
     release();
@@ -194,7 +194,7 @@ describe("LoginForm", () => {
     );
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "Please wait" })).toBeDisabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Signing in…" })).toBeDisabled());
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
@@ -203,7 +203,7 @@ describe("LoginForm", () => {
     render(<LoginForm onPasswordSignIn={async () => navigatingAway()} />);
     await fill(user);
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(screen.getByRole("button", { name: "Please wait" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Signing in…" })).toBeDisabled();
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
@@ -864,5 +864,12 @@ describe("LoginForm shadcn Alert and AUTH_BUTTON", () => {
     render(<LoginForm onPasswordSignIn={vi.fn()} onGoogleSignIn={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Sign in" })).toHaveClass("h-11", "w-full", "font-semibold");
     expect(screen.getByRole("button", { name: /continue with google/i })).toHaveClass("h-11", "w-full");
+  });
+});
+
+describe("LoginForm alignment", () => {
+  it("left-aligns the mode toggle prompt", () => {
+    const { container } = render(<LoginForm onPasswordSignIn={vi.fn()} />);
+    expect(container.innerHTML).not.toContain("text-center");
   });
 });

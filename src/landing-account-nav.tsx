@@ -11,7 +11,8 @@ import { getSwitchKits } from "./kit-family";
 import type { NavUser } from "./nav-user";
 import { Button } from "./ui/button";
 
-const GENERIC_ERROR = "Something went wrong. Please try again.";
+const DEFAULT_ERROR_MESSAGE =
+  "Could not complete that. Check your connection and try again.";
 
 type ActionResult = { success: boolean; error?: string };
 
@@ -33,15 +34,13 @@ export interface LandingAccountNavProps<C extends string = string> {
   supportCategories: Record<C, string>;
   /** Defaults to a sonner error toast. */
   onError?: (error: unknown) => void;
+  /** Used when a failure carries no message of its own. */
+  errorMessage?: string;
   LinkComponent?: React.ComponentType<AccountMenuLinkProps>;
 }
 
-function defaultOnError(error: unknown) {
-  toast.error(error instanceof Error && error.message ? error.message : GENERIC_ERROR);
-}
-
-function assertOk(res: ActionResult) {
-  if (!res.success) throw new Error(res.error ?? GENERIC_ERROR);
+function assertOk(res: ActionResult, fallback: string) {
+  if (!res.success) throw new Error(res.error ?? fallback);
 }
 
 /**
@@ -55,9 +54,13 @@ export function LandingAccountNav<C extends string = string>({
   signOutAction,
   actions,
   supportCategories,
-  onError = defaultOnError,
+  onError,
+  errorMessage = DEFAULT_ERROR_MESSAGE,
   LinkComponent,
 }: LandingAccountNavProps<C>) {
+  const handleError = onError ?? ((error: unknown) => {
+    toast.error(error instanceof Error && error.message ? error.message : errorMessage);
+  });
   const Link = LinkComponent ?? ContextAppLink;
   const categories = React.useMemo(
     () =>
@@ -80,7 +83,7 @@ export function LandingAccountNav<C extends string = string>({
         feedbackSource="vendor"
         feedbackMetric="nps"
         showNps
-        onError={onError}
+        onError={handleError}
         LinkComponent={LinkComponent}
         getHelp={{
           type: "form",
@@ -91,7 +94,7 @@ export function LandingAccountNav<C extends string = string>({
               Object.hasOwn(supportCategories, data.category)
                 ? (data.category as C)
                 : ("other" as C);
-            assertOk(await actions.submitSupport({ category, message: data.message }));
+            assertOk(await actions.submitSupport({ category, message: data.message }), errorMessage);
           },
         }}
         onFeedbackSubmit={async (data: FeedbackData) => {
@@ -102,6 +105,7 @@ export function LandingAccountNav<C extends string = string>({
               nps: data.nps ?? 0,
               message: message === "" ? undefined : message,
             }),
+            errorMessage,
           );
         }}
       />

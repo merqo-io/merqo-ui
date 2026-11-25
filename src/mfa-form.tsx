@@ -62,12 +62,12 @@ function EnrolmentDetails({ enrolment }: { enrolment: MfaEnrolment }) {
     <div className="space-y-2">
       {/* Only data:image/ sources render: the value comes from a callback, and any other URL would load a remote image. */}
       {isImageDataUrl(enrolment.qr) ? (
-        <img src={enrolment.qr} alt="Authenticator QR code" className="mx-auto size-44" />
+        <img src={enrolment.qr} alt="Authenticator QR code" className="size-44" />
       ) : null}
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-left text-xs text-muted-foreground">
         Can&rsquo;t scan? Enter this key instead:
       </p>
-      <code className="block break-all text-center text-sm">{enrolment.secret}</code>
+      <code className="block break-all text-left text-sm">{enrolment.secret}</code>
     </div>
   );
 }

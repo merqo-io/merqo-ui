@@ -242,6 +242,22 @@ describe("AccountMenu", () => {
     expect(onError).toHaveBeenCalled();
   });
 
+  it("uses a direct default for a non-Error sign-out failure and honours errorMessage", async () => {
+    signOutAction.mockRejectedValue("boom");
+    const user = await openMenu({});
+    await user.click(await screen.findByRole("menuitem", { name: /sign out/i }));
+    expect(
+      await screen.findByText("Could not sign out. Check your connection and try again."),
+    ).toBeInTheDocument();
+  });
+
+  it("errorMessage overrides the sign-out fallback", async () => {
+    signOutAction.mockRejectedValue("boom");
+    const user = await openMenu({ errorMessage: "Sign out failed. Retry in a moment." });
+    await user.click(await screen.findByRole("menuitem", { name: /sign out/i }));
+    expect(await screen.findByText("Sign out failed. Retry in a moment.")).toBeInTheDocument();
+  });
+
   it("a sign-out action that ends in a Next.js redirect is navigation: no alert, no onError, stays Signing out…", async () => {
     signOutAction.mockRejectedValue(
       Object.assign(new Error("NEXT_REDIRECT"), {

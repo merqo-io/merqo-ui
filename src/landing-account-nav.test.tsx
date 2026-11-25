@@ -162,7 +162,18 @@ describe("LandingAccountNav", () => {
     await user.type(await screen.findByLabelText(/message/i), "help");
     await user.click(screen.getByRole("button", { name: /send/i }));
     await waitFor(() =>
-      expect(toastError).toHaveBeenCalledWith("Something went wrong. Please try again."),
+      expect(toastError).toHaveBeenCalledWith("Could not complete that. Check your connection and try again."),
+    );
+  });
+
+  it("errorMessage overrides the generic fallback", async () => {
+    submitSupport.mockResolvedValue({ success: false });
+    const user = setup({ errorMessage: "Support is unreachable. Try again later." });
+    await openHelp(user);
+    await user.type(await screen.findByLabelText(/message/i), "help");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+    await waitFor(() =>
+      expect(toastError).toHaveBeenCalledWith("Support is unreachable. Try again later."),
     );
   });
 
@@ -173,7 +184,7 @@ describe("LandingAccountNav", () => {
     await user.type(await screen.findByLabelText(/message/i), "help");
     await user.click(screen.getByRole("button", { name: /send/i }));
     await waitFor(() =>
-      expect(toastError).toHaveBeenCalledWith("Something went wrong. Please try again."),
+      expect(toastError).toHaveBeenCalledWith("Could not complete that. Check your connection and try again."),
     );
   });
 

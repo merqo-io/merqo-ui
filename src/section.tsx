@@ -8,7 +8,8 @@ import { cn } from "./lib/utils";
 import { EYEBROW, GROUP, SECTION_TITLE } from "./recipes";
 
 export interface SectionProps {
-  icon: React.ReactNode;
+  /** Optional; omit for a heading that needs no pictogram. */
+  icon?: React.ReactNode;
   eyebrow?: string;
   title: string;
   description?: string;
@@ -51,9 +52,11 @@ export function Section({
     <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <span className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full">
-            {icon}
-          </span>
+          {icon ? (
+            <span className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full">
+              {icon}
+            </span>
+          ) : null}
           <div className="flex flex-col">
             {eyebrow ? (
               <span className={EYEBROW}>

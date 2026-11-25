@@ -33,8 +33,8 @@ export function ErrorPage({
   wordmark,
   eyebrow,
   media,
-  title = "Something went wrong",
-  description = "Could not load this page. This is usually a flaky connection, so try again.",
+  title = "Could not load this page",
+  description = "This is usually a flaky connection. Try again in a moment.",
   resetLabel = "Try again",
   actions,
   onError,
@@ -98,8 +98,8 @@ export function GlobalError({
   fontFamily,
   radius,
   lang = "en",
-  title = "Something went wrong",
-  description = "An unexpected error interrupted the page. Try again, and if it keeps happening, refresh in a moment.",
+  title = "Could not load the app",
+  description = "Try again. If it keeps failing, refresh the page.",
   resetLabel = "Try again",
 }: GlobalErrorProps): React.ReactElement {
   return (
@@ -117,7 +117,7 @@ export function GlobalError({
           padding: "1.5rem",
         }}
       >
-        <main style={{ maxWidth: "24rem", textAlign: "center" }}>
+        <main style={{ maxWidth: "24rem", textAlign: "left" }}>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.5rem" }}>{title}</h1>
           <p
             style={{

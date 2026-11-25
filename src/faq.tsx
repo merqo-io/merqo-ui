@@ -29,12 +29,12 @@ export function Faq({ items, id, eyebrow, title, className }: FaqProps): React.R
     <section id={id} className={cn("border-t", className)}>
       <div className="mx-auto max-w-3xl px-5 py-16">
         {eyebrow && (
-          <p className={cn("text-center", EYEBROW)}>
+          <p className={cn("text-left", EYEBROW)}>
             {eyebrow}
           </p>
         )}
         {title && (
-          <h2 className={cn("mt-3 text-center", PAGE_TITLE)}>
+          <h2 className={cn("mt-3 text-left", PAGE_TITLE)}>
             {title}
           </h2>
         )}

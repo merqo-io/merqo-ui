@@ -70,7 +70,7 @@ export function AuthConfirmForm({
       method="post"
       action={action}
       onSubmit={() => setPending(true)}
-      className={className ?? "space-y-6 text-center"}
+      className={className ?? "space-y-6 text-left"}
     >
       <input type="hidden" name="token_hash" value={tokenHash} />
       <input type="hidden" name="type" value={type} />
@@ -97,7 +97,7 @@ export function AuthConfirmInvalid({
   className,
 }: AuthConfirmInvalidProps) {
   return (
-    <div className={className ?? "space-y-4 text-center"}>
+    <div className={className ?? "space-y-4 text-left"}>
       <h2 className="font-display text-2xl font-bold tracking-tight">{title}</h2>
       <p className="text-sm text-muted-foreground">{body}</p>
       <a href={loginHref} className={LINK_CLASS}>

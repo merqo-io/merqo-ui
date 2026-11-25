@@ -361,3 +361,18 @@ describe("FeedbackSheet score error Alert", () => {
     expect(alert).toHaveAttribute("data-slot", "alert");
   });
 });
+
+describe("FeedbackSheet errorMessage fallback", () => {
+  it.each([
+    [undefined, "Could not send your message. Check your connection and try again."],
+    ["Custom failure text.", "Custom failure text."],
+  ])("shows the right text for a non-Error rejection (%s)", async (prop, expected) => {
+    const user = userEvent.setup();
+    render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn().mockRejectedValue("boom")} errorMessage={prop} />,
+    );
+    await user.type(screen.getByLabelText(/message/i), "hi");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+    expect(await screen.findByText(expected)).toBeInTheDocument();
+  });
+});

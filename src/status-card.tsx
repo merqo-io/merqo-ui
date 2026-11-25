@@ -32,10 +32,10 @@ export function StatusCard({
   return (
     <main className={cn("flex min-h-screen items-center justify-center p-5", className)}>
       <div className="w-full max-w-md">
-        {wordmark ? <div className="mb-8 text-center">{wordmark}</div> : null}
-        <ElevatedCard className="px-7 py-10 text-center">
+        {wordmark ? <div className="mb-8">{wordmark}</div> : null}
+        <ElevatedCard className="px-7 py-10 text-left">
           {media ? (
-            <div className="mx-auto mb-6 aspect-video w-full overflow-hidden rounded-lg [&_img]:size-full [&_img]:object-cover [&_svg]:size-full">
+            <div className="mb-6 aspect-video w-full overflow-hidden rounded-lg [&_img]:size-full [&_img]:object-cover [&_svg]:size-full">
               {media}
             </div>
           ) : null}

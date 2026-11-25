@@ -40,3 +40,13 @@ describe("StatusCard media", () => {
     expect(container.querySelector(".aspect-video")).toBeNull();
   });
 });
+
+describe("StatusCard alignment", () => {
+  it("reads from the left edge in the card and the wordmark", () => {
+    const { container } = render(
+      <StatusCard wordmark={<span>Kit</span>} title="Gone" description="d" />,
+    );
+    expect(container.innerHTML).not.toContain("text-center");
+    expect(container.querySelector(".rounded-2xl")).toHaveClass("text-left");
+  });
+});

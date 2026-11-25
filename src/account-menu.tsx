@@ -74,6 +74,8 @@ export interface AccountMenuProps {
   feedbackNpsLabel?: string;
   /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
   onError?: (error: unknown) => void;
+  /** Shown under Sign out when the failure carries no message of its own. */
+  errorMessage?: string;
   /** One extra menu link. `icon` is a component (not an element) so the menu
    * applies the shared `size-4`. `placement` "top" puts it first in the menu,
    * above Switch products and Profile; the default sits after Feedback. */
@@ -105,10 +107,11 @@ export interface AccountMenuProps {
   LinkComponent?: React.ComponentType<AccountMenuLinkProps>;
 }
 
-function toErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "Something went wrong. Please try again.";
+const DEFAULT_SIGN_OUT_ERROR =
+  "Could not sign out. Check your connection and try again.";
+
+function toErrorMessage(error: unknown, fallback = DEFAULT_SIGN_OUT_ERROR): string {
+  return error instanceof Error ? error.message : fallback;
 }
 
 function TierSlot({ tier, tierBadge }: { tier?: string; tierBadge?: React.ReactNode }) {
@@ -184,6 +187,7 @@ export function AccountMenu({
   showNps,
   feedbackNpsLabel,
   onError,
+  errorMessage,
   extraLink,
   tier,
   tierBadge,
@@ -338,7 +342,7 @@ export function AccountMenu({
           </DropdownMenuItem>
           {signOut.error ? (
             <p className="text-destructive px-2 py-1 text-xs" role="alert">
-              {toErrorMessage(signOut.error)}
+              {toErrorMessage(signOut.error, errorMessage)}
             </p>
           ) : null}
         </DropdownMenuContent>

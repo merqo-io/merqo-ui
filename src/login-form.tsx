@@ -147,7 +147,7 @@ function ModeToggle({
   const signinPrompt = prompt?.signin ?? "New here?";
   const signupPrompt = prompt?.signup ?? "Already have an account?";
   return (
-    <p className="mt-6 text-center text-sm text-muted-foreground">
+    <p className="mt-6 text-left text-sm text-muted-foreground">
       {isSignin ? signinPrompt : signupPrompt}{" "}
       <button
         type="button"
@@ -242,7 +242,7 @@ function ConfirmPanel({
     headingRef.current?.focus();
   }, []);
   return (
-    <div className="space-y-4 text-center">
+    <div className="space-y-4 text-left">
       <h2
         ref={headingRef}
         tabIndex={-1}

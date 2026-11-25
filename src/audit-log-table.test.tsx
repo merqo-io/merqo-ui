@@ -148,3 +148,12 @@ describe("AuditLogTable small screens", () => {
     expect(actor.querySelector("span")).toHaveClass("sm:hidden");
   });
 });
+
+describe("AuditLogTable empty state alignment", () => {
+  it("left-aligns the empty message", () => {
+    render(<AuditLogTable entries={[]} />);
+    const msg = screen.getByText("No activity recorded yet.");
+    expect(msg).toHaveClass("text-left");
+    expect(msg).not.toHaveClass("text-center");
+  });
+});

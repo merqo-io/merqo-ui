@@ -37,7 +37,7 @@ export interface FooterProps {
   layout?: "compact";
 }
 
-// Under sm the footer collapses to three centred rows (brand, links, copyright)
+// Under sm the footer collapses to three left-aligned rows (brand, links, copyright)
 // via order and wrapper groups; from sm up the groups are `display: contents`
 // so the original single row and DOM order are untouched. Vendors use these
 // links on phones and tablets, so every link keeps a 44px hit area at every
@@ -70,16 +70,16 @@ export function Footer({
   // phone fold: brand and copyright share row one, the links take row two.
   const wrapClass = compact
     ? "mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-5 gap-y-1 px-5 py-2 max-sm:pb-14 sm:pr-20 text-sm text-muted-foreground"
-    : "mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 pt-5 pb-20 text-sm text-muted-foreground sm:flex-row sm:gap-3 sm:pt-6";
+    : "mx-auto flex max-w-6xl flex-col items-start justify-between gap-2 px-5 pt-5 pb-20 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-3 sm:pt-6";
   const brandClass = compact
     ? "order-1 flex flex-wrap items-center gap-x-2"
-    : "order-1 flex flex-wrap items-center justify-center gap-x-2 sm:contents";
+    : "order-1 flex flex-wrap items-center gap-x-2 sm:contents";
   const copyClass = compact
     ? "order-2 text-xs sm:order-3"
     : "order-3 text-xs sm:order-none";
   const linksClass = compact
     ? "order-3 flex basis-full flex-wrap items-center gap-x-0 sm:order-2 sm:basis-auto"
-    : "order-2 flex flex-wrap items-center justify-center gap-x-0 sm:contents";
+    : "order-2 flex flex-wrap items-center gap-x-0 sm:contents";
   return (
     <footer className="border-t border-border">
       {/* Default keeps pb-20 to lift the links above the fixed 48px BackToTop button (24px from the viewport edge). Compact stays ~64px tall, so it reserves the button column with sm:pr-20 and, on a phone where that column would starve the link row, lifts with max-sm:pb-14 instead. */}

@@ -146,8 +146,9 @@ export function SheetConfirmation({
   );
 }
 
-export function toErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "Something went wrong. Please try again.";
+export function toErrorMessage(
+  error: unknown,
+  fallback = "Could not send your message. Check your connection and try again.",
+): string {
+  return error instanceof Error ? error.message : fallback;
 }

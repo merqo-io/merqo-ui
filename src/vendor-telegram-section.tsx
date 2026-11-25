@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { MessageCircle } from "lucide-react";
 
 import { ConfirmDialog } from "./confirm-dialog";
 import { Section } from "./section";
@@ -156,7 +155,6 @@ function ConnectPanel({
 export function VendorTelegramSection(props: VendorTelegramSectionProps) {
   return (
     <Section
-      icon={<MessageCircle className="size-5" />}
       eyebrow="Stay in the loop"
       title="Telegram alerts"
       description="Get a Telegram message here whenever there's new activity for your shop."

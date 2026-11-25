@@ -240,3 +240,12 @@ describe("Footer", () => {
     );
   });
 });
+
+describe("Footer alignment", () => {
+  it("stacks left-aligned under sm and keeps the sm row layout", () => {
+    const { container } = render(<Footer wordmark={<a href="/">K</a>} tagline="t" kitName="kit" />);
+    expect(container.innerHTML).not.toContain("justify-center");
+    const wrap = container.querySelector("footer > div") as HTMLElement;
+    expect(wrap).toHaveClass("items-start", "sm:flex-row", "sm:items-center");
+  });
+});

@@ -866,3 +866,10 @@ describe("LoginForm shadcn Alert and AUTH_BUTTON", () => {
     expect(screen.getByRole("button", { name: /continue with google/i })).toHaveClass("h-11", "w-full");
   });
 });
+
+describe("LoginForm alignment", () => {
+  it("left-aligns the mode toggle prompt", () => {
+    const { container } = render(<LoginForm onPasswordSignIn={vi.fn()} />);
+    expect(container.innerHTML).not.toContain("text-center");
+  });
+});

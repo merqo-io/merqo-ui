@@ -36,7 +36,7 @@ export function CustomerTelegramConnect({
 }: CustomerTelegramConnectProps): React.ReactElement | null {
   if (!isSafeDeepLink(deepLink)) return null;
   return (
-    <div className={cn("text-center", className)}>
+    <div className={cn("text-left", className)}>
       <a
         href={deepLink}
         className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"

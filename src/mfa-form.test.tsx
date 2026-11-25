@@ -342,3 +342,15 @@ describe("MfaForm shadcn Alert and AUTH_BUTTON", () => {
     expect(screen.getByRole("button", { name: "Set up authenticator" })).toHaveClass("h-11", "font-semibold");
   });
 });
+
+describe("MfaForm enrolment alignment", () => {
+  it("left-aligns the manual key note and the secret", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <MfaForm hasFactor={false} onVerify={vi.fn()} onEnrol={vi.fn().mockResolvedValue({ qr: "data:image/png;base64,AA", secret: "KEY123" })} />,
+    );
+    await user.click(screen.getByRole("button", { name: "Set up authenticator" }));
+    expect(await screen.findByText("KEY123")).toHaveClass("text-left");
+    expect(container.innerHTML).not.toContain("text-center");
+  });
+});

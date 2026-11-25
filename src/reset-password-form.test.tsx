@@ -492,3 +492,12 @@ describe("ResetPasswordForm shadcn Alert and AUTH_BUTTON", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 });
+
+describe("ResetPasswordForm alignment", () => {
+  it.each(["checking", "expired", "failed", "ready"] as const)("%s state has no centred text", (state) => {
+    const { container } = render(
+      <ResetPasswordForm onSubmit={vi.fn()} state={state} signInHref="/login" />,
+    );
+    expect(container.innerHTML).not.toContain("text-center");
+  });
+});

@@ -61,7 +61,7 @@ describe("GlobalError", () => {
     expect(html).toContain("font-family:serif");
     expect(html).toContain("border-radius:4px");
     expect(html).toContain("<main");
-    expect(html).toContain("Something went wrong");
+    expect(html).toContain("The app hit an unexpected error");
   });
 
   it("calls reset from the button by touch", async () => {
@@ -99,5 +99,17 @@ describe("ErrorPage media", () => {
     );
     expect(screen.getByTestId("media")).toBeInTheDocument();
     spy.mockRestore();
+  });
+});
+
+describe("alignment and default copy", () => {
+  it("GlobalError text reads from the left edge", () => {
+    const colors = { background: "white", foreground: "black", primary: "p", primaryForeground: "pf", mutedForeground: "m", border: "b" };
+    const html = renderToStaticMarkup(
+      <GlobalError reset={() => {}} colors={colors as never} fontFamily="serif" radius="4px" />,
+    );
+    expect(html).toContain("text-align:left");
+    expect(html).not.toContain("text-align:center");
+    expect(html).not.toMatch(/Please|Sorry|Something went wrong/);
   });
 });

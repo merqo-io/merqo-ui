@@ -559,8 +559,11 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   **Data shapes.** Set `align: "end"` on numeric columns: the header and
   cells right-align (`text-end`), use tabular figures and stay on one line.
   `className: "text-right"` keeps working; `align: "end"` is preferred.
-  Show cents with `formatMoney` and times with `formatDate`, `formatDateTime`
-  or `formatRelativeTime`, all in Singapore time. `AuditLogTable` now uses
+  Show cents with `<Money>` and times with `<Timestamp>` (or the plain
+  `formatMoney`, `formatDate`, `formatDateTime` and `formatRelativeTime`
+  helpers), all in Singapore time. `<Timestamp>` relative text renders the
+  absolute time first so server and client markup match, then switches after
+  mount. `AuditLogTable` now uses
   `formatDateTime` by default, so `dateFormatter` is only for a different
   format. Text cells wrap anywhere, so a long email or ID never widens the
   table past a phone. Truncate only when the full value is one tap away;
@@ -1439,6 +1442,20 @@ whatever the server or browser zone.
 - `formatMoney(cents, { trimWholeDollars? })`: `1250` -> `S$12.50`, `-5` ->
   `-S$0.05`, `0` -> `S$0.00`, large values grouped (`S$1,234,567.89`).
   `trimWholeDollars` gives `S$16` for whole amounts. Non-finite input gives `-`.
+- `Money({cents, trimWholeDollars?, className?})`: `formatMoney` as a `<span>`
+  with tabular figures that never wraps mid-amount. Server-safe. It adds no
+  colour by sign; each kit decides that.
+- `Timestamp({value, variant?, now?, className?})`: a `<time>` with an ISO
+  `dateTime`. `variant` is `"relative"` (default), `"date"` (`7 Nov 2026`) or
+  `"datetime"` (`7 Nov 2026, 1:30 am`); an invalid value renders `-`. `date`
+  and `datetime` are plain text and server-safe. `relative` is a button: tap,
+  click or Enter/Space opens a popover with the exact Singapore time, so a
+  phone user never needs hover, and its `aria-label` carries both texts
+  (`3h ago, 7 Nov 2026, 1:30 am`). It renders the absolute time on the server
+  and on the first client render, then switches to relative after mount, so
+  hydration never disagrees about "ago". Every mounted instance shares one
+  once-a-minute timer that pauses while the tab is hidden. `now` fixes the
+  reference time and disables the timer (tests, frozen displays).
 - `centsToDollarString(cents)`: `650` -> `6.50`, for input values.
 - `parseDollarsToCents(input, { allowNegative? })`: accepts a string (FormData
   value, `S$`/`$` prefix and `1,234.50` grouping allowed) or a number. Returns

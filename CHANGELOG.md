@@ -4,6 +4,8 @@
 
 ### Added
 
+- `Money`: `formatMoney` as a non-wrapping, tabular-figure `<span>`, server-safe, no colour by sign.
+- `Timestamp`: a `<time>` in `relative` (default), `date` or `datetime` form, always in Singapore time. Relative text renders the absolute time first (hydration-safe), then updates once a minute from one shared timer that pauses in hidden tabs; tap, click or keyboard opens a popover with the exact time. `date` and `datetime` are server-safe.
 - `DataTableColumn.align`: `"end"` right-aligns a column's header and cells with tabular figures and no wrapping, so amounts line up. `className="text-right"` still works; `align="end"` is the preferred form.
 - `signature` slot on `AuthShell`, `StatusCard`, `ErrorPage` and `NotFound`: one optional, decorative (`aria-hidden`) identity mark in the card's top-end corner, coloured by the kit through `currentColor`. Opt-in; output is unchanged when it is not passed.
 - `Empty` parts, `Item` parts and `Spinner` in `@merqo/ui/primitives` (shadcn, `Spinner` stops under reduced motion).

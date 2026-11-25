@@ -655,6 +655,21 @@ routine, irreversible and high-stakes actions.
   `useDataTablePage(total, pageSize)` -> `{page, setPage, pageCount}`: the
   pager controls and a clamped page-state hook behind `DataTable`'s
   `pagination`. Client module.
+- `DataTableSkeleton({rows?, columns?, header?, label?, className?})`,
+  `StatTileSkeleton({card?, label?, className?})` and
+  `ListSkeleton({rows?, media?, actions?, label?, className?})`: loading
+  placeholders that show the shape of `DataTable` (5 x 4 by default),
+  `StatTile` (`card` by default) and a list of `Item` rows (`media` draws a
+  leading square, `actions` a trailing block). Use them instead of a spinner
+  or hand-rolled `animate-pulse` divs: a spinner only goes inside the control
+  that is busy, content that is loading shows its shape. Each is a
+  `role="status"` `aria-busy="true"` region with an sr-only `label` (default
+  "Loading"; pass a translated string); the blocks are `aria-hidden`. Line
+  widths vary in fixed steps, so server and client render the same markup.
+  The pulse stops under `prefers-reduced-motion` (it is `Skeleton`'s). The
+  table uses a fixed layout, so it never overflows a 360px phone. To
+  cross-fade into the loaded content, use the recipe under `Skeleton` in
+  Shared primitives. No client code, so they render in a Server Component.
 - `Faq({items, id?, eyebrow?, title?, className?})` — accordion FAQ on
   native `<details>`, so it works by touch, keyboard and screen reader.
   `items` is `{question, answer}[]` (nodes allowed); the content stays in

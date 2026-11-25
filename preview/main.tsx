@@ -23,6 +23,9 @@ import {
   Section,
   SegmentedControl,
   StatTile,
+  DataTableSkeleton,
+  StatTileSkeleton,
+  ListSkeleton,
 } from "../src";
 import type { AuditLogEntry, PlanCatalog } from "../src";
 import { StatusCard } from "../src/status-card";
@@ -190,6 +193,15 @@ function Preview() {
           <StatTile card label="Revenue" value="S$1,284.50" delta={-8} primary />
           <StatTile card label={LONG_STALL} value="S$12,345,678,901,234.90" caption={LONG_STALL} delta={null} />
         </div>
+      </Group>
+
+      <Group name="Skeletons">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatTileSkeleton />
+          <StatTileSkeleton />
+        </div>
+        <DataTableSkeleton />
+        <ListSkeleton media actions />
       </Group>
 
       <Group name="StatusCard">

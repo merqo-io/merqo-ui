@@ -24,6 +24,24 @@ describe("LandingNav", () => {
   });
 });
 
+describe("LandingNav radius", () => {
+  it("uses one radius across buttons and raw links, with touch press twins", async () => {
+    const { container } = render(
+      <LandingNav
+        wordmark={<span>k</span>} end={<span>e</span>}
+        links={[{ href: "/a", label: "A" }]}
+      />,
+    );
+    expect(container.innerHTML).not.toMatch(/rounded-lg/);
+    const user = userEvent.setup();
+    const burger = screen.getByRole("button", { name: "Menu" });
+    expect(burger).toHaveClass("rounded-md", "active:bg-secondary");
+    await user.pointer({ keys: "[TouchA]", target: burger });
+    const mobile = screen.getAllByRole("link", { name: "A" }).pop()!;
+    expect(mobile).toHaveClass("rounded-md", "active:bg-secondary");
+  });
+});
+
 describe("LandingNav links", () => {
   const links = [
     { label: "FAQ", href: "/#faq" },

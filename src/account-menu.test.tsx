@@ -658,7 +658,7 @@ describe("AccountMenu separators", () => {
     await screen.findByRole("menuitem", { name: /profile/i });
     const kids = menuChildren();
     const rules = kids.filter((k) => k === "|").length;
-    expect(rules).toBe(c.subtitle ? 3 : 2);
+    expect(rules).toBe(c.subtitle ? 2 : 1);
     expect(kids[0]).not.toBe("|");
     expect(kids[kids.length - 1]).not.toBe("|");
     kids.forEach((k, i) => {
@@ -666,7 +666,8 @@ describe("AccountMenu separators", () => {
     });
     expect(kids[kids.length - 2]).toBe("|");
     const theme = kids.findIndex((k) => k.startsWith("Theme"));
-    expect(kids[theme - 1]).toBe("|");
+    expect(kids[theme - 1]).not.toBe("|");
+    expect(kids[theme + 1]).toBe("|");
     if (c.subtitle) expect(kids[1]).toBe("|");
     const switchIdx = kids.findIndex((k) => k.startsWith("Switch products"));
     if (switchIdx >= 0) {

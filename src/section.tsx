@@ -5,7 +5,7 @@ import * as React from "react";
 import { ElevatedCard } from "./elevated-card";
 import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
-import { EYEBROW, SECTION_TITLE, SURFACE } from "./recipes";
+import { EYEBROW, GROUP, SECTION_TITLE } from "./recipes";
 
 export interface SectionProps {
   icon: React.ReactNode;
@@ -25,8 +25,8 @@ export interface SectionProps {
    */
   wrapper?: (content: React.ReactNode) => React.ReactNode;
   /**
-   * Card chrome of the default shell. "default" is the existing bordered
-   * card, "elevated" the `ElevatedCard` look, "none" no chrome at all.
+   * Card chrome of the default shell. "default" is a flat bordered
+   * group, "elevated" the `ElevatedCard` look, "none" no chrome at all.
    * Ignored when `wrapper` is set.
    */
   surface?: "default" | "elevated" | "none";
@@ -94,7 +94,7 @@ export function Section({
   return (
     <section
       className={cn(
-        surface === "default" && cn(SURFACE, "flex flex-col gap-4 p-6"),
+        surface === "default" && cn(GROUP, "flex flex-col gap-4 p-6"),
         surface === "none" && "flex flex-col gap-4",
         className,
       )}

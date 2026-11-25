@@ -3,6 +3,22 @@ import { render, screen } from "@testing-library/react";
 import { AuditLogTable, type AuditLogEntry } from "./audit-log-table";
 import { GROUP } from "./recipes";
 
+describe("AuditLogTable header", () => {
+  it("uses the sentence-case label recipe for column headings", () => {
+    const { container } = render(<AuditLogTable entries={[]} />);
+    expect(container.innerHTML).not.toMatch(/uppercase|tracking-wider/);
+  });
+
+  it("filled header row is sentence case", () => {
+    const { container } = render(
+      <AuditLogTable
+        entries={[{ id: "1", createdAt: "2025-01-01T00:00:00Z", actor: "a", action: "x", target: "t" } satisfies AuditLogEntry]}
+      />,
+    );
+    expect(container.innerHTML).not.toMatch(/uppercase|tracking-wider/);
+  });
+});
+
 describe("AuditLogTable frame", () => {
   it("is an in-page group, with no shadow, filled or empty", () => {
     const { container, rerender } = render(<AuditLogTable entries={[]} />);

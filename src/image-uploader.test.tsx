@@ -655,6 +655,20 @@ describe("ImageUploader object paths", () => {
     }
   });
 
+  it("gives the empty drop zone a focus-visible ring and keeps touch select working", async () => {
+    const user = userEvent.setup();
+    render(<ImageUploader {...baseProps()} />);
+    const zone = screen.getByRole("button", { name: "Add photo" });
+    expect(zone).toHaveClass(
+      "outline-none",
+      "focus-visible:ring-[3px]",
+      "focus-visible:ring-ring/50",
+      "active:border-primary/50",
+    );
+    await user.pointer({ keys: "[TouchA]", target: zone });
+    expect(zone).toBeInTheDocument();
+  });
+
   it("reports an upload failure when cryptographic randomness is unavailable", async () => {
     vi.stubGlobal("crypto", undefined);
     try {

@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { StatusCard } from "./status-card";
-import { CARD_TITLE, EYEBROW } from "./recipes";
+import { CARD_TITLE, LABEL } from "./recipes";
 
 describe("StatusCard", () => {
-  it("uses the eyebrow and card title recipes", () => {
+  it("uses the sentence-case label and card title recipes", () => {
     render(<StatusCard eyebrow="Offline" title="Gone" />);
-    expect(screen.getByText("Offline")).toHaveClass(...EYEBROW.split(" "));
+    expect(screen.getByText("Offline")).toHaveClass(...LABEL.split(" "));
     expect(screen.getByRole("heading", { name: "Gone" })).toHaveClass(
       ...CARD_TITLE.split(" "),
     );

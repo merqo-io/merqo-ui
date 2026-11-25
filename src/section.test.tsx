@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Info } from "lucide-react";
 import { Section } from "./section";
-import { EYEBROW, SECTION_TITLE, SURFACE } from "./recipes";
+import { EYEBROW, GROUP, SECTION_TITLE } from "./recipes";
 
 describe("Section", () => {
   it("renders eyebrow, title, and children", () => {
@@ -169,7 +169,22 @@ describe("Section", () => {
     );
     expect(container.firstChild).toHaveClass("custom-class");
     // still carries the base neutral card classes
-    expect(container.firstChild).toHaveClass("rounded-2xl", "border", "bg-card");
+    expect(container.firstChild).toHaveClass("rounded-xl", "border", "bg-card");
+  });
+
+  it("is a flat in-page group by default; only surface=elevated lifts", () => {
+    const { container, rerender } = render(
+      <Section icon={<Info />} eyebrow="e" title="t">
+        <div />
+      </Section>,
+    );
+    expect((container.firstChild as HTMLElement).className).not.toMatch(/shadow/);
+    rerender(
+      <Section icon={<Info />} eyebrow="e" title="t" surface="elevated">
+        <div />
+      </Section>,
+    );
+    expect(container.firstChild).toHaveClass("shadow-sm");
   });
 
   it("never uses a literal color, font, or radius value", () => {
@@ -240,13 +255,13 @@ describe("Section", () => {
 });
 
 describe("Section surface", () => {
-  it("keeps the default card shell without a surface prop", () => {
+  it("keeps a flat group shell without a surface prop", () => {
     const { container } = render(
       <Section icon={<Info />} title="t">
         <div />
       </Section>,
     );
-    expect(container.querySelector("section")).toHaveClass("bg-card", "shadow-sm");
+    expect(container.querySelector("section")).toHaveClass("bg-card", "rounded-xl");
   });
 
   it('surface="elevated" applies the ElevatedCard chrome', () => {
@@ -305,7 +320,7 @@ describe("Section shape", () => {
       </Section>,
     );
     const shell = container.querySelector("section") as HTMLElement;
-    expect(shell).toHaveClass(...SURFACE.split(" "));
-    expect(shell.className).not.toMatch(/rounded-(\[|lg|xl)/);
+    expect(shell).toHaveClass(...GROUP.split(" "));
+    expect(shell.className).not.toMatch(/rounded-(\[|lg|2xl)|shadow/);
   });
 });

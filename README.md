@@ -774,7 +774,7 @@ reversible ones.
 - `DownloadButton({label?="Download", pendingLabel?, onDownload, onError?, variant?="outline", size?="sm", ...buttonProps})` —
   runs `onDownload` (sync or async), stays disabled with `aria-busy` and a spinner until it settles, and passes a
   rejection to `onError`.
-- `FORM_LABEL_CLASS` — small-caps field label classes. `FORM_ERROR_CLASS` —
+- `FORM_LABEL_CLASS` — sentence-case field label classes (`text-sm font-medium text-muted-foreground`). `FORM_ERROR_CLASS` —
   the `text-sm font-medium text-destructive` classes `FormError` renders, for
   error text a kit lays out itself. `FormError({message, id?, className?})` — inline
   `role="alert"` error in `text-destructive`; renders nothing when `message` is empty.
@@ -1989,14 +1989,19 @@ injected dependency, and none throws to the caller except `callMerqoRpc`.
 Shared components draw cards and headings from one recipe (`src/recipes.ts`,
 private), all from semantic classes so each kit's own tokens drive the look.
 
-- **Standalone surface** (`rounded-2xl border bg-card shadow-sm`): a card that
-  stands alone on the page. `ElevatedCard`, the default `Section` card,
-  `StatusCard`.
+- **Standalone surface** (`rounded-2xl border bg-card shadow-sm`): the page's
+  primary object, the only lifted card. `ElevatedCard` (`AuthShell`,
+  `StatusCard`, `Section surface="elevated"`).
 - **In-page group** (`rounded-xl border bg-card`, no shadow): a box inside a
   page or inside a surface, usually repeated. `PricingLadder` tiers and note
-  boxes, `Faq` items, the `AuditLogTable` frame.
-- **Eyebrow** (`text-xs font-semibold uppercase tracking-wider`): `Section`,
-  `PageHeader`, `StatusCard`, `Faq`.
+  boxes, `Faq` items, the `AuditLogTable` frame, the default `Section` card
+  (so `VendorTelegramSection`), `EmptyState` (dashed) and the `ImageUploader`
+  drop zone.
+- **Label** (`text-sm font-medium text-muted-foreground`, sentence case): form
+  field labels, the `AdminShell` badge, `JourneyStep` labels (in `text-primary`),
+  the `StatusCard` kicker and `AuditLogTable` column headings.
+- **Eyebrow** (`text-xs font-semibold uppercase tracking-wider`): page-level
+  section labels only, `Section`, `PageHeader`, `Faq`.
 - **Page title** (`font-display text-3xl font-bold tracking-tight text-balance
   break-words`): `PageHeader`, `AuthShell`, `Faq`. Every
   `PageHeader` title is `text-3xl`, responsive or not.

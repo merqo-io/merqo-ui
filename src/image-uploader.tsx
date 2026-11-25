@@ -195,7 +195,7 @@ function UploadTrigger({
       aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
       aria-busy={uploading}
       className={cn(
-        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center rounded-xl border border-dashed transition-colors disabled:opacity-60",
+        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground active:border-primary/50 active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex flex-col items-center justify-center rounded-xl border border-dashed outline-none transition-colors focus-visible:ring-[3px] disabled:opacity-60",
         variant === "thumb" ? "gap-1" : "gap-1.5",
         box,
       )}

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "./lib/utils";
-import { GROUP } from "./recipes";
+import { GROUP, LABEL } from "./recipes";
 
 export interface AuditLogEntry {
   id: string;
@@ -48,7 +48,7 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
   return (
     <div className={cn(GROUP, "overflow-hidden border-border")}>
       <div
-        className={`hidden ${GRID_COLS} sm:gap-x-4 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:grid`}
+        className={cn("hidden sm:gap-x-4 px-5 py-3 text-xs sm:grid", GRID_COLS, LABEL)}
       >
         <span>Action</span>
         <span>Actor</span>

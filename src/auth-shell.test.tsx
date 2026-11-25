@@ -104,4 +104,14 @@ describe("AuthShell signature", () => {
     expect(container.querySelector("[aria-hidden]")).toBeNull();
     expect(screen.getByRole("heading", { level: 1 })).not.toHaveClass("pe-12");
   });
+  it("pads both sides of a centred title so it stays centred", () => {
+    render(
+      <AuthShell title="T" align="center" signature={<svg />}>
+        x
+      </AuthShell>,
+    );
+    const h = screen.getByRole("heading", { level: 1 });
+    expect(h).toHaveClass("px-12");
+    expect(h).not.toHaveClass("pe-12");
+  });
 });

@@ -55,7 +55,7 @@ export function AuthShell({
               {signature}
             </div>
           ) : null}
-          <h1 className={cn(PAGE_TITLE, centred, signature && "pe-12")}>{title}</h1>
+          <h1 className={cn(PAGE_TITLE, centred, signature && (align === "center" ? "px-12" : "pe-12"))}>{title}</h1>
           {subtitle ? (
             <p className={cn("mt-1.5 text-sm text-muted-foreground", centred)}>{subtitle}</p>
           ) : null}

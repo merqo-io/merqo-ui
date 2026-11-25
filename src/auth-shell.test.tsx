@@ -84,3 +84,34 @@ describe("AuthShell", () => {
     expect(container.querySelector(".mb-8")).toBeNull();
   });
 });
+
+describe("AuthShell signature", () => {
+  it("renders the signature aria-hidden inside the card and pads the title", () => {
+    render(
+      <AuthShell title="T" signature={<svg data-testid="mark" />}>
+        x
+      </AuthShell>,
+    );
+    const wrapper = screen.getByTestId("mark").parentElement as HTMLElement;
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    expect(wrapper).toHaveClass("absolute", "end-4", "pointer-events-none");
+    expect(wrapper.parentElement).toHaveClass("relative");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("pe-12");
+  });
+
+  it("adds no wrapper or padding without a signature", () => {
+    const { container } = render(<AuthShell title="T">x</AuthShell>);
+    expect(container.querySelector("[aria-hidden]")).toBeNull();
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveClass("pe-12");
+  });
+  it("pads both sides of a centred title so it stays centred", () => {
+    render(
+      <AuthShell title="T" align="center" signature={<svg />}>
+        x
+      </AuthShell>,
+    );
+    const h = screen.getByRole("heading", { level: 1 });
+    expect(h).toHaveClass("px-12");
+    expect(h).not.toHaveClass("pe-12");
+  });
+});

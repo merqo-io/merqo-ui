@@ -365,3 +365,30 @@ test("help sheet: fit, empty submit error and sent state", async ({ page }, test
   await finishSend(page, dialog, testInfo, { touch, heading: "Message sent", shot: "help" });
   expect(errors).toEqual([]);
 });
+
+// The title box includes its end padding, so overlap is judged against the
+// rendered text lines, which is what a vendor would see run under the mark.
+test("signature slot stays clear of the title text and inside the card", async ({ page }) => {
+  const group = page.locator('[data-group="Signature slot"]');
+  await group.scrollIntoViewIfNeeded();
+  const result = await group.evaluate((root) => {
+    const rects = (r: DOMRect) => ({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+    return Array.from(root.querySelectorAll<HTMLElement>("main > div > div")).map((card) => {
+      const mark = card.querySelector<HTMLElement>('[aria-hidden="true"]')!.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(card.querySelector("h1")!);
+      const lines = Array.from(range.getClientRects()).map(rects);
+      const box = card.getBoundingClientRect();
+      const hit = lines.some(
+        (l) => l.left < mark.right && mark.left < l.right && l.top < mark.bottom && mark.top < l.bottom,
+      );
+      return { hit, lines: lines.length, inside: mark.right <= box.right && mark.left >= box.left };
+    });
+  });
+  expect(result).toHaveLength(2);
+  for (const card of result) {
+    expect(card.lines).toBeGreaterThan(0);
+    expect(card.hit).toBe(false);
+    expect(card.inside).toBe(true);
+  }
+});

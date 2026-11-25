@@ -12,4 +12,8 @@ describe("NotFound media", () => {
     render(<NotFound />);
     expect(screen.getByRole("heading", { name: "Page not found" })).toBeInTheDocument();
   });
+  it("threads signature to the status card", () => {
+    render(<NotFound signature={<svg data-testid="mark" />} />);
+    expect(screen.getByTestId("mark").parentElement).toHaveAttribute("aria-hidden", "true");
+  });
 });

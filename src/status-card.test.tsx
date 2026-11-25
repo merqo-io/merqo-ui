@@ -50,3 +50,20 @@ describe("StatusCard alignment", () => {
     expect(container.querySelector(".rounded-2xl")).toHaveClass("text-left");
   });
 });
+
+describe("StatusCard signature", () => {
+  it("renders the signature aria-hidden inside the card and pads the title", () => {
+    render(<StatusCard title="Gone" signature={<svg data-testid="mark" />} />);
+    const wrapper = screen.getByTestId("mark").parentElement as HTMLElement;
+    expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    expect(wrapper).toHaveClass("absolute", "end-4", "pointer-events-none");
+    expect(wrapper.parentElement).toHaveClass("relative");
+    expect(screen.getByRole("heading", { name: "Gone" })).toHaveClass("pe-12");
+  });
+
+  it("adds no wrapper or padding without a signature", () => {
+    const { container } = render(<StatusCard title="Gone" />);
+    expect(container.querySelector("[aria-hidden]")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Gone" })).not.toHaveClass("pe-12");
+  });
+});

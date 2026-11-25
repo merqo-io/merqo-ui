@@ -113,3 +113,10 @@ describe("alignment and default copy", () => {
     expect(html).not.toMatch(/Please|Sorry|Something went wrong/);
   });
 });
+
+describe("ErrorPage signature", () => {
+  it("threads signature to the status card", () => {
+    render(<ErrorPage error={new Error("x")} reset={() => {}} onError={() => {}} signature={<svg data-testid="mark" />} />);
+    expect(screen.getByTestId("mark").parentElement).toHaveAttribute("aria-hidden", "true");
+  });
+});

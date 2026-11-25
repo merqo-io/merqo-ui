@@ -9,6 +9,8 @@ export interface NotFoundProps {
   code?: string;
   /** Image or illustration shown above the title. */
   media?: React.ReactNode;
+  /** The kit's identity mark in the card's top-end corner; see `StatusCard`. */
+  signature?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
   homeHref?: string;
@@ -24,6 +26,7 @@ export function NotFound({
   wordmark,
   code,
   media,
+  signature,
   title = "Page not found",
   description = "This link may be out of date, or the page it pointed to no longer exists.",
   homeHref = "/",
@@ -36,6 +39,7 @@ export function NotFound({
       wordmark={wordmark}
       code={code}
       media={media}
+      signature={signature}
       title={title}
       description={description}
     >

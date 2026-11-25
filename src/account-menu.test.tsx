@@ -467,6 +467,18 @@ describe("AccountMenu", () => {
     expect(separator).toHaveAttribute("data-slot", "dropdown-menu-separator");
   });
 
+  it("draws a rule after the account header and one before Sign out", async () => {
+    await openMenu({ vendor: { name: "M", subtitle: "m@example.com" } });
+    expect(document.querySelectorAll('[data-slot="dropdown-menu-separator"]')).toHaveLength(2);
+  });
+
+  it("draws only the Sign out rule without a header", async () => {
+    await openMenu();
+    const rules = document.querySelectorAll('[data-slot="dropdown-menu-separator"]');
+    expect(rules).toHaveLength(1);
+    expect(rules[0].nextElementSibling).toHaveTextContent(/sign out/i);
+  });
+
   it("does not render a label or separator in the dropdown when vendor.subtitle is not set", async () => {
     await openMenu();
     // Profile should be the first item (no label/separator before it)

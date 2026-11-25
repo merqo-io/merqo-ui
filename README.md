@@ -205,9 +205,10 @@ works locally.
   `className`, not baked into the component. Optional `wrapper?: (content:
 ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
-  default bg-card/border/shadow classes don't apply.
-  `surface?: "default" | "elevated" | "none"` picks the default shell: the existing
-  bordered card (`rounded-lg`, driven by the kit's `--radius`), the `ElevatedCard` look, or no chrome (ignored with `wrapper`).
+  default bg-card/border classes don't apply.
+  `surface?: "default" | "elevated" | "none"` picks the default shell: a flat in-page
+  group (`rounded-xl border`, no shadow), the lifted `ElevatedCard` look
+  (`surface="elevated"`, for the page's primary object), or no chrome (ignored with `wrapper`).
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -2009,8 +2010,9 @@ private), all from semantic classes so each kit's own tokens drive the look.
   `StatusCard`, `EmptyState`.
 - **Section title** (`text-base font-semibold`): `Section`.
 
-Visual changes against earlier releases: `Section` card is `rounded-2xl`
-(was `rounded-lg`); `PricingLadder` tiers and `Faq` items are `rounded-xl` (was
+Visual changes against earlier releases: the default `Section` card is a flat
+in-page group, `rounded-xl border` with no shadow (was `rounded-lg`; pass
+`surface="elevated"` for the lifted `rounded-2xl` card); `PricingLadder` tiers and `Faq` items are `rounded-xl` (was
 `rounded-lg`); `AuditLogTable` frame is `rounded-xl` (was `rounded-2xl`);
 `EmptyState` title is bold; `PageHeader` title is `text-3xl` (36px to 30px
 when not `responsive`, and no `text-4xl` step when `responsive`); the `Faq` eyebrow is no longer monospace; every

@@ -5,6 +5,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { undoToast, type UndoToastHandle } from "./undo-toast";
 
 import { cn } from "./lib/utils";
+import { GROUP } from "./recipes";
 import {
   discardPendingImage,
   isPendingImage,
@@ -195,7 +196,8 @@ function UploadTrigger({
       aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
       aria-busy={uploading}
       className={cn(
-        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground active:border-primary/50 active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex flex-col items-center justify-center rounded-xl border border-dashed outline-none transition-colors focus-visible:ring-[3px] disabled:opacity-60",
+        GROUP,
+        "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground active:border-primary/50 active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex flex-col items-center justify-center border-dashed outline-none transition-colors focus-visible:ring-[3px] disabled:opacity-60",
         variant === "thumb" ? "gap-1" : "gap-1.5",
         box,
       )}

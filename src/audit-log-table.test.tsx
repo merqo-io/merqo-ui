@@ -16,6 +16,9 @@ describe("AuditLogTable header", () => {
       />,
     );
     expect(container.innerHTML).not.toMatch(/uppercase|tracking-wider/);
+    const head = container.firstElementChild!.firstElementChild as HTMLElement;
+    expect(head).toHaveClass("text-xs");
+    expect(head).not.toHaveClass("text-sm");
   });
 });
 

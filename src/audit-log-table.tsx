@@ -48,7 +48,7 @@ export function AuditLogTable({ entries, formatAction, emptyState, dateFormatter
   return (
     <div className={cn(GROUP, "overflow-hidden border-border")}>
       <div
-        className={cn("hidden sm:gap-x-4 px-5 py-3 text-xs sm:grid", GRID_COLS, LABEL)}
+        className={cn(LABEL, "hidden sm:gap-x-4 px-5 py-3 text-xs sm:grid", GRID_COLS)}
       >
         <span>Action</span>
         <span>Actor</span>

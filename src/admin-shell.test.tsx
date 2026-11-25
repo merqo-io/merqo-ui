@@ -29,7 +29,8 @@ describe("AdminShell", () => {
   it("renders the badge as a sentence-case label, not uppercase", () => {
     setup("/admin");
     const badge = screen.getByText("Admin");
-    expect(badge).toHaveClass("font-medium", "text-muted-foreground");
+    expect(badge).toHaveClass("font-medium", "text-muted-foreground", "text-xs");
+    expect(badge).not.toHaveClass("text-sm");
     expect(badge.className).not.toMatch(/uppercase|tracking/);
   });
 

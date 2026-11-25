@@ -31,6 +31,8 @@ describe("AsyncSubmitButton", () => {
     const button = screen.getByRole("button", { name: "Saving…" });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
+    expect(document.querySelector('[role="status"]')).toBeNull();
+    expect(button.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
   });
 });
 

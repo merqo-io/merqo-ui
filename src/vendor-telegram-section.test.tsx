@@ -271,5 +271,6 @@ describe("VendorTelegramSection reduced motion", () => {
     const tokens = button.querySelector("svg")!.getAttribute("class")!.split(" ");
     expect(tokens).toContain("motion-safe:animate-spin");
     expect(tokens).not.toContain("animate-spin");
+    expect(document.querySelector('[role="status"]')).toBeNull();
   });
 });

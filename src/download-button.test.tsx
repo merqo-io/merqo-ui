@@ -15,6 +15,7 @@ describe("DownloadButton", () => {
     expect(onDownload).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(btn).toBeDisabled());
     expect(btn).toHaveAttribute("aria-busy", "true");
+    expect(document.querySelector('[role="status"]')).toBeNull();
     resolve();
     await waitFor(() => expect(btn).not.toBeDisabled());
   });

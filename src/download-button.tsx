@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download } from "lucide-react";
 
 import { Button } from "./ui/button";
+import { Spinner } from "./ui/spinner";
 import { useAsyncAction } from "./use-async-action";
 
 export interface DownloadButtonProps
@@ -46,7 +47,7 @@ export function DownloadButton({
       }}
     >
       {pending ? (
-        <Loader2 className="motion-safe:animate-spin" aria-hidden="true" />
+        <Spinner role={undefined} aria-label={undefined} className={size === "xs" || size === "icon-xs" ? "size-3" : undefined} aria-hidden="true" />
       ) : (
         <Download aria-hidden="true" />
       )}

@@ -2,7 +2,7 @@
 
 Private shadcn/ui (new-york) primitives that the shared components build on.
 
-Only the `ui/*` entries in `ENTRIES` in `tsup.config.ts` are public, through `@merqo/ui/primitives`. That covers alert, alert dialog, badge, button, card, checkbox, dialog, dropdown menu, input, label, popover, select, sheet, skeleton, switch, tabs, textarea, toggle, toggle group and tooltip. Any other module here stays internal and may change freely.
+Only the `ui/*` entries in `ENTRIES` in `tsup.config.ts` are public, through `@merqo/ui/primitives`. That covers alert, alert dialog, badge, button, card, checkbox, dialog, dropdown menu, empty, input, item, label, popover, select, sheet, skeleton, spinner, switch, tabs, textarea, toggle, toggle group and tooltip. Any other module here stays internal and may change freely.
 
 Rules: each file declares its own `"use client"`; do not add a barrel, since a barrel mixes Server and Client Components. Use design tokens, never literal colour, font or radius values. Do not export a part nothing uses; knip checks this.
 
@@ -24,4 +24,7 @@ Rules: each file declares its own `"use client"`; do not add a barrel, since a b
 | `alert` | `default` and `destructive` variants only, `role="alert"` by default, no icon colour variants | Errors are announced at once; a polite notice passes `role="status"` |
 | `sheet`, `dialog`, `alert-dialog` | `OVERLAY_TRANSITION` timing | Shared motion and reduced-motion contract |
 | `popover`, `select`, `tooltip` | `POPUP_TRANSITION` timing; select trigger is 44px on coarse pointers | Same |
+| `empty` | No `md:p-12` on `Empty` (padding is `p-6` at every width, so a caller's padding class wins at all widths). Otherwise upstream parts. `EmptyState` never uses `EmptyMedia variant="icon"` | The tinted tile reads as generic; the bare icon is the house style |
+| `spinner` | `motion-safe:animate-spin` instead of `animate-spin` | Reduced motion stops the spin; callers that already announce busy pass `aria-hidden` |
+| `item` | Upstream, with `Separator` from `radix-ui` | No separate separator primitive is shipped |
 | all animated primitives | Reduced motion shortens to 1ms instead of `animate-none` | `animationend` still fires |

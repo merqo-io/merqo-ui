@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Loader2 } from "lucide-react";
 
 import { cn } from "./lib/utils";
 import { Button } from "./ui/button";
+import { Spinner } from "./ui/spinner";
 
 export interface AsyncSubmitButtonProps {
   pending: boolean;
@@ -31,7 +31,7 @@ export function AsyncSubmitButton({
       className={cn("gap-1.5 has-[>svg]:px-4", className)}
     >
       {pending ? (
-        <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
+        <Spinner role={undefined} aria-label={undefined} aria-hidden="true" />
       ) : null}
       {pending ? (pendingChildren ?? children) : children}
     </Button>

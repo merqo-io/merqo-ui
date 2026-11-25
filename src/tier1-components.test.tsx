@@ -77,7 +77,7 @@ describe("EmptyState", () => {
     expect(screen.getByText("Add one")).toBeInTheDocument();
     expect(screen.getByTestId("icon")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
-    expect(screen.getByRole("heading").parentElement).toHaveClass("mine");
+    expect(screen.getByRole("heading").closest("[data-slot=empty]")).toHaveClass("mine");
   });
 
   it("accepts the sentence as children and omits empty slots", () => {

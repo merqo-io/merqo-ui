@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-11-25
+
 ### Added
 
 - `Money`: `formatMoney` as a non-wrapping, tabular-figure `<span>`, server-safe, no colour by sign.

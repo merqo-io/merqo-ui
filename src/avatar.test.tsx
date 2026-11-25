@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { Avatar, AvatarIdentity, initials } from "./avatar";
 
 describe("initials", () => {
@@ -26,6 +26,26 @@ describe("Avatar", () => {
     const { container } = render(<Avatar name="Ada" avatarUrl="/a.png" />);
     expect(container.querySelector("img")).toHaveAttribute("src", "/a.png");
     expect(screen.queryByText("AD")).not.toBeInTheDocument();
+  });
+});
+
+describe("Avatar broken photo", () => {
+  it("falls back to initials when the image fails to load", () => {
+    const { container } = render(<Avatar name="Ada Lovelace" avatarUrl="/bad.png" />);
+    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("AL")).toBeInTheDocument();
+  });
+  it("tries a new avatarUrl after a failure", () => {
+    const { container, rerender } = render(<Avatar name="Ada" avatarUrl="/bad.png" />);
+    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+    rerender(<Avatar name="Ada" avatarUrl="/good.png" />);
+    expect(container.querySelector("img")).toHaveAttribute("src", "/good.png");
+  });
+  it("AvatarIdentity inherits the fallback", () => {
+    const { container } = render(<AvatarIdentity name="Ada Lovelace" avatarUrl="/bad.png" />);
+    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+    expect(screen.getByText("AL")).toBeInTheDocument();
   });
 });
 

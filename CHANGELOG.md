@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.62.0] - 2026-11-27
+
 ### Added
 
 - `DashboardNav` takes `mobileNav?: "menu" | "none"` (default `"menu"`, today's

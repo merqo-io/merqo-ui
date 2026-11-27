@@ -291,7 +291,11 @@ ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   tap-away scrim is a `tabIndex={-1}` `<button>` named "Close navigation
   menu" (since v0.35.0). Optional `collapseBelow?: "sm" | "md" | "lg" | "xl"`
   (since v0.38.0, default `"sm"`) sets the breakpoint below which links
-  collapse into the burger menu.
+  collapse into the burger menu. Optional `mobileNav?: "menu" | "none"`
+  (default `"menu"`) set to `"none"` renders no burger, no mobile panel and
+  no `data-tour="nav-menu"` anchor, for a kit that navigates on phone some
+  other way (e.g. a bottom tab bar); inline links at or above the breakpoint
+  and the account menu are unchanged.
 - `LandingNav` — public-page nav shell: sticky header, shared shape
   (`z-20`; the translucent `bg-background/85` and `backdrop-blur-md` sit on a `before:` pseudo-element so the header is not a containing block for the fixed tap-away scrim), horizontal padding on the inner `<nav>`
   (`mx-auto max-w-6xl px-5`, so it shares an edge with content in the same

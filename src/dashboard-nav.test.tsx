@@ -25,13 +25,48 @@ beforeEach(() => {
   onFeedbackSubmit.mockResolvedValue(undefined);
 });
 
+describe("DashboardNav mobileNav", () => {
+  it("renders the burger by default and opens the mobile panel", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<DashboardNav {...baseProps} />);
+    const burger = screen.getByRole("button", {
+      name: "Mobile navigation menu",
+    });
+    expect(container.querySelector('[data-tour="nav-menu"]')).not.toBeNull();
+    await user.click(burger);
+    expect(
+      screen.getByRole("navigation", { name: "Mobile navigation menu" }),
+    ).toBeTruthy();
+  });
+
+  it('renders no burger or mobile panel with mobileNav="none"', () => {
+    const { container } = render(
+      <DashboardNav {...baseProps} mobileNav="none" />,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Mobile navigation menu" }),
+    ).toBeNull();
+    expect(container.querySelector('[data-tour="nav-menu"]')).toBeNull();
+    expect(container.querySelector("[aria-controls]")).toBeNull();
+    expect(
+      screen.queryByRole("navigation", { name: "Mobile navigation menu" }),
+    ).toBeNull();
+    expect(screen.getByRole("link", { name: "Orders" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Stats" })).toBeTruthy();
+    expect(screen.getByText("QKit")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /account menu/i })).toBeTruthy();
+  });
+});
+
 describe("DashboardNav", () => {
   it("passes switchKits through to the account menu's Switch products submenu", async () => {
     const user = userEvent.setup();
     render(
       <DashboardNav
         {...baseProps}
-        switchKits={[{ label: "loopkit", href: "https://loopkit-sg.vercel.app" }]}
+        switchKits={[
+          { label: "loopkit", href: "https://loopkit-sg.vercel.app" },
+        ]}
       />,
     );
     await user.click(screen.getByRole("button", { name: /account menu/i }));
@@ -47,20 +82,28 @@ describe("DashboardNav", () => {
 
   it("renders the account menu trigger at all times", () => {
     render(<DashboardNav {...baseProps} />);
-    expect(screen.getByRole("button", { name: /account menu/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /account menu/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders a burger button with aria-expanded/aria-controls that toggles a mobile link panel with the given nav links", async () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);
 
-    const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+    const burger = screen.getByRole("button", {
+      name: "Mobile navigation menu",
+    });
     expect(burger).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", { name: "Mobile navigation menu" }),
+    ).not.toBeInTheDocument();
 
     await user.click(burger);
     expect(burger).toHaveAttribute("aria-expanded", "true");
-    const nav = screen.getByRole("navigation", { name: "Mobile navigation menu" });
+    const nav = screen.getByRole("navigation", {
+      name: "Mobile navigation menu",
+    });
     expect(burger).toHaveAttribute("aria-controls", nav.id);
     expect(within(nav).getByRole("link", { name: "Orders" })).toHaveAttribute(
       "href",
@@ -76,17 +119,25 @@ describe("DashboardNav", () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);
 
-    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
-    const nav = screen.getByRole("navigation", { name: "Mobile navigation menu" });
+    await user.click(
+      screen.getByRole("button", { name: "Mobile navigation menu" }),
+    );
+    const nav = screen.getByRole("navigation", {
+      name: "Mobile navigation menu",
+    });
     await user.click(within(nav).getByRole("link", { name: "Orders" }));
 
-    expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", { name: "Mobile navigation menu" }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the scrim out of any backdrop-filter containing block", async () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);
-    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
+    await user.click(
+      screen.getByRole("button", { name: "Mobile navigation menu" }),
+    );
     const scrim = screen.getByRole("button", { name: "Close navigation menu" });
     expect(scrim).toHaveClass("fixed", "inset-0");
     for (let el: Element | null = scrim; el; el = el.parentElement) {
@@ -98,27 +149,39 @@ describe("DashboardNav", () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);
 
-    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
-    expect(screen.getByRole("navigation", { name: "Mobile navigation menu" })).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Mobile navigation menu" }),
+    );
+    expect(
+      screen.getByRole("navigation", { name: "Mobile navigation menu" }),
+    ).toBeInTheDocument();
 
     const scrim = screen.getByRole("button", { name: "Close navigation menu" });
     expect(scrim.tagName).toBe("BUTTON");
     expect(scrim).toHaveAttribute("tabindex", "-1");
     await user.click(scrim);
 
-    expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", { name: "Mobile navigation menu" }),
+    ).not.toBeInTheDocument();
   });
 
   it("I7: closes the mobile panel on Escape", async () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);
 
-    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
-    expect(screen.getByRole("navigation", { name: "Mobile navigation menu" })).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Mobile navigation menu" }),
+    );
+    expect(
+      screen.getByRole("navigation", { name: "Mobile navigation menu" }),
+    ).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
 
-    expect(screen.queryByRole("navigation", { name: "Mobile navigation menu" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", { name: "Mobile navigation menu" }),
+    ).not.toBeInTheDocument();
   });
 
   it("also renders the same links inline for desktop viewports (sm:flex)", () => {
@@ -128,7 +191,7 @@ describe("DashboardNav", () => {
     expect(inlineLinks.length).toBeGreaterThan(0);
   });
 
-  it("stamps data-tour=\"nav-menu\" on the mobile burger button", () => {
+  it('stamps data-tour="nav-menu" on the mobile burger button', () => {
     render(<DashboardNav {...baseProps} navLinks={[]} />);
     expect(
       screen.getByRole("button", { name: /mobile navigation menu/i }),
@@ -160,15 +223,27 @@ describe("DashboardNav", () => {
         isActiveHref={(href) => href === "/dashboard"}
       />,
     );
-    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Stats" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("link", { name: "Stats" })).not.toHaveAttribute(
+      "aria-current",
+    );
   });
 
   it.each(["data-tour", "aria-current"])(
     "links carry no %s when its driver prop is not given",
     (attribute) => {
-      render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
-      expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute(attribute);
+      render(
+        <DashboardNav
+          {...baseProps}
+          navLinks={[{ href: "/dashboard", label: "Home" }]}
+        />,
+      );
+      expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute(
+        attribute,
+      );
     },
   );
 
@@ -198,7 +273,11 @@ describe("DashboardNav", () => {
 
   it("renders nav links (desktop and mobile) through a given LinkComponent instead of a plain <a>", async () => {
     const user = userEvent.setup();
-    const CustomLink = ({ href, children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    const CustomLink = ({
+      href,
+      children,
+      ...rest
+    }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
       <a href={href} data-custom-link="true" {...rest}>
         {children}
       </a>
@@ -214,8 +293,12 @@ describe("DashboardNav", () => {
       expect(link).toHaveAttribute("data-custom-link", "true");
     }
 
-    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
-    const nav = screen.getByRole("navigation", { name: "Mobile navigation menu" });
+    await user.click(
+      screen.getByRole("button", { name: "Mobile navigation menu" }),
+    );
+    const nav = screen.getByRole("navigation", {
+      name: "Mobile navigation menu",
+    });
     expect(within(nav).getByRole("link", { name: "Home" })).toHaveAttribute(
       "data-custom-link",
       "true",
@@ -223,36 +306,61 @@ describe("DashboardNav", () => {
   });
 
   it("defaults to a plain <a> when LinkComponent is not given", () => {
-    render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
-    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("data-custom-link");
+    render(
+      <DashboardNav
+        {...baseProps}
+        navLinks={[{ href: "/dashboard", label: "Home" }]}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute(
+      "data-custom-link",
+    );
   });
 
   describe("collapseBelow", () => {
     async function openMenu() {
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
+      await user.click(
+        screen.getByRole("button", { name: "Mobile navigation menu" }),
+      );
     }
 
     it("uses sm classes when the prop is omitted", async () => {
       render(<DashboardNav {...baseProps} />);
       await openMenu();
-      expect(screen.getByRole("button", { name: "Mobile navigation menu" })).toHaveClass("sm:hidden");
-      expect(document.querySelector("header nav:not(#dashboard-nav-mobile-panel)")).toHaveClass("hidden", "sm:flex");
-      expect(screen.getByRole("button", { name: "Close navigation menu" })).toHaveClass("sm:hidden");
-      expect(document.getElementById("dashboard-nav-mobile-panel")).toHaveClass("sm:hidden");
+      expect(
+        screen.getByRole("button", { name: "Mobile navigation menu" }),
+      ).toHaveClass("sm:hidden");
+      expect(
+        document.querySelector("header nav:not(#dashboard-nav-mobile-panel)"),
+      ).toHaveClass("hidden", "sm:flex");
+      expect(
+        screen.getByRole("button", { name: "Close navigation menu" }),
+      ).toHaveClass("sm:hidden");
+      expect(document.getElementById("dashboard-nav-mobile-panel")).toHaveClass(
+        "sm:hidden",
+      );
     });
 
     it("uses xl classes on burger, inline nav, scrim and panel when collapseBelow is xl", async () => {
       render(<DashboardNav {...baseProps} collapseBelow="xl" />);
       await openMenu();
-      const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+      const burger = screen.getByRole("button", {
+        name: "Mobile navigation menu",
+      });
       expect(burger).toHaveClass("xl:hidden");
       expect(burger).not.toHaveClass("sm:hidden");
-      const inline = document.querySelector("header nav:not(#dashboard-nav-mobile-panel)");
+      const inline = document.querySelector(
+        "header nav:not(#dashboard-nav-mobile-panel)",
+      );
       expect(inline).toHaveClass("hidden", "xl:flex");
       expect(inline).not.toHaveClass("sm:flex");
-      expect(screen.getByRole("button", { name: "Close navigation menu" })).toHaveClass("xl:hidden");
-      expect(document.getElementById("dashboard-nav-mobile-panel")).toHaveClass("xl:hidden");
+      expect(
+        screen.getByRole("button", { name: "Close navigation menu" }),
+      ).toHaveClass("xl:hidden");
+      expect(document.getElementById("dashboard-nav-mobile-panel")).toHaveClass(
+        "xl:hidden",
+      );
     });
   });
 });
@@ -260,14 +368,18 @@ describe("DashboardNav", () => {
 describe("DashboardNav touch target", () => {
   it("gives the burger a 44px coarse-pointer hit area", () => {
     render(<DashboardNav {...baseProps} />);
-    const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+    const burger = screen.getByRole("button", {
+      name: "Mobile navigation menu",
+    });
     expect(burger).toHaveClass("relative", "pointer-coarse:after:size-11");
   });
 
   it("opens the mobile panel by touch", async () => {
     const user = userEvent.setup();
     render(<DashboardNav {...baseProps} />);
-    const burger = screen.getByRole("button", { name: "Mobile navigation menu" });
+    const burger = screen.getByRole("button", {
+      name: "Mobile navigation menu",
+    });
     await user.pointer({ keys: "[TouchA]", target: burger });
     expect(burger).toHaveAttribute("aria-expanded", "true");
   });
@@ -281,7 +393,9 @@ describe("DashboardNav touch and focus", () => {
       keys: "[TouchA]",
       target: screen.getByRole("button", { name: "Mobile navigation menu" }),
     });
-    const panel = screen.getByRole("navigation", { name: "Mobile navigation menu" });
+    const panel = screen.getByRole("navigation", {
+      name: "Mobile navigation menu",
+    });
     for (const link of within(panel).getAllByRole("link")) {
       const tokens = link.className.split(" ");
       expect(tokens).toContain("min-h-11");

@@ -7,9 +7,10 @@ import { Menu } from "lucide-react";
 import { AccountMenu, type AccountMenuProps } from "./account-menu";
 import { cn } from "./lib/utils";
 
-export type DashboardNavLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string;
-};
+export type DashboardNavLinkProps =
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: string;
+  };
 
 export type DashboardNavProps = {
   wordmark: React.ReactNode;
@@ -30,6 +31,13 @@ export type DashboardNavProps = {
    * the header between `sm` and the width they need.
    */
   collapseBelow?: "sm" | "md" | "lg" | "xl";
+  /**
+   * `"menu"` (default) shows the burger and its panel below the
+   * `collapseBelow` breakpoint. `"none"` renders neither, for a kit that
+   * navigates on phone some other way (e.g. a bottom tab bar). Inline links
+   * at or above the breakpoint are unaffected.
+   */
+  mobileNav?: "menu" | "none";
 } & AccountMenuProps;
 
 // Tailwind only sees literal class strings, so each breakpoint spells out
@@ -50,21 +58,23 @@ export function DashboardNav({
   tourAnchor,
   LinkComponent,
   collapseBelow = "sm",
+  mobileNav = "menu",
   ...accountMenuProps
 }: DashboardNavProps) {
   const collapse = COLLAPSE_CLASSES[collapseBelow];
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const Link = LinkComponent ?? ContextAppLink;
+  const showMobileMenu = mobileNav === "menu";
 
   // I7: Escape closes the mobile panel, matching the tap-away scrim below.
   React.useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen || !showMobileMenu) return;
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setMobileOpen(false);
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [mobileOpen]);
+  }, [mobileOpen, showMobileMenu]);
 
   return (
     // Shares its border/bg/blur/z-index shape with LandingNav's header, but
@@ -74,20 +84,22 @@ export function DashboardNav({
     <header className="border-border sticky top-0 z-20 border-b px-5 py-3.5 before:absolute before:inset-0 before:-z-10 before:bg-background/85 before:backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-4">
-          <button
-            type="button"
-            aria-label="Mobile navigation menu"
-            aria-expanded={mobileOpen}
-            aria-controls={MOBILE_PANEL_ID}
-            data-tour="nav-menu"
-            className={cn(
-              "focus-visible:ring-ring/50 relative inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2 pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']",
-              collapse.burger,
-            )}
-            onClick={() => setMobileOpen((open) => !open)}
-          >
-            <Menu className="size-5" />
-          </button>
+          {showMobileMenu ? (
+            <button
+              type="button"
+              aria-label="Mobile navigation menu"
+              aria-expanded={mobileOpen}
+              aria-controls={MOBILE_PANEL_ID}
+              data-tour="nav-menu"
+              className={cn(
+                "focus-visible:ring-ring/50 relative inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2 pointer-coarse:after:absolute pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 pointer-coarse:after:content-['']",
+                collapse.burger,
+              )}
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              <Menu className="size-5" />
+            </button>
+          ) : null}
           {wordmark}
           <nav className={cn("items-center gap-4", collapse.inline)}>
             {navLinks.map((link) => (
@@ -110,7 +122,7 @@ export function DashboardNav({
         <AccountMenu {...accountMenuProps} LinkComponent={LinkComponent} />
       </div>
 
-      {mobileOpen ? (
+      {showMobileMenu && mobileOpen ? (
         <>
           {/* Tap-away scrim (I7). Out of the tab order: Escape (above) and the
               panel's own links are the keyboard ways to dismiss it. */}
@@ -118,7 +130,10 @@ export function DashboardNav({
             type="button"
             tabIndex={-1}
             aria-label="Close navigation menu"
-            className={cn("bg-foreground/20 fixed inset-0 z-10 cursor-default", collapse.overlay)}
+            className={cn(
+              "bg-foreground/20 fixed inset-0 z-10 cursor-default",
+              collapse.overlay,
+            )}
             onClick={() => setMobileOpen(false)}
           />
           <nav

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- `DashboardNav` takes `mobileNav?: "menu" | "none"` (default `"menu"`, today's
+  behaviour). `"none"` drops the burger and mobile panel so a kit with its own
+  phone navigation keeps only the wordmark, account menu and tier chip.
+
 ## [0.61.2] - 2026-11-26
 
 ### Fixed

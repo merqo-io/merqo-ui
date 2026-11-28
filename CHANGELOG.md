@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.62.1] - 2026-11-28
+
 ### Fixed
 
 - `AboutMerqo` no longer claims qkit runs "with a few vendors" or that paykit is

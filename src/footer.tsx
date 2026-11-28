@@ -44,9 +44,9 @@ export interface FooterProps {
 // width; the horizontal padding stands in for the old inter-link gap.
 const LINK_FOCUS =
   "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
-const LINK_TAP = `inline-flex min-h-11 items-center px-2 ${LINK_FOCUS}`;
+const LINK_TAP = `inline-flex min-h-11 min-w-11 items-center justify-center px-2 ${LINK_FOCUS}`;
 const LEGAL_LINK_TAP =
-  "gap-0 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a]:px-2 [&_a]:outline-none [&_a]:focus-visible:ring-[3px] [&_a]:focus-visible:ring-ring/50";
+  "gap-0 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:min-w-11 [&_a]:items-center [&_a]:justify-center [&_a]:px-2 [&_a]:outline-none [&_a]:focus-visible:ring-[3px] [&_a]:focus-visible:ring-ring/50";
 
 // Shell only, same "fix drift in the shared shape" rationale as LandingNav:
 // every kit's own footer had converged on the exact same layout/copy order
@@ -85,7 +85,9 @@ export function Footer({
       {/* Default keeps pb-20 to lift the links above the fixed 48px BackToTop button (24px from the viewport edge). Compact stays ~64px tall, so it reserves the button column with sm:pr-20 and, on a phone where that column would starve the link row, lifts with max-sm:pb-14 instead. */}
       <div className={wrapClass}>
         <div className={brandClass}>
-          {wordmark}
+          <span className="inline-flex [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center">
+            {wordmark}
+          </span>
           <span>{tagline}</span>
         </div>
         <span className={copyClass}>

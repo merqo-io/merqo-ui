@@ -122,4 +122,11 @@ describe("LandingNav links", () => {
     rerender(<LandingNav wordmark={<span>Kit</span>} end={<span>End</span>} links={[]} />);
     expect(container.innerHTML).toBe(before);
   });
+
+  it("gives the wordmark anchor a 44px tall touch box", () => {
+    render(<LandingNav wordmark={<a href="/">Kit</a>} end={<span>End</span>} />);
+    const wrap = screen.getByRole("link", { name: "Kit" }).parentElement;
+    expect(wrap?.className).toContain("[&>a]:min-h-11");
+    expect(wrap?.className).toContain("[&>a]:inline-flex");
+  });
 });

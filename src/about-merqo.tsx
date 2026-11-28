@@ -34,15 +34,14 @@ export function AboutMerqo({ kitName, className, children }: AboutMerqoProps) {
           That mess is where <span className="font-medium text-foreground">qkit</span> came
           from: a queue and order system a small vendor can run with no
           app for the customer and no extra hardware to buy. It is
-          piloting, running with a few vendors.
+          running in a pilot.
         </p>
         <p>
-          Merqo is the shared home for the rest of the family. The rest of
-          the family is in build (built, not yet tried with vendors): <span className="font-medium text-foreground">loopkit</span> for
-          stamp-card loyalty and <span className="font-medium text-foreground">stockkit</span> for
-          stock. <span className="font-medium text-foreground">paykit</span>, for
-          PayNow and payment tracking, is in pilot with Merqo stalls. The plan is one account, one
-          sign-in and one dashboard across all of them.
+          Merqo is the shared home for the rest of the family, all still
+          in build (built, not yet tried with vendors): <span className="font-medium text-foreground">loopkit</span> for
+          stamp-card loyalty, <span className="font-medium text-foreground">paykit</span> for PayNow and payment
+          tracking, <span className="font-medium text-foreground">stockkit</span> for stock, and <span className="font-medium text-foreground">printkit</span> for
+          printing qkit orders on a Bluetooth printer.
         </p>
         <p>
           Merqo is a personal software project built and run by Clarence Lee. Merqo is not registered with ACRA or incorporated as a company.

@@ -4,6 +4,9 @@
 
 ### Added
 
+- `Badge` variants `soft-destructive`, `warning` and `gold`, so kits can drop
+  local badge tones. `warning` and `gold` need `--warning`, `--gold` and
+  `--gold-foreground` defined and mapped in the kit's theme.
 - `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
   tappable phone and tablet landing demo (tabs and stepper below 960px, steps
   beside a sticky device pair from 960px, `followStep` via ref). Screens, state

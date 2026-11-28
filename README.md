@@ -1579,8 +1579,19 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   large field style the kits used to copy as a className override; `className`
   still merges last. The native numeric `size` attribute is not accepted.
 - `Badge`, `badgeVariants`, `BadgeProps`. Variants: `default`, `secondary`,
-  `destructive`, `outline`, `ghost`, `link`, `muted`, `success`. A kit that needs a gold badge wraps
-  `Badge` locally.
+  `destructive`, `outline`, `ghost`, `link`, `muted`, `success`, `soft-destructive`
+  (`bg-destructive/10 text-destructive`), `warning` (`bg-warning/12
+  text-warning`) and `gold` (solid `bg-gold text-gold-foreground`, with a
+  link hover). `warning` and `gold` need theme tokens the package does not
+  ship: `--warning`, `--gold` and `--gold-foreground`. Define them in each
+  kit's `globals.css` in `:root` and `.dark`, and map them in `@theme inline`
+  (`--color-warning: var(--warning)`, `--color-gold: var(--gold)`,
+  `--color-gold-foreground: var(--gold-foreground)`), as for `--success`
+  above. Text on its background must reach at least 4.5:1 in light and dark.
+  A kit that lacks a token renders that badge blank, so add any missing one
+  when you move the pin. `--warning` exists in qkit and printkit; `--gold` and
+  `--gold-foreground` exist in loopkit and merqo. Other kits may need all
+  three.
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.

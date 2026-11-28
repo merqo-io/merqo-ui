@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `AboutMerqo` no longer claims qkit runs "with a few vendors" or that paykit is
+  in pilot, and drops the one-account plan. qkit is "running in a pilot"; loopkit,
+  paykit, stockkit and printkit are in build (built, not yet tried with vendors).
+- `Footer` links (About, FAQ, sign-in, legal) and the wordmark anchor, and the
+  `LandingNav` wordmark anchor, now reach a 44px touch target on phones. The
+  `LandingNav` header padding drops from `py-4` to `py-3` so its height barely
+  changes.
+
 ## [0.62.0] - 2026-11-27
 
 ### Added

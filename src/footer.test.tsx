@@ -244,8 +244,20 @@ describe("Footer", () => {
 describe("Footer alignment", () => {
   it("stacks left-aligned under sm and keeps the sm row layout", () => {
     const { container } = render(<Footer wordmark={<a href="/">K</a>} tagline="t" kitName="kit" />);
-    expect(container.innerHTML).not.toContain("justify-center");
+    expect(container.querySelector("footer > div")?.className).not.toContain("justify-center");
     const wrap = container.querySelector("footer > div") as HTMLElement;
     expect(wrap).toHaveClass("items-start", "sm:flex-row", "sm:items-center");
+  });
+
+  it("gives short links and the wordmark anchor a 44px touch box", () => {
+    const { container } = render(
+      <Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" faqHref="/faq" />,
+    );
+    expect(screen.getByRole("link", { name: "FAQ" })).toHaveClass("min-h-11", "min-w-11", "justify-center");
+    expect(screen.getByRole("link", { name: "About" })).toHaveClass("min-h-11", "min-w-11");
+    const wrap = screen.getByRole("link", { name: "Kit" }).parentElement;
+    expect(wrap?.className).toContain("[&>a]:min-h-11");
+    expect(wrap?.className).toContain("[&>a]:inline-flex");
+    expect(container.querySelector("nav")?.className).toContain("[&_a]:min-w-11");
   });
 });

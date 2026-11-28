@@ -14,14 +14,16 @@ describe("AboutMerqo", () => {
   it("describes qkit as piloting and the rest as in build, never live", () => {
     const { container } = render(<AboutMerqo />);
     const text = container.textContent ?? "";
-    expect(text).toMatch(/piloting, running with a few vendors/);
-    expect(text).toMatch(/is in build \(built, not yet tried with vendors\)/);
-    expect(text).toMatch(/paykit[^.]*in pilot with Merqo stalls/);
-    const inBuildSentence = text.split(".").find((s) => s.includes("in build")) ?? "";
-    expect(inBuildSentence).not.toMatch(/paykit/);
+    expect(text).toMatch(/It is running in a pilot\./);
+    expect(text).toMatch(/all still in build \(built, not yet tried with vendors\)/);
     expect(text).toMatch(/loopkit/);
     expect(text).toMatch(/paykit/);
     expect(text).toMatch(/stockkit/);
+    expect(text).toMatch(/printkit/);
+    expect(text).not.toMatch(/few vendors/);
+    expect(text).not.toMatch(/in pilot with/);
+    expect(text).not.toMatch(/one sign-in/);
+    expect(text).not.toMatch(/—/);
     expect(text).not.toMatch(/\b(live|now|available today|proven)\b/i);
   });
 

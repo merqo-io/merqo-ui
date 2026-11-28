@@ -150,4 +150,138 @@ describe("pending and failed refreshes", () => {
     expect(tick).toHaveBeenCalledTimes(3);
     unmount();
   });
+
+  describe("refetchOnFocus", () => {
+    it("ignores window focus by default", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, { intervalMs: 10_000, enabled: true }),
+      );
+      vi.advanceTimersByTime(1000);
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(1);
+      unmount();
+    });
+
+    it("ticks on window focus when opted in", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, {
+          intervalMs: 10_000,
+          enabled: true,
+          refetchOnFocus: true,
+        }),
+      );
+      vi.advanceTimersByTime(1000);
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(2);
+      unmount();
+    });
+
+    it("makes one call when visibilitychange and focus arrive together", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, {
+          intervalMs: 10_000,
+          enabled: true,
+          refetchOnFocus: true,
+        }),
+      );
+      setHidden(true);
+      document.dispatchEvent(new Event("visibilitychange"));
+      vi.advanceTimersByTime(5000);
+      setHidden(false);
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(2);
+      unmount();
+    });
+
+    it("makes one call when focus arrives before visibilitychange", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, {
+          intervalMs: 10_000,
+          enabled: true,
+          refetchOnFocus: true,
+        }),
+      );
+      setHidden(true);
+      document.dispatchEvent(new Event("visibilitychange"));
+      vi.advanceTimersByTime(5000);
+      setHidden(false);
+      window.dispatchEvent(new Event("focus"));
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(tick).toHaveBeenCalledTimes(2);
+      vi.advanceTimersByTime(10_000);
+      expect(tick).toHaveBeenCalledTimes(3);
+      unmount();
+    });
+
+    it("does not let a focus while hidden swallow the next visibilitychange", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, {
+          intervalMs: 10_000,
+          enabled: true,
+          refetchOnFocus: true,
+        }),
+      );
+      setHidden(true);
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(1);
+      setHidden(false);
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(tick).toHaveBeenCalledTimes(2);
+      unmount();
+    });
+
+    it("skips a focus tick while one is in flight, while hidden or disabled", async () => {
+      let finish!: () => void;
+      const pending = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      const tick = vi.fn().mockReturnValueOnce(pending);
+      const { rerender, unmount } = renderHook(
+        ({ enabled }) =>
+          usePolling(tick, {
+            intervalMs: 10_000,
+            enabled,
+            refetchOnFocus: true,
+          }),
+        { initialProps: { enabled: true } },
+      );
+      vi.advanceTimersByTime(1000);
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(1);
+      finish();
+      await Promise.resolve();
+      setHidden(true);
+      vi.advanceTimersByTime(1000);
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(1);
+      setHidden(false);
+      rerender({ enabled: false });
+      vi.advanceTimersByTime(1000);
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(1);
+      unmount();
+    });
+
+    it("stops listening on unmount", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, {
+          intervalMs: 10_000,
+          enabled: true,
+          refetchOnFocus: true,
+        }),
+      );
+      unmount();
+      vi.advanceTimersByTime(1000);
+      window.dispatchEvent(new Event("focus"));
+      expect(tick).toHaveBeenCalledTimes(1);
+    });
+  });
 });

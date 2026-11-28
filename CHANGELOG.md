@@ -4,6 +4,13 @@
 
 ### Added
 
+- `usePolling` option `refetchOnFocus` (default false): also tick when the
+  window regains focus, de-duplicated with the visibilitychange tick so a return
+  makes one call.
+- `useLeaveGuard(when, message?)`: beforeunload prompt plus a capture-phase
+  confirm on links that leave the page (cross-origin included), returning a
+  `() => boolean` for in-code navigation.
+- `formatShortDate` (`10 Jul`, SGT) and `formatMoneyCompact` (`S$1.5k`, `S$2.5M`).
 - `Badge` variants `soft-destructive`, `warning` and `gold`, so kits can drop
   local badge tones. `warning` and `gold` need `--warning`, `--gold` and
   `--gold-foreground` defined and mapped in the kit's theme.

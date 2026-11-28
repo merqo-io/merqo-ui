@@ -6,6 +6,7 @@ export { weakPasswordMessage, errorReasons } from "./weak-password-message";
 export type { WeakPasswordReason } from "./weak-password-message";
 export { useAsyncAction, navigatingAway } from "./use-async-action";
 export { usePolling } from "./use-polling";
+export { useLeaveGuard } from "./use-leave-guard";
 export { isRedirectError } from "./redirect-error";
 export { TwoColumnSections } from "./two-column-sections";
 export type { TwoColumnSectionsProps } from "./two-column-sections";
@@ -217,6 +218,7 @@ export type { DataCollectionNoticeProps } from "./data-collection-notice";
 export {
   MAX_MONEY_CENTS,
   formatMoney,
+  formatMoneyCompact,
   centsToDollarString,
   parseDollarsToCents,
   dollarsToCents,
@@ -225,6 +227,7 @@ export type { FormatMoneyOptions, ParseMoneyOptions, ParsedMoney } from "./money
 export {
   SGT_TIME_ZONE,
   formatDate,
+  formatShortDate,
   formatTime,
   formatDateTime,
   formatRelativeTime,

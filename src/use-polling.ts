@@ -39,10 +39,12 @@ export function usePolling(
     if (!enabled) return;
     let timer: ReturnType<typeof setInterval> | undefined;
 
-    let lastFire = Number.NEGATIVE_INFINITY;
+    // Only return-to-tab fires (visibility or focus) are recorded, not interval
+    // ticks: the pair arrives in either order (focus first on Safari/iOS), and
+    // an interval tick just before a return should not swallow the refresh.
+    let lastReturn = Number.NEGATIVE_INFINITY;
     const run = () => {
       if (document.hidden || inFlight.current) return;
-      lastFire = Date.now();
       inFlight.current = true;
       try {
         const result = tickRef.current();
@@ -72,21 +74,21 @@ export function usePolling(
         timer = undefined;
       }
     };
+    const runOnReturn = () => {
+      if (Date.now() - lastReturn < FOCUS_DEDUPE_MS) return;
+      lastReturn = Date.now();
+      run();
+    };
     const onVisibility = () => {
       if (document.hidden) stop();
       else {
-        run();
+        runOnReturn();
         start();
       }
     };
 
-    const onFocus = () => {
-      if (Date.now() - lastFire < FOCUS_DEDUPE_MS) return;
-      run();
-    };
-
     document.addEventListener("visibilitychange", onVisibility);
-    if (refetchOnFocus) window.addEventListener("focus", onFocus);
+    if (refetchOnFocus) window.addEventListener("focus", runOnReturn);
     if (!document.hidden) {
       run();
       start();
@@ -94,7 +96,7 @@ export function usePolling(
     return () => {
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("focus", runOnReturn);
     };
   }, [intervalMs, enabled, refetchOnFocus]);
 }

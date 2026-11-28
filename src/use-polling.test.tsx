@@ -197,6 +197,27 @@ describe("pending and failed refreshes", () => {
       unmount();
     });
 
+    it("makes one call when focus arrives before visibilitychange", () => {
+      const tick = vi.fn();
+      const { unmount } = renderHook(() =>
+        usePolling(tick, {
+          intervalMs: 10_000,
+          enabled: true,
+          refetchOnFocus: true,
+        }),
+      );
+      setHidden(true);
+      document.dispatchEvent(new Event("visibilitychange"));
+      vi.advanceTimersByTime(5000);
+      setHidden(false);
+      window.dispatchEvent(new Event("focus"));
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(tick).toHaveBeenCalledTimes(2);
+      vi.advanceTimersByTime(10_000);
+      expect(tick).toHaveBeenCalledTimes(3);
+      unmount();
+    });
+
     it("skips a focus tick while one is in flight, while hidden or disabled", async () => {
       let finish!: () => void;
       const pending = new Promise<void>((resolve) => {

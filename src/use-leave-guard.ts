@@ -4,12 +4,27 @@ import { useCallback, useEffect } from "react";
 
 const DEFAULT_MESSAGE = "Leave this page? Changes you made may not be saved.";
 
+/** True when `href` is an http(s) page other than the current one. */
+function isOtherPage(href: string): boolean {
+  const next = new URL(href, window.location.href);
+  // mailto:, tel: and similar hand off to another app and leave the page alone.
+  if (next.protocol !== "http:" && next.protocol !== "https:") return false;
+  const here = window.location;
+  return !(
+    next.origin === here.origin &&
+    next.pathname === here.pathname &&
+    next.search === here.search
+  );
+}
+
 /**
  * A plain left click on a link that moves this tab to a different page, on this
  * site or another. Same-page links (a hash on the current URL), downloads, new
  * tab targets and modified clicks stay in or beside the current page.
  */
 function leavingLink(event: MouseEvent): boolean {
+  // An earlier capture handler already owns this click, so asking again would
+  // double-prompt.
   if (event.defaultPrevented || event.button !== 0) return false;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return false;
@@ -20,13 +35,7 @@ function leavingLink(event: MouseEvent): boolean {
   if (!(anchor instanceof HTMLAnchorElement)) return false;
   if (anchor.hasAttribute("download")) return false;
   if (anchor.target && anchor.target !== "_self") return false;
-  const next = new URL(anchor.href, window.location.href);
-  const here = window.location;
-  return !(
-    next.origin === here.origin &&
-    next.pathname === here.pathname &&
-    next.search === here.search
-  );
+  return isOtherPage(anchor.href);
 }
 
 /**

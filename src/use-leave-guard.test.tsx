@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, renderHook } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useLeaveGuard } from "./use-leave-guard";
 
 function Links() {
@@ -39,19 +39,27 @@ function clickLink(name: string, init?: MouseEventInit) {
     button: 0,
     ...init,
   });
-  // test-setup cancels every anchor click, which the hook rightly treats as
-  // already handled, so cancelling is ignored here and a stopped click is
-  // detected by it never reaching the anchor.
-  event.preventDefault = () => {};
-  let reached = false;
-  link.addEventListener("click", () => {
-    reached = true;
-  });
   link.dispatchEvent(event);
-  return { blocked: !reached };
+  return { blocked: event.defaultPrevented };
 }
 
+// test-setup registers a document capture listener that cancels every anchor
+// click, which the guard rightly treats as already handled. This window capture
+// listener runs earlier and swallows that first preventDefault call, so later
+// calls (the guard's, or a router link's) stay real.
+function swallowSetupCancel(event: Event) {
+  const real = event.preventDefault.bind(event);
+  let first = true;
+  event.preventDefault = () => {
+    if (first) first = false;
+    else real();
+  };
+}
+
+beforeEach(() => window.addEventListener("click", swallowSetupCancel, true));
+
 afterEach(() => {
+  window.removeEventListener("click", swallowSetupCancel, true);
   cleanup();
   vi.restoreAllMocks();
 });
@@ -128,13 +136,52 @@ describe("useLeaveGuard", () => {
     const user = userEvent.setup();
     const { getByText } = render(<Links />);
     guard(true);
-    const mute = (event: Event) => {
-      event.preventDefault = () => {};
-    };
-    window.addEventListener("click", mute, true);
     await user.pointer({ keys: "[TouchA]", target: getByText("external") });
-    window.removeEventListener("click", mute, true);
     expect(confirm).toHaveBeenCalled();
+  });
+
+  it("prompts before a router link's bubble-phase handler cancels the click", () => {
+    const order: string[] = [];
+    vi.spyOn(window, "confirm").mockImplementation(() => {
+      order.push("confirm");
+      return true;
+    });
+    render(<Links />);
+    guard(true);
+    const link = document.querySelector("a") as HTMLAnchorElement;
+    link.addEventListener("click", (event) => {
+      order.push("router");
+      event.preventDefault();
+    });
+    clickLink("other");
+    expect(order).toEqual(["confirm", "router"]);
+  });
+
+  it("does not run a router link's handler when the user cancels", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    const router = vi.fn();
+    render(<Links />);
+    guard(true);
+    (document.querySelector("a") as HTMLAnchorElement).addEventListener(
+      "click",
+      router,
+    );
+    expect(clickLink("other").blocked).toBe(true);
+    expect(router).not.toHaveBeenCalled();
+  });
+
+  it("does not prompt for mailto: and tel: links", () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(
+      <div>
+        <a href="mailto:hi@example.com">mail</a>
+        <a href="tel:+6591234567">call</a>
+      </div>,
+    );
+    guard(true);
+    expect(clickLink("mail").blocked).toBe(false);
+    expect(clickLink("call").blocked).toBe(false);
+    expect(confirm).not.toHaveBeenCalled();
   });
 
   it("stops guarding when `when` turns false and on unmount", () => {

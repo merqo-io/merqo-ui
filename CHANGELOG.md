@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
+  tappable phone and tablet landing demo (tabs and stepper below 960px, steps
+  beside a sticky device pair from 960px, `followStep` via ref). Screens, state
+  and copy stay in the kit.
+
 ## [0.62.1] - 2026-11-28
 
 ### Fixed

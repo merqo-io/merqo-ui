@@ -9,10 +9,12 @@ const built = existsSync(path.join(dist, "primitives.js"));
 const CLIENT = [
   "alert-dialog",
   "checkbox",
+  "command",
   "dialog",
   "dropdown-menu",
   "label",
   "popover",
+  "radio-group",
   "select",
   "sheet",
   "switch",

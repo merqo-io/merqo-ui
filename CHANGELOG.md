@@ -4,6 +4,11 @@
 
 ### Added
 
+- `RadioGroup`, `RadioGroupItem`, `Command`, `CommandInput`, `CommandList`,
+  `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator` and
+  `CommandDialog` in `@merqo/ui/primitives`. New dependency `cmdk`. Command
+  items and the input row reach 44px on coarse pointers; wrap a radio item and
+  its text in a `min-h-11` label row for touch.
 - `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
   tappable phone and tablet landing demo (tabs and stepper below 960px, steps
   beside a sticky device pair from 960px, `followStep` via ref). Screens, state

@@ -4,6 +4,7 @@ import * as React from "react";
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "./ui/button";
+import { LiveRegion } from "./live-region";
 
 const RESET_MS = 2000;
 
@@ -73,9 +74,7 @@ export function CopyButton({
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
         {copied ? copiedLabel : label}
       </Button>
-      <span key={copyCount} role="status" aria-live="polite" className="sr-only">
-        {copied ? copiedLabel : ""}
-      </span>
+      <LiveRegion message={copied ? copiedLabel : null} announceKey={copyCount} />
     </span>
   );
 }

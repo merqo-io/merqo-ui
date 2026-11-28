@@ -4,10 +4,20 @@
 
 ### Added
 
+- `LiveRegion`: one sr-only announcer (`message`, `politeness`, `announceKey` to
+  repeat an identical message) so components and kits stop hand-rolling
+  `aria-live` regions.
+
 - `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
   tappable phone and tablet landing demo (tabs and stepper below 960px, steps
   beside a sticky device pair from 960px, `followStep` via ref). Screens, state
   and copy stay in the kit.
+
+### Changed
+
+- `CopyButton` and `DeviceStory` announce through `LiveRegion`. `DeviceStory`'s
+  announcement element is now a `<span role="status" aria-atomic="true">` (it
+  was a `<p aria-live="polite">`); behaviour is otherwise unchanged.
 
 ## [0.62.1] - 2026-11-28
 

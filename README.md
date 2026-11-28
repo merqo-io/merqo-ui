@@ -1590,8 +1590,8 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   above. Text on its background must reach at least 4.5:1 in light and dark.
   A kit that lacks a token renders that badge blank, so add any missing one
   when you move the pin. `--warning` exists in qkit and printkit; `--gold` and
-  `--gold-foreground` exist in loopkit and merqo. Other kits may need all
-  three.
+  `--gold-foreground` exist in loopkit and merqo. paykit and stockkit have
+  none of the three.
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`,
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.

@@ -771,7 +771,7 @@ routine, irreversible and high-stakes actions.
     />
   </Journey>;
   ```
-- `DeviceStory`, `Cue`, `useWide`, `useFitScale` — the shell of a tappable
+- `DeviceStory`, `Cue`, `useWide`, `useFitScale`: the shell of a tappable
   "one story, two devices" landing demo. Client module. The kit keeps its
   screens, reducer and copy and passes them in; the shell owns layout only and
   imports no frame, so pass framed screens (`PhoneFrame`, `TabletFrame`) as
@@ -799,7 +799,9 @@ routine, irreversible and high-stakes actions.
   `"primary"` default or `"foreground"`; reduced motion keeps the ring and
   drops the pulse). `useWide()` is true from 960px (false on the server).
   `useFitScale(hostRef, targetRef, wide, design?)` CSS-zooms the device pair
-  to its column and, when wide, to the viewport height.
+  to its column and, when wide, to the viewport height. Its default sizes
+  assume a phone plus a tablet; a `design` override must be a stable reference
+  (a module constant or memoised) because it is an effect dependency.
 
   ```tsx
   "use client";

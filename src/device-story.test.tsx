@@ -111,10 +111,28 @@ describe("DeviceStory narrow", () => {
     const second = group.querySelectorAll("button")[1];
     expect(group.querySelectorAll("button")[0]).toHaveAttribute(
       "aria-current",
-      "true",
+      "step",
     );
+    expect(second).not.toHaveAttribute("aria-current");
     await user.pointer({ keys: "[TouchA]", target: second });
     expect(props.onStepSelect).toHaveBeenCalledWith(2);
+  });
+
+  it("wires each tab to a labelled tabpanel", () => {
+    render(<DeviceStory {...baseProps()} />);
+    const phone = screen.getByRole("tab", { name: /Phone/ });
+    expect(phone).toHaveAttribute("id", "d-phone-tab");
+    const panel = document.getElementById("d-phone");
+    expect(panel).toHaveAttribute("role", "tabpanel");
+    expect(panel).toHaveAttribute("aria-labelledby", "d-phone-tab");
+  });
+
+  it("gives a single device no tabpanel wiring", () => {
+    const props = baseProps();
+    render(<DeviceStory {...props} devices={[props.devices[0]]} />);
+    const panel = document.getElementById("d-phone");
+    expect(panel).not.toHaveAttribute("role");
+    expect(panel).not.toHaveAttribute("aria-labelledby");
   });
 
   it("renders no tab list for one device", () => {

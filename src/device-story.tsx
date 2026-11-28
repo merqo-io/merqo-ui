@@ -84,15 +84,19 @@ export type DeviceStoryProps = {
 function Device({
   device,
   off,
+  tabbed,
   children,
 }: {
   device: DeviceStoryDevice;
   off: boolean;
+  tabbed: boolean;
   children: ReactNode;
 }) {
   return (
     <div
       id={device.id}
+      role={tabbed ? "tabpanel" : undefined}
+      aria-labelledby={tabbed ? `${device.id}-tab` : undefined}
       data-off={off ? "" : undefined}
       data-lit={device.lit ? "" : undefined}
       className={cn(
@@ -269,9 +273,9 @@ export function DeviceStory({
             <button
               key={s.n}
               type="button"
-              aria-current={step === s.n}
+              aria-current={step === s.n ? "step" : undefined}
               onClick={() => onStepSelect(s.n)}
-              className="min-h-11 rounded-lg border border-border bg-card text-sm font-semibold active:bg-accent aria-[current=true]:border-foreground aria-[current=true]:bg-foreground aria-[current=true]:text-background"
+              className="min-h-11 rounded-lg border border-border bg-card text-sm font-semibold active:bg-accent aria-[current=step]:border-foreground aria-[current=step]:bg-foreground aria-[current=step]:text-background"
             >
               {s.n} {s.tab}
             </button>
@@ -295,6 +299,7 @@ export function DeviceStory({
                     type="button"
                     role="tab"
                     aria-selected={focus === d.id}
+                    id={`${d.id}-tab`}
                     aria-controls={d.id}
                     data-cue={d.cued && focus !== d.id ? "" : undefined}
                     onClick={() => onFocusChange(d.id)}
@@ -332,6 +337,7 @@ export function DeviceStory({
                   key={d.id}
                   device={d}
                   off={tabbed && focus !== d.id}
+                  tabbed={tabbed}
                 >
                   {d.node}
                 </Device>

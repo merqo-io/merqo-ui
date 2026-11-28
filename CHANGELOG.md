@@ -4,6 +4,13 @@
 
 ### Added
 
+- `usePolling` option `refetchOnFocus` (default false): also tick when the
+  window regains focus, de-duplicated with the visibilitychange tick so a return
+  makes one call.
+- `useLeaveGuard(when, message?)`: beforeunload prompt plus a capture-phase
+  confirm on links that leave the page (cross-origin included), returning a
+  `() => boolean` for in-code navigation.
+- `formatShortDate` (`10 Jul`, SGT) and `formatMoneyCompact` (`S$1.5k`, `S$2.5M`).
 - `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
   tappable phone and tablet landing demo (tabs and stepper below 960px, steps
   beside a sticky device pair from 960px, `followStep` via ref). Screens, state

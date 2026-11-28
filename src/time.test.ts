@@ -4,6 +4,7 @@ import {
   formatDate,
   formatDateTime,
   formatRelativeTime,
+  formatShortDate,
   formatTime,
   sgDayKey,
   startOfSgDay,
@@ -99,5 +100,27 @@ describe("formatRelativeTime", () => {
 
   it("defaults now to the current time", () => {
     expect(formatRelativeTime(new Date())).toBe("just now");
+  });
+});
+
+describe("formatShortDate", () => {
+  it("renders day and month in SGT without a year", () => {
+    expect(formatShortDate(new Date("2026-07-10T04:00:00Z"))).toBe("10 Jul");
+    expect(formatShortDate("2026-01-05T03:00:00Z")).toBe("5 Jan");
+  });
+
+  it("renders a YYYY-MM-DD key as that same day", () => {
+    expect(formatShortDate("2026-07-10")).toBe("10 Jul");
+    expect(formatShortDate("2026-12-31")).toBe("31 Dec");
+  });
+
+  it("moves a late-evening UTC instant to the next SGT day", () => {
+    expect(formatShortDate("2026-07-09T16:30:00Z")).toBe("10 Jul");
+    expect(formatShortDate(new Date("2026-12-31T16:00:00Z"))).toBe("1 Jan");
+  });
+
+  it("renders invalid input as a dash", () => {
+    expect(formatShortDate("nope")).toBe("-");
+    expect(formatShortDate(new Date(Number.NaN))).toBe("-");
   });
 });

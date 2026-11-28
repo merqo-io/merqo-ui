@@ -55,6 +55,28 @@ export function formatMoney(
 }
 
 /**
+ * Short money for tight spots such as chart axes and tiles: 4250 -> "S$43",
+ * 150000 -> "S$1.5k", 250000000 -> "S$2.5M". The "M" tier starts at S$1,000,000
+ * and is the last one, so billions read as "S$2500.0M". An amount that rounds
+ * up into the next tier moves to it (99999 cents is "S$1.0k", not "S$1000"). A
+ * negative amount keeps its sign in front of the prefix ("-S$1.5k"); an amount
+ * that rounds to zero has no sign. Non-finite input renders as "-".
+ */
+export function formatMoneyCompact(cents: number): string {
+  if (!Number.isFinite(cents)) return "-";
+  const dollars = Math.abs(cents) / 100;
+  let body: string;
+  if (Math.round(dollars) < 1000) {
+    body = `S$${Math.round(dollars)}`;
+  } else if (Number((dollars / 1000).toFixed(1)) < 1000) {
+    body = `S$${(dollars / 1000).toFixed(1)}k`;
+  } else {
+    body = `S$${(dollars / 1e6).toFixed(1)}M`;
+  }
+  return cents < 0 && body !== "S$0" ? `-${body}` : body;
+}
+
+/**
  * 650 -> "6.50". Plain digits for an input value: no symbol, no grouping.
  * Non-finite or unsafe-large input gives "".
  */

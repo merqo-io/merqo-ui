@@ -4,6 +4,7 @@ import {
   centsToDollarString,
   dollarsToCents,
   formatMoney,
+  formatMoneyCompact,
   parseDollarsToCents,
 } from "./money";
 
@@ -153,5 +154,28 @@ describe("rounding, guards and signs", () => {
     expect(parseDollarsToCents("$-5.25", opts)).toEqual({ ok: true, cents: -525 });
     expect(parseDollarsToCents("S$-5")).toEqual({ ok: false });
     expect(parseDollarsToCents("-S$-5", opts)).toEqual({ ok: false });
+  });
+});
+
+describe("formatMoneyCompact", () => {
+  it.each([
+    [0, "S$0"],
+    [4250, "S$43"],
+    [99_949, "S$999"],
+    [99_950, "S$1.0k"],
+    [100_000, "S$1.0k"],
+    [150_000, "S$1.5k"],
+    [99_994_000, "S$999.9k"],
+    [99_995_000, "S$1.0M"],
+    [100_000_000, "S$1.0M"],
+    [250_000_000, "S$2.5M"],
+    [-4250, "-S$43"],
+    [-150_000, "-S$1.5k"],
+    [-250_000_000, "-S$2.5M"],
+    [-20, "S$0"],
+    [Number.NaN, "-"],
+    [Number.POSITIVE_INFINITY, "-"],
+  ])("formats %s as %s", (cents, expected) => {
+    expect(formatMoneyCompact(cents)).toBe(expected);
   });
 });

@@ -77,6 +77,17 @@ export function formatDate(input: DateInput): string {
   return date ? dateText(sgtParts(date)) : "-";
 }
 
+/**
+ * "10 Jul" in SGT: day and English month, no year. A "YYYY-MM-DD" key renders
+ * that same day. Invalid input renders as "-".
+ */
+export function formatShortDate(value: Date | string): string {
+  const date = toDate(value);
+  if (!date) return "-";
+  const p = sgtParts(date);
+  return `${p.day} ${MONTHS[p.month - 1]}`;
+}
+
 /** "1:30 am" in SGT (12-hour, lower-case). Invalid input renders as "-". */
 export function formatTime(input: DateInput): string {
   const date = toDate(input);

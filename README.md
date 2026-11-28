@@ -166,7 +166,7 @@ works locally.
   Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
   end of a success-and-navigate branch to keep `pending` true through the
   route transition instead of the button re-enabling mid-navigation.
-- `usePolling(tick, {intervalMs, enabled})`: run `tick` (sync or async) every
+- `usePolling(tick, {intervalMs, enabled, refetchOnFocus?})`: run `tick` (sync or async) every
   `intervalMs` while `enabled`. It ticks once at once, then on each interval,
   pauses while the tab is hidden (a pocketed phone stops hitting the server) and
   ticks again the moment the tab is visible. A tick that is still pending is not
@@ -174,6 +174,10 @@ works locally.
   `tick` is read through a ref, so a new closure each render does not restart the
   timer; only `intervalMs` and `enabled` do. To stop on a condition, flip
   `enabled` to false when it is met; cleanup also runs on unmount.
+  `refetchOnFocus` (default false) also ticks when the window regains focus,
+  for a desktop user switching back to the tab. A return fires both focus and
+  visibilitychange, and the pair makes one call, not two. The in-flight guard,
+  hidden-tab pause and `enabled` still apply.
   ```tsx
   const [done, setDone] = useState(false);
   usePolling(
@@ -183,6 +187,23 @@ works locally.
     },
     { intervalMs: 3000, enabled: !done },
   );
+  ```
+  ```tsx
+  usePolling(refresh, { intervalMs: 15_000, enabled: true, refetchOnFocus: true });
+  ```
+- `useLeaveGuard(when, message?)`: asks before the user leaves the page while
+  `when` is true. A reload or closed tab raises the browser prompt, and a click
+  on a link to another page, on this site or another, asks `window.confirm`
+  first and stays put on Cancel (caught on the document in the capture phase,
+  before a router link sees it). Same-page hash links, `download`, `target`
+  other than `_self`, modified clicks and non-primary buttons are left alone.
+  Returns `() => boolean` for navigation done in code: true when `when` is false
+  or the user confirms. The default message is generic; pass your own. Listeners
+  are removed when `when` turns false and on unmount. The Back button is not
+  covered, since the App Router cannot hold it.
+  ```tsx
+  const confirmLeave = useLeaveGuard(dirty, "You have unsaved changes. Leave?");
+  <Button onClick={() => confirmLeave() && router.push("/orders")}>Cancel</Button>
   ```
   An action that throws a Next.js `redirect()` is treated the same way:
   `pending` stays true, `error` stays null and `run()` still rejects with
@@ -1505,6 +1526,15 @@ whatever the server or browser zone.
 - `formatMoney(cents, { trimWholeDollars? })`: `1250` -> `S$12.50`, `-5` ->
   `-S$0.05`, `0` -> `S$0.00`, large values grouped (`S$1,234,567.89`).
   `trimWholeDollars` gives `S$16` for whole amounts. Non-finite input gives `-`.
+- `formatMoneyCompact(cents)`: short money for axes and tiles. Below S$1,000 a
+  whole dollar (`4250` -> `S$43`), below S$1,000,000 thousands with one decimal
+  (`150000` -> `S$1.5k`), else millions (`250000000` -> `S$2.5M`; M is the last
+  tier). An amount that rounds into the next tier moves up (`99995` -> `S$1.0k`).
+  A negative keeps its sign before the prefix (`-S$1.5k`); one that rounds to
+  zero has none. Non-finite input gives `-`.
+  ```ts
+  formatMoneyCompact(150_000); // "S$1.5k"
+  ```
 - `Money({cents, trimWholeDollars?, className?})`: `formatMoney` as a `<span>`
   with tabular figures that never wraps mid-amount. Server-safe. It adds no
   colour by sign; each kit decides that.
@@ -1531,6 +1561,12 @@ whatever the server or browser zone.
   `7 Nov 2026`, `1:30 am`, `7 Nov 2026, 1:30 am`, `5m ago` / `in 3h` / `just
   now`, falling back to the date after a week. Input is an ISO string, epoch
   milliseconds or a `Date`; invalid input gives `-`.
+- `formatShortDate(value)`: `10 Jul`, day and English month in SGT with no year.
+  A `YYYY-MM-DD` key renders that same day, and a late-evening UTC instant lands
+  on the next SGT day. Invalid input gives `-`.
+  ```ts
+  formatShortDate("2026-07-10"); // "10 Jul"
+  ```
 - `sgDayKey(input)` (`2026-11-07`), `startOfSgDay(input)` (the 00:00 SGT
   instant) and `SGT_TIME_ZONE`.
 - `normalizeTelegramHandle`, `telegramLink(handle)`, `isTelegramLink(url)`:

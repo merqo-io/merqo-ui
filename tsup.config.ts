@@ -101,6 +101,7 @@ const ENTRIES = {
   "use-async-action": "src/use-async-action.ts",
   "use-money-field": "src/use-money-field.ts",
   "use-polling": "src/use-polling.ts",
+  "use-leave-guard": "src/use-leave-guard.ts",
   "vendor-telegram-section": "src/vendor-telegram-section.tsx",
   "weak-password-message": "src/weak-password-message.ts",
   "error-page": "src/error-page.tsx",

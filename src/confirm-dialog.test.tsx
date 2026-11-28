@@ -263,3 +263,39 @@ describe("ConfirmDialog error Alert", () => {
     expect(screen.getByRole("alertdialog")).toContainElement(alert);
   });
 });
+describe("ConfirmDialog body and hideConfirm", () => {
+  it("renders body outside the description, between header and footer", async () => {
+    const user = userEvent.setup();
+    setup(() => undefined, { body: <form data-testid="custom-body"><input aria-label="Reason" /></form> });
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    const body = screen.getByTestId("custom-body");
+    const description = screen.getByText("This cannot be undone.");
+    expect(description.contains(body)).toBe(false);
+    expect(body.closest("[data-slot='alert-dialog-description']")).toBeNull();
+    expect(screen.getByRole("textbox", { name: "Reason" })).toBeInTheDocument();
+  });
+
+  it("hideConfirm drops the action and keeps cancel", async () => {
+    const user = userEvent.setup();
+    setup(() => undefined, { hideConfirm: true, body: <button>Hold to close</button> });
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.queryByRole("button", { name: "Yes, delete" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hold to close" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
+
+  it("still gates on confirmPhrase and shows consequence alongside body", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    setup(onConfirm, { body: <p>Extra</p>, confirmPhrase: "close", consequence: "All orders lost." });
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByText("Extra")).toBeInTheDocument();
+    expect(screen.getByText("All orders lost.")).toBeInTheDocument();
+    const confirm = screen.getByRole("button", { name: "Yes, delete" });
+    expect(confirm).toBeDisabled();
+    await user.type(screen.getByRole("textbox"), "close");
+    expect(confirm).toBeEnabled();
+    await user.click(confirm);
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
+  });
+});

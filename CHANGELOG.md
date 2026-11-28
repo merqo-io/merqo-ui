@@ -11,10 +11,32 @@
   confirm on links that leave the page (cross-origin included), returning a
   `() => boolean` for in-code navigation.
 - `formatShortDate` (`10 Jul`, SGT) and `formatMoneyCompact` (`S$1.5k`, `S$2.5M`).
+- `Badge` variants `soft-destructive`, `warning` and `gold`, so kits can drop
+  local badge tones. `warning` and `gold` need `--warning`, `--gold` and
+  `--gold-foreground` defined and mapped in the kit's theme.
+- `RadioGroup`, `RadioGroupItem`, `Command`, `CommandInput`, `CommandList`,
+  `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator` and
+  `CommandDialog` in `@merqo/ui/primitives`. New dependency `cmdk`. Command
+  items and the input row reach 44px on coarse pointers; wrap a radio item and
+  its text in a `min-h-11` label row for touch.
+- `ConfirmDialog` `body` (custom content outside the description) and
+  `hideConfirm` (drop the confirm button), `LoginForm` `signUpFields` (extra
+  sign-up-only fields above the email) and a `SegmentedControl` link mode
+  (`{label, href, selected}` options render a `<nav>` of links with
+  `aria-current="page"`; `LinkComponent` prop). No existing prop changes.
 - `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
   tappable phone and tablet landing demo (tabs and stepper below 960px, steps
   beside a sticky device pair from 960px, `followStep` via ref). Screens, state
   and copy stay in the kit.
+- `LiveRegion`: one sr-only announcer (`message`, `politeness`, `announceKey` to
+  repeat an identical message) so components and kits stop hand-rolling
+  `aria-live` regions.
+
+### Changed
+
+- `CopyButton` and `DeviceStory` announce through `LiveRegion`. `DeviceStory`'s
+  announcement element is now a `<span role="status" aria-atomic="true">` (it
+  was a `<p aria-live="polite">`); behaviour is otherwise unchanged.
 
 ## [0.62.1] - 2026-11-28
 

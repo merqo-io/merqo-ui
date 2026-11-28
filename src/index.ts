@@ -204,6 +204,8 @@ export { AsyncSubmitButton } from "./async-submit-button";
 export type { AsyncSubmitButtonProps } from "./async-submit-button";
 export { CopyButton } from "./copy-button";
 export type { CopyButtonProps } from "./copy-button";
+export { LiveRegion } from "./live-region";
+export type { LiveRegionProps } from "./live-region";
 export { downloadBlob } from "./download";
 export { DownloadButton } from "./download-button";
 export type { DownloadButtonProps } from "./download-button";

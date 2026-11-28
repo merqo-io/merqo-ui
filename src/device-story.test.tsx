@@ -148,6 +148,8 @@ describe("DeviceStory narrow", () => {
     const live = container.querySelectorAll("[aria-live]");
     expect(live).toHaveLength(1);
     expect(live[0]).toHaveTextContent("Order placed");
+    expect(live[0]).toHaveAttribute("aria-live", "polite");
+    expect(live[0]).toHaveClass("sr-only");
   });
 
   it("shows the try-it line only for steps that have one", () => {

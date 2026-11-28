@@ -11,6 +11,7 @@ import {
 
 import { Button } from "./ui/button";
 import { Cue } from "./cue";
+import { LiveRegion } from "./live-region";
 import { cn } from "./lib/utils";
 import { usePrefersReducedMotion } from "./use-scroll-play";
 import { useFitScale, useWide } from "./use-story-layout";
@@ -358,9 +359,7 @@ export function DeviceStory({
                 </Cue>
               ) : null}
             </div>
-            <p aria-live="polite" className="sr-only">
-              {announcement}
-            </p>
+            <LiveRegion message={announcement} />
           </div>
         </div>
 

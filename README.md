@@ -887,6 +887,14 @@ routine, irreversible and high-stakes actions.
   copies `value` with `navigator.clipboard.writeText`, swaps the icon to a check and shows `copiedLabel` for 2s, and
   announces it through a polite live region. On failure (or no clipboard) it calls `onError` and shows no copied state.
   It never toasts; the caller decides. Built on `Button`, so it keeps the 44px touch target on coarse pointers.
+- `LiveRegion({message, politeness?="polite", announceKey?})` — an sr-only `aria-live` + `aria-atomic` element
+  (`role="status"`, or `role="alert"` when `politeness="assertive"`). An empty `message` renders it empty but mounted,
+  so later messages announce. Change `announceKey` to announce an identical message again. `CopyButton` and
+  `DeviceStory` use it. Visible on-screen status regions in kits keep their own `aria-live` markup; this is for
+  sr-only announcements.
+  ```tsx
+  <LiveRegion message={saved ? "Settings saved" : ""} announceKey={saveCount} />
+  ```
 - `downloadBlob(blob, filename)` — plain helper (no `"use client"`, browser only): creates an object URL, clicks a
   temporary anchor and revokes the URL after 1s. Import it from `@merqo/ui`; there is no `@merqo/ui/download` subpath. Kits keep building their own CSV text.
 - `DownloadButton({label?="Download", pendingLabel?, onDownload, onError?, variant?="outline", size?="sm", ...buttonProps})` —

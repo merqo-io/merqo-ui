@@ -15,6 +15,7 @@ const ENTRIES = {
   "app-link-provider": "src/app-link-provider.tsx",
   "async-submit-button": "src/async-submit-button.tsx",
   "copy-button": "src/copy-button.tsx",
+  "live-region": "src/live-region.tsx",
   download: "src/download.ts",
   "download-button": "src/download-button.tsx",
   "audit-log-table": "src/audit-log-table.tsx",

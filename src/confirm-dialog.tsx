@@ -39,6 +39,16 @@ export interface ConfirmDialogProps {
    */
   confirmPhrase?: string;
   /**
+   * Custom content between the header and the footer, outside the described
+   * node so a form or control is valid DOM. Rendered above the phrase field.
+   */
+  body?: React.ReactNode;
+  /**
+   * Drops the confirm button. Use with `body` when the body carries its own
+   * action, e.g. a hold-to-confirm button. Cancel stays.
+   */
+  hideConfirm?: boolean;
+  /**
    * `destructive` paints the confirm button red. Defaults to `destructive`
    * when `confirmPhrase` is set, otherwise `default`.
    */
@@ -84,6 +94,31 @@ function ConfirmDescription({
         <p className="text-sm text-foreground">{consequence}</p>
       </div>
     </AlertDialogDescription>
+  );
+}
+
+function ConfirmAction({
+  hidden,
+  onClick,
+  disabled,
+  destructive,
+  children,
+}: {
+  hidden: boolean | undefined;
+  onClick: (event: React.MouseEvent) => void;
+  disabled: boolean;
+  destructive: boolean;
+  children: React.ReactNode;
+}) {
+  if (hidden) return null;
+  return (
+    <AlertDialogAction
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(destructive && buttonVariants({ variant: "destructive" }))}
+    >
+      {children}
+    </AlertDialogAction>
   );
 }
 
@@ -141,6 +176,8 @@ export function ConfirmDialog({
   pendingLabel,
   variant,
   consequence,
+  body,
+  hideConfirm,
   confirmPhrase: confirmPhraseProp,
   onConfirm,
   errorMessage = "Could not complete that action. Try again.",
@@ -213,6 +250,7 @@ export function ConfirmDialog({
             {description}
           </ConfirmDescription>
         </AlertDialogHeader>
+        {body}
         {confirmPhrase !== undefined && (
           <PhraseField
             phrase={confirmPhrase}
@@ -231,16 +269,14 @@ export function ConfirmDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction
+          <ConfirmAction
+            hidden={hideConfirm}
             onClick={confirm}
             disabled={pending || !matched}
-            className={cn(
-              resolvedVariant === "destructive" &&
-                buttonVariants({ variant: "destructive" }),
-            )}
+            destructive={resolvedVariant === "destructive"}
           >
             {pending ? (pendingLabel ?? confirmLabel) : confirmLabel}
-          </AlertDialogAction>
+          </ConfirmAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -79,6 +79,8 @@ export type LoginFormProps = {
    * so tapping it never focuses the input; give a button `type="button"`.
    */
   passwordLabelSlot?: React.ReactNode | ((mode: LoginMode) => React.ReactNode);
+  /** Fields above the email, in sign-up mode only (e.g. "Business name"); name inputs to read them from the form. */
+  signUpFields?: React.ReactNode;
   /** Replaces the "New here?" and "Already have an account?" prompts. */
   modeTogglePrompt?: { signin: string; signup: string };
   /** Initial value of the email field. */
@@ -101,9 +103,7 @@ const FALLBACK: Record<LoginErrorContext, string> = {
 
 const ENTER_EMAIL = "Enter your email first.";
 
-export type LoginFormLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string;
-};
+export type LoginFormLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
 const ERROR_ID = "login-form-error";
 
@@ -288,7 +288,9 @@ function CredentialFields({
   emailPlaceholder,
   passwordPlaceholder,
   passwordLabelSlot,
+  signUpFields,
 }: {
+  signUpFields: React.ReactNode;
   fieldsRef: React.RefObject<HTMLDivElement | null>;
   emailRef: React.RefObject<HTMLInputElement | null>;
   passwordRef: React.RefObject<HTMLInputElement | null>;
@@ -317,6 +319,7 @@ function CredentialFields({
   const hasSlot = passwordLabelSlot !== null && passwordLabelSlot !== undefined && passwordLabelSlot !== false;
   return (
     <div ref={fieldsRef} className="space-y-5">
+      {!isSignin && signUpFields}
       <div className="space-y-2">
         <Label htmlFor="login-email" className={LABEL_CLASS}>
           Email
@@ -375,10 +378,7 @@ function CredentialFields({
   );
 }
 
-function resolveSlot(
-  slot: LoginFormProps["passwordLabelSlot"],
-  mode: LoginMode,
-): React.ReactNode {
+function resolveSlot(slot: LoginFormProps["passwordLabelSlot"], mode: LoginMode): React.ReactNode {
   return typeof slot === "function" ? slot(mode) : slot;
 }
 
@@ -406,6 +406,7 @@ export function LoginForm({
   emailPlaceholder,
   passwordPlaceholder,
   passwordLabelSlot,
+  signUpFields,
   modeTogglePrompt,
   defaultEmail,
   confirmEmailTitle,
@@ -565,6 +566,7 @@ export function LoginForm({
           emailPlaceholder={emailPlaceholder}
           passwordPlaceholder={passwordPlaceholder}
           passwordLabelSlot={resolveSlot(passwordLabelSlot, mode)}
+          signUpFields={signUpFields}
         />
         <Feedback error={shown} notice={noticeDisplay === "none" ? null : notice} />
         <Button

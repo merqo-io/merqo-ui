@@ -873,3 +873,21 @@ describe("LoginForm alignment", () => {
     expect(container.innerHTML).not.toContain("text-center");
   });
 });
+
+describe("LoginForm signUpFields", () => {
+  it("renders only in sign-up mode, before the email field", async () => {
+    const user = userEvent.setup();
+    render(
+      <LoginForm
+        onPasswordSignIn={vi.fn()}
+        onPasswordSignUp={vi.fn()}
+        signUpFields={<input aria-label="Business name" name="business" />}
+      />,
+    );
+    expect(screen.queryByLabelText("Business name")).toBeNull();
+    await user.pointer({ keys: "[TouchA]", target: screen.getByRole("button", { name: "Create an account" }) });
+    const business = screen.getByLabelText("Business name");
+    const email = screen.getByLabelText("Email");
+    expect(business.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});

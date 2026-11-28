@@ -611,7 +611,7 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   `"pill"` is a grid of bordered
   buttons (give it `className="grid-cols-11 gap-1"`).
   **Link mode:** pass `options` shaped `{label, href, selected?, ariaLabel?}[]`
-  and no `value` or `onChange` (the types forbid mixing). It renders a
+  (hrefs should be unique) and no `value` or `onChange` (the types forbid mixing). It renders a
   `<nav aria-label>` of links (`LinkComponent`, default `a`, e.g. `next/link`)
   with `aria-current="page"` on the selected one, the same pill look and the
   same 44px coarse-pointer target, and no radio roles or arrow-key handling:

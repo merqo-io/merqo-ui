@@ -82,7 +82,8 @@ const TRACK_SIZE = {
 export function SegmentedControl<T extends string = string>(
   props: SegmentedControlProps<T>,
 ): React.ReactElement {
-  if (props.options.length > 0 && "href" in props.options[0]) {
+  const [first] = props.options;
+  if (first ? "href" in first : props.onChange === undefined) {
     return <SegmentedLinks {...(props as SegmentedLinkProps)} />;
   }
   return <SegmentedValue {...(props as SegmentedValueProps<T>)} />;
@@ -129,9 +130,9 @@ function SegmentedLinks({
         className,
       )}
     >
-      {options.map((option) => (
+      {options.map((option, index) => (
         <LinkComponent
-          key={option.href}
+          key={`${index}:${option.href}`}
           href={option.href}
           aria-label={option.ariaLabel}
           aria-current={option.selected ? "page" : undefined}

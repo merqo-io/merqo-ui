@@ -4,6 +4,9 @@
 
 ### Added
 
+- `Badge` variants `soft-destructive`, `warning` and `gold`, so kits can drop
+  local badge tones. `warning` and `gold` need `--warning`, `--gold` and
+  `--gold-foreground` defined and mapped in the kit's theme.
 - `RadioGroup`, `RadioGroupItem`, `Command`, `CommandInput`, `CommandList`,
   `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator` and
   `CommandDialog` in `@merqo/ui/primitives`. New dependency `cmdk`. Command

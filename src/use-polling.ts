@@ -75,6 +75,9 @@ export function usePolling(
       }
     };
     const runOnReturn = () => {
+      // A hidden tab makes no call, so it must not stamp: the visibilitychange
+      // that follows still has to fire.
+      if (document.hidden) return;
       if (Date.now() - lastReturn < FOCUS_DEDUPE_MS) return;
       lastReturn = Date.now();
       run();

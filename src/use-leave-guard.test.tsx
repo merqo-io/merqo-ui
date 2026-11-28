@@ -157,6 +157,17 @@ describe("useLeaveGuard", () => {
     expect(order).toEqual(["confirm", "router"]);
   });
 
+  it("leaves a click alone that an earlier capture handler already cancelled", () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<Links />);
+    const owner = (event: Event) => event.preventDefault();
+    document.addEventListener("click", owner, true);
+    guard(true);
+    clickLink("other");
+    document.removeEventListener("click", owner, true);
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
   it("does not run a router link's handler when the user cancels", () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     const router = vi.fn();

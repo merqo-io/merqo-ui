@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.63.0] - 2026-11-28
+
 ### Added
 
 - `usePolling` option `refetchOnFocus` (default false): also tick when the

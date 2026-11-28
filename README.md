@@ -609,13 +609,18 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   bordered row with a tinted active pill that slides to the chosen option
   (200ms; near-instant under reduced motion, selection still updates);
   `"pill"` is a grid of bordered
-  buttons (give it `className="grid-cols-11 gap-1"`). For link-based
-  switches, call `router.push` from `onChange`.
+  buttons (give it `className="grid-cols-11 gap-1"`).
+  **Link mode:** pass `options` shaped `{label, href, selected?, ariaLabel?}[]`
+  (hrefs should be unique) and no `value` or `onChange` (the types forbid mixing). It renders a
+  `<nav aria-label>` of links (`LinkComponent`, default `a`, e.g. `next/link`)
+  with `aria-current="page"` on the selected one, the same pill look and the
+  same 44px coarse-pointer target, and no radio roles or arrow-key handling:
+  `<SegmentedControl ariaLabel="Range" LinkComponent={Link} options={[{label: "Today", href: "?r=1", selected: r === "1"}, {label: "Week", href: "?r=7", selected: r === "7"}]} />`
 - `StatCard` — `StatTile` (all its props) inside the `ElevatedCard` shell.
   Adds `icon` (label-row icon, ignored when `delta`/`deltaSlot` is set),
   `featured` (tinted card, primary value) and `className` for the card.
 - `ConfirmDialog({trigger?, title, description, confirmLabel, cancelLabel?,
-  pendingLabel?, variant?, consequence?, confirmPhrase?, onConfirm, errorMessage?, open?, onOpenChange?})`
+  pendingLabel?, variant?, consequence?, confirmPhrase?, body?, hideConfirm?, onConfirm, errorMessage?, open?, onOpenChange?})`
   — confirm/cancel alert dialog. `onConfirm` may be async: the dialog stays
   open and busy until it settles, closes on success, and on a throw stays
   open with the message inline (retry allowed). A Next.js redirect error is
@@ -626,6 +631,11 @@ Promise<void>`. Picks the tour whose `route` most specifically matches
   <phrase> to confirm" field and keeps the confirm button disabled until the
   trimmed entry matches, ignoring case; Enter confirms once it matches. With
   a phrase set and no `variant`, the button is destructive.
+  `body` is a node rendered between the header and the footer, outside the
+  described node, so a form or custom control is valid DOM (it sits above the
+  phrase field). `hideConfirm` drops the confirm button, for a body that
+  carries its own action such as a hold-to-close button; Cancel stays:
+  `<ConfirmDialog hideConfirm body={<HoldToCloseButton />} ... />`
 
 ### Destructive actions
 
@@ -1142,6 +1152,9 @@ Security duties that stay with the kit:
   - `emailPlaceholder`, `passwordPlaceholder`, `defaultEmail` (initial email)
     and `modeTogglePrompt={{signin, signup}}` (replaces "New here?" and
     "Already have an account?").
+  - `signUpFields` is a node rendered above the email field in sign-up mode
+    only, never in sign-in: `signUpFields={<Input name="businessName" aria-label="Business name" />}`.
+    Give inputs a `name` to read them from the form data.
   - `passwordLabelSlot` is a node, or `(mode) => node`, rendered right beside
     the "Password" label (a sibling of it, so tapping does not focus the
     input). The forgot-password link stays right-aligned. Absent or empty, the
@@ -1596,6 +1609,58 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.
 - `Switch` (`size`: `default` or `sm`), `Checkbox`. Both keep their compact desktop size and get a 44px hit area on coarse pointers. The hit area extends beyond the visible control (about 13px above and below the `Switch`, 14px around the `Checkbox`), so dense rows should leave that space.
+- `RadioGroup`, `RadioGroupItem`. The item is a compact `size-4` circle with no
+  coarse min-height. For touch, wrap the item and its text in a `<label>` row
+  with `min-h-11` (44px) so the whole row is the target:
+
+  ```tsx
+  <RadioGroup defaultValue="card" onValueChange={setMethod}>
+    <label className="flex min-h-11 items-center gap-3">
+      <RadioGroupItem value="card" />
+      Card
+    </label>
+    <label className="flex min-h-11 items-center gap-3">
+      <RadioGroupItem value="cash" />
+      Cash
+    </label>
+  </RadioGroup>
+  ```
+- `Command`, `CommandInput`, `CommandList`, `CommandEmpty`, `CommandGroup`,
+  `CommandItem`, `CommandSeparator`, `CommandDialog` (built on `cmdk`, which
+  `@merqo/ui` installs for you). `CommandItem` and the `CommandInput` row get
+  `pointer-coarse:min-h-11`. `CommandDialog` wraps the command in the shared
+  `Dialog`:
+
+  ```tsx
+  <Command>
+    <CommandInput placeholder="Search products" />
+    <CommandList>
+      <CommandEmpty>No products found</CommandEmpty>
+      <CommandGroup heading="Products">
+        <CommandItem onSelect={pick}>Espresso</CommandItem>
+      </CommandGroup>
+    </CommandList>
+  </Command>
+  ```
+
+  `CommandDialog` takes the `Dialog` props plus `title` (default
+  `"Command Palette"`) and `description` (default `"Search for a command to
+  run"`). Both render in a screen-reader-only header that names the dialog, so
+  pass your own when the default does not fit:
+
+  ```tsx
+  <CommandDialog
+    open={open}
+    onOpenChange={setOpen}
+    title="Find a product"
+    description="Search the catalogue"
+  >
+    <CommandInput placeholder="Search products" />
+    <CommandList>
+      <CommandItem onSelect={pick}>Espresso</CommandItem>
+    </CommandList>
+  </CommandDialog>
+  ```
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.

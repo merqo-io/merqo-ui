@@ -1598,6 +1598,58 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
   `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton`,
   `SelectScrollDownButton`.
 - `Switch` (`size`: `default` or `sm`), `Checkbox`. Both keep their compact desktop size and get a 44px hit area on coarse pointers. The hit area extends beyond the visible control (about 13px above and below the `Switch`, 14px around the `Checkbox`), so dense rows should leave that space.
+- `RadioGroup`, `RadioGroupItem`. The item is a compact `size-4` circle with no
+  coarse min-height. For touch, wrap the item and its text in a `<label>` row
+  with `min-h-11` (44px) so the whole row is the target:
+
+  ```tsx
+  <RadioGroup defaultValue="card" onValueChange={setMethod}>
+    <label className="flex min-h-11 items-center gap-3">
+      <RadioGroupItem value="card" />
+      Card
+    </label>
+    <label className="flex min-h-11 items-center gap-3">
+      <RadioGroupItem value="cash" />
+      Cash
+    </label>
+  </RadioGroup>
+  ```
+- `Command`, `CommandInput`, `CommandList`, `CommandEmpty`, `CommandGroup`,
+  `CommandItem`, `CommandSeparator`, `CommandDialog` (built on `cmdk`, which
+  `@merqo/ui` installs for you). `CommandItem` and the `CommandInput` row get
+  `pointer-coarse:min-h-11`. `CommandDialog` wraps the command in the shared
+  `Dialog`:
+
+  ```tsx
+  <Command>
+    <CommandInput placeholder="Search products" />
+    <CommandList>
+      <CommandEmpty>No products found</CommandEmpty>
+      <CommandGroup heading="Products">
+        <CommandItem onSelect={pick}>Espresso</CommandItem>
+      </CommandGroup>
+    </CommandList>
+  </Command>
+  ```
+
+  `CommandDialog` takes the `Dialog` props plus `title` (default
+  `"Command Palette"`) and `description` (default `"Search for a command to
+  run"`). Both render in a screen-reader-only header that names the dialog, so
+  pass your own when the default does not fit:
+
+  ```tsx
+  <CommandDialog
+    open={open}
+    onOpenChange={setOpen}
+    title="Find a product"
+    description="Search the catalogue"
+  >
+    <CommandInput placeholder="Search products" />
+    <CommandList>
+      <CommandItem onSelect={pick}>Espresso</CommandItem>
+    </CommandList>
+  </CommandDialog>
+  ```
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.

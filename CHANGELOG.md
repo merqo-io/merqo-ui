@@ -4,6 +4,11 @@
 
 ### Added
 
+- `RadioGroup`, `RadioGroupItem`, `Command`, `CommandInput`, `CommandList`,
+  `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator` and
+  `CommandDialog` in `@merqo/ui/primitives`. New dependency `cmdk`. Command
+  items and the input row reach 44px on coarse pointers; wrap a radio item and
+  its text in a `min-h-11` label row for touch.
 - `ConfirmDialog` `body` (custom content outside the description) and
   `hideConfirm` (drop the confirm button), `LoginForm` `signUpFields` (extra
   sign-up-only fields above the email) and a `SegmentedControl` link mode

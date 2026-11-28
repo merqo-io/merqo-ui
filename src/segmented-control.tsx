@@ -14,12 +14,17 @@ export interface SegmentedOption<T extends string = string> {
   disabled?: boolean;
 }
 
-export interface SegmentedControlProps<T extends string = string> {
+export interface SegmentedLinkOption {
+  label: React.ReactNode;
+  href: string;
+  /** Marks the current page; gets `aria-current="page"`. */
+  selected?: boolean;
+  /** Accessible name override; only needed when `label` isn't readable text. */
+  ariaLabel?: string;
+}
+
+interface SegmentedBaseProps {
   ariaLabel: string;
-  options: readonly SegmentedOption<T>[];
-  /** `null` when nothing is chosen yet; the first enabled option then takes the Tab stop. */
-  value: T | null;
-  onChange: (value: T) => void;
   size?: "sm" | "md";
   /**
    * `track` (default) is a bordered row with a tinted active pill, for view
@@ -32,6 +37,32 @@ export interface SegmentedControlProps<T extends string = string> {
   /** Extra classes on every option button, e.g. `tabular-nums`. */
   optionClassName?: string;
 }
+
+export interface SegmentedValueProps<T extends string = string>
+  extends SegmentedBaseProps {
+  options: readonly SegmentedOption<T>[];
+  /** `null` when nothing is chosen yet; the first enabled option then takes the Tab stop. */
+  value: T | null;
+  onChange: (value: T) => void;
+  LinkComponent?: never;
+}
+
+/**
+ * Link mode: each option navigates, so the control renders a `<nav>` of links
+ * instead of a radio group. It has no `value` or `onChange`; the page marks
+ * the current option with `selected`.
+ */
+export interface SegmentedLinkProps extends SegmentedBaseProps {
+  options: readonly SegmentedLinkOption[];
+  /** Link element, e.g. `next/link`. Defaults to `a`. */
+  LinkComponent?: React.ElementType;
+  value?: never;
+  onChange?: never;
+}
+
+export type SegmentedControlProps<T extends string = string> =
+  | SegmentedValueProps<T>
+  | SegmentedLinkProps;
 
 const TRACK_SIZE = {
   md: { group: "text-sm", item: "px-3 py-1.5" },
@@ -48,7 +79,73 @@ const TRACK_SIZE = {
  * option is never reported as checked, so the Tab stop and `aria-checked`
  * always agree. Option values must be unique: they are used as React keys.
  */
-export function SegmentedControl<T extends string = string>({
+export function SegmentedControl<T extends string = string>(
+  props: SegmentedControlProps<T>,
+): React.ReactElement {
+  const [first] = props.options;
+  if (first ? "href" in first : props.onChange === undefined) {
+    return <SegmentedLinks {...(props as SegmentedLinkProps)} />;
+  }
+  return <SegmentedValue {...(props as SegmentedValueProps<T>)} />;
+}
+
+function linkClasses(
+  track: boolean,
+  size: "sm" | "md",
+  selected: boolean,
+): (string | false)[] {
+  return track
+    ? [
+        "relative inline-flex items-center justify-center rounded-md font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors motion-reduce:transition-none pointer-coarse:min-h-11",
+        TRACK_SIZE[size].item,
+        selected
+          ? "bg-primary/10 text-primary active:bg-primary/20"
+          : "text-muted-foreground hover:text-foreground active:bg-primary/10 active:text-foreground",
+      ]
+    : [
+        "flex items-center justify-center rounded-md border outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-2 py-2 pointer-coarse:min-h-11 text-sm font-medium transition-colors motion-reduce:transition-none",
+        selected
+          ? "border-primary bg-primary text-primary-foreground active:bg-primary/80"
+          : "border-input text-muted-foreground hover:border-primary/50 active:border-primary active:bg-primary/10",
+      ];
+}
+
+function SegmentedLinks({
+  ariaLabel,
+  options,
+  LinkComponent = "a",
+  size = "md",
+  variant = "track",
+  className,
+  optionClassName,
+}: SegmentedLinkProps): React.ReactElement {
+  const track = variant === "track";
+  return (
+    <nav
+      aria-label={ariaLabel}
+      className={cn(
+        track
+          ? ["relative inline-flex rounded-lg border border-border p-0.5", TRACK_SIZE[size].group]
+          : "grid",
+        className,
+      )}
+    >
+      {options.map((option, index) => (
+        <LinkComponent
+          key={`${index}:${option.href}`}
+          href={option.href}
+          aria-label={option.ariaLabel}
+          aria-current={option.selected ? "page" : undefined}
+          className={cn(linkClasses(track, size, !!option.selected), optionClassName)}
+        >
+          {option.label}
+        </LinkComponent>
+      ))}
+    </nav>
+  );
+}
+
+function SegmentedValue<T extends string = string>({
   ariaLabel,
   options,
   value,
@@ -57,7 +154,7 @@ export function SegmentedControl<T extends string = string>({
   variant = "track",
   className,
   optionClassName,
-}: SegmentedControlProps<T>): React.ReactElement {
+}: SegmentedValueProps<T>): React.ReactElement {
   const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const enabled = options.flatMap((option, index) =>
     option.disabled ? [] : [index],

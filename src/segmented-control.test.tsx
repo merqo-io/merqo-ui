@@ -410,3 +410,41 @@ describe("SegmentedControl sliding pill", () => {
     expect(onChange).toHaveBeenCalledWith("c");
   });
 });
+
+describe("SegmentedControl link mode", () => {
+  const links = [
+    { label: "Today", href: "/today", selected: true },
+    { label: "Week", href: "/week" },
+  ];
+
+  it("renders a labelled nav of links with aria-current on the selected one", () => {
+    render(<SegmentedControl ariaLabel="Range" options={links} />);
+    expect(screen.getByRole("navigation", { name: "Range" })).toBeInTheDocument();
+    expect(screen.queryByRole("radio")).toBeNull();
+    expect(screen.queryByRole("radiogroup")).toBeNull();
+    expect(screen.getByRole("link", { name: "Today" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Today" })).toHaveAttribute("href", "/today");
+    expect(screen.getByRole("link", { name: "Week" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("uses finger-sized links and a custom LinkComponent", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn((e: React.MouseEvent) => e.preventDefault());
+    const Custom = ({ href, children, ...rest }: React.ComponentProps<"a">) => (
+      <a href={href} data-custom="1" onClick={onClick} {...rest}>
+        {children}
+      </a>
+    );
+    render(<SegmentedControl ariaLabel="Range" options={links} LinkComponent={Custom} variant="pill" />);
+    const week = screen.getByRole("link", { name: "Week" });
+    expect(week).toHaveAttribute("data-custom", "1");
+    expect(week.className).toContain("pointer-coarse:min-h-11");
+    await user.pointer({ keys: "[TouchA]", target: week });
+    expect(onClick).toHaveBeenCalled();
+  });
+
+  it("track variant also keeps the coarse tap target", () => {
+    render(<SegmentedControl ariaLabel="Range" options={links} size="sm" />);
+    expect(screen.getByRole("link", { name: "Week" }).className).toContain("pointer-coarse:min-h-11");
+  });
+});

@@ -9,6 +9,11 @@
   `CommandDialog` in `@merqo/ui/primitives`. New dependency `cmdk`. Command
   items and the input row reach 44px on coarse pointers; wrap a radio item and
   its text in a `min-h-11` label row for touch.
+- `ConfirmDialog` `body` (custom content outside the description) and
+  `hideConfirm` (drop the confirm button), `LoginForm` `signUpFields` (extra
+  sign-up-only fields above the email) and a `SegmentedControl` link mode
+  (`{label, href, selected}` options render a `<nav>` of links with
+  `aria-current="page"`; `LinkComponent` prop). No existing prop changes.
 - `DeviceStory`, `Cue`, `useWide` and `useFitScale`: the layout shell of a
   tappable phone and tablet landing demo (tabs and stepper below 960px, steps
   beside a sticky device pair from 960px, `followStep` via ref). Screens, state

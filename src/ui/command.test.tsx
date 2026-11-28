@@ -98,7 +98,25 @@ describe("CommandDialog", () => {
         </CommandList>
       </CommandDialog>,
     );
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "Command Palette" }),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Jump to")).toBeInTheDocument();
+  });
+
+  it("names the dialog from a custom title", () => {
+    render(
+      <CommandDialog
+        open
+        onOpenChange={() => {}}
+        title="Find a product"
+        description="Search the catalogue"
+      >
+        <CommandInput placeholder="Jump to" />
+      </CommandDialog>,
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Find a product" }),
+    ).toBeInTheDocument();
   });
 });

@@ -1618,6 +1618,25 @@ import { Button, Dialog, DialogContent, cn } from "@merqo/ui/primitives";
     </CommandList>
   </Command>
   ```
+
+  `CommandDialog` takes the `Dialog` props plus `title` (default
+  `"Command Palette"`) and `description` (default `"Search for a command to
+  run"`). Both render in a screen-reader-only header that names the dialog, so
+  pass your own when the default does not fit:
+
+  ```tsx
+  <CommandDialog
+    open={open}
+    onOpenChange={setOpen}
+    title="Find a product"
+    description="Search the catalogue"
+  >
+    <CommandInput placeholder="Search products" />
+    <CommandList>
+      <CommandItem onSelect={pick}>Espresso</CommandItem>
+    </CommandList>
+  </CommandDialog>
+  ```
 - `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`,
   `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogOverlay`,
   `DialogPortal`.

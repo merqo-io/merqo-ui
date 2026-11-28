@@ -771,6 +771,63 @@ routine, irreversible and high-stakes actions.
     />
   </Journey>;
   ```
+- `DeviceStory`, `Cue`, `useWide`, `useFitScale` — the shell of a tappable
+  "one story, two devices" landing demo. Client module. The kit keeps its
+  screens, reducer and copy and passes them in; the shell owns layout only and
+  imports no frame, so pass framed screens (`PhoneFrame`, `TabletFrame`) as
+  `devices[].node`. Props: `id?` (section id, default `"story"`), `eyebrow`,
+  `heading`, `intro?`; `steps: {n, tab, who, heading, body, try?}[]`; `step`
+  (active step number); `devices: {id, label, lit, cued?, tabSubtitle?,
+  tabFlash?, node}[]` (one or two; one device renders no tab list); `focus`
+  (device id shown below 960px); `announcement` (the text of the one polite
+  live region); `replay?: {label, visible, cued?}` (a hidden button keeps its
+  space); `onStepSelect(step)`, `onScrollStep(step)`, `onFocusChange(id)`,
+  `onReplay()`; optional `stepsLabel`, `tabsLabel`, `tryLabel`.
+  Below 960px one device shows at a time behind a tab list (the hidden tab
+  pulses when `cued`, and `tabFlash` colours its subtitle) and a row of 44px
+  step buttons; both devices share one grid cell, bottom aligned, so switching
+  tabs never changes the page height. From 960px the steps scroll beside a
+  sticky device pair, an unlit device dims, and `onScrollStep` fires with the
+  step whose top passed the viewport middle. After a tap changes the step,
+  call `ref.current.followStep(step)` (the `ref` prop gives a
+  `DeviceStoryHandle`): it scrolls that step to the middle without releasing
+  the sticky pair and locks the scroll picker for a second. It does nothing
+  below 960px and scrolls with `behavior: "auto"` under reduced motion; read
+  `usePrefersReducedMotion()` in the kit to decide whether to call it at all
+  and whether scroll should drive the step. `Cue({active, tone?, className?,
+  children})` pulses a `ring-2` around the next tap target (`tone`
+  `"primary"` default or `"foreground"`; reduced motion keeps the ring and
+  drops the pulse). `useWide()` is true from 960px (false on the server).
+  `useFitScale(hostRef, targetRef, wide, design?)` CSS-zooms the device pair
+  to its column and, when wide, to the viewport height.
+
+  ```tsx
+  "use client";
+  const ref = useRef<DeviceStoryHandle>(null);
+  const [s, dispatch] = useReducer(storyReducer, INITIAL); // kit-owned
+  const place = () => {
+    dispatch({ type: "place" });
+    ref.current?.followStep(2);
+  };
+  <DeviceStory
+    ref={ref}
+    eyebrow="One order, two screens"
+    heading="What your customer sees. What you see."
+    steps={STEPS}
+    step={s.step}
+    focus={s.focus}
+    announcement={announce(s)}
+    devices={[
+      { id: "phone", label: "Customer's phone", lit: s.step !== 2,
+        node: <PhoneFrame label="Customer's phone"><Menu onPlace={place} /></PhoneFrame> },
+      { id: "board", label: "Your board", lit: s.step !== 1, cued: s.step === 2,
+        node: <TabletFrame label="Your board"><Board state={s} /></TabletFrame> },
+    ]}
+    onStepSelect={(step) => dispatch({ type: "go", step })}
+    onScrollStep={(step) => dispatch({ type: "scroll", step })}
+    onFocusChange={(id) => dispatch({ type: "tab", id })}
+  />;
+  ```
 - `readTourSeen(key, storage?)` and `writeTourSeen(key, storage?, now?)` —
   the tour-seen core. The kit passes the storage key; storage defaults to
   `window.localStorage`, and missing or blocked storage reads as unseen and

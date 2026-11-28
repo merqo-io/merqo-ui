@@ -137,6 +137,16 @@ export { BackToTop } from "./back-to-top";
 export { Journey, JourneyStep } from "./journey";
 export { PhoneFrame } from "./phone-frame";
 export type { PhoneFrameProps } from "./phone-frame";
+export { DeviceStory } from "./device-story";
+export type {
+  DeviceStoryDevice,
+  DeviceStoryHandle,
+  DeviceStoryProps,
+  DeviceStoryStep,
+} from "./device-story";
+export { Cue } from "./cue";
+export { useWide, useFitScale } from "./use-story-layout";
+export type { FitDesign } from "./use-story-layout";
 export { TabletFrame } from "./tablet-frame";
 export type { TabletFrameProps } from "./tablet-frame";
 export { PressButton } from "./press-button";
